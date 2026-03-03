@@ -14,7 +14,7 @@ Unlike traditional contests, **Feek Nafas** focuses on the adrenaline of live, d
 ## 📸 Screenshots
 | **Home Page** | **Match Page** |
 |:---:|:---:|
-| ![Arena UI](./stitch_feek_nafas/feek_nafas_home_page/screen.png) | ![Lobby UI](./stitch_feek_nafas/battle_arena_live_match/screen.png) |
+| ![Arena UI](./design/feek_nafas_home_page/screen.png) | ![Lobby UI](./design/battle_arena_live_match/screen.png) |
 
 ---
 

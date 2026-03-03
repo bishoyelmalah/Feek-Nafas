@@ -1,4 +1,5 @@
 import './FindMatchPage.css';
+import radarImg from '../../assets/radar.png';
 
 export function FindMatchPage() {
     return (
@@ -156,7 +157,9 @@ export function FindMatchPage() {
                         <button className="find-match-btn find-match-glow">
                             <div className="find-match-btn-gradient" />
                             <div className="scanline" />
-                            <span className="material-symbols-outlined find-match-btn-icon">radar</span>
+                            <span className="">
+                                <img src={radarImg} width={72} height={72}/>
+                            </span>
                             <h2 className="find-match-btn-title glitch-text">Find Match</h2>
                             <p className="find-match-btn-subtitle">Ranked 1v1</p>
                             <div className="btn-corner-tl" />
