@@ -12,10 +12,9 @@ Unlike traditional contests, **Feek Nafas** focuses on the adrenaline of live, d
 ---
 
 ## 📸 Screenshots
-*(Add your screenshots here later)*
-| **The Arena** | **Lobby** |
+| **Home Page** | **Match Page** |
 |:---:|:---:|
-| ![Arena UI](./screenshots/arena.png) | ![Lobby UI](./screenshots/lobby.png) |
+| ![Arena UI](./stitch_feek_nafas/feek_nafas_home_page/screen.png) | ![Lobby UI](./stitch_feek_nafas/battle_arena_live_match/screen.png) |
 
 ---
 
@@ -128,4 +127,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-**Built with ❤️ and ☕ by [Bishoy Mina]**
+**Built with ❤️ and ☕**
