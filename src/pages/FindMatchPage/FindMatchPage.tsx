@@ -108,9 +108,6 @@ export function FindMatchPage() {
 
                     {/* Rank Card */}
                     <div className="rank-card">
-                        <div className="rank-card-decoration">
-                            <span className="material-symbols-outlined">military_tech</span>
-                        </div>
                         <div className="rank-card-header">
                             <div className="rank-badge">
                                 <img
