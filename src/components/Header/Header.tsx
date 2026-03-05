@@ -5,7 +5,7 @@ interface HeaderProps {
   activeLink?: 'arena' | 'leaderboard' | 'challenges' | 'profile';
 }
 
-const Header = ({ activeLink = 'arena' }: HeaderProps) => {
+function Header ({ activeLink = 'arena' }: HeaderProps){
   return (
     <header>
       <div className="header-content">

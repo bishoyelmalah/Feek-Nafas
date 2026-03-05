@@ -180,7 +180,7 @@
   flex: 1;
   display: flex;
   padding: 1.5rem;
-  gap: 1.5rem;
+  gap: 4rem;
   position: relative;
   overflow: hidden;
 }
@@ -223,6 +223,10 @@
   gap: 0.5rem;
   overflow-y: auto;
   padding-right: 0.5rem;
+}
+
+.match-list::-webkit-scrollbar {
+  display: none;
 }
 
 .match-card {
@@ -419,7 +423,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: start;
   position: relative;
   z-index: 10;
 }
@@ -443,6 +447,7 @@
 /* Find Match Button */
 .find-match-btn-wrapper {
   position: relative;
+  margin-top: 8rem;
 }
 
 .btn-outer-ring {
@@ -502,16 +507,28 @@
   pointer-events: none;
 }
 
-.find-match-btn-icon {
-  font-size: 3.75rem;
+@keyframes radar-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes radar-pulse {
+  0%, 100% { text-shadow: 0 0 8px var(--color-primary), 0 0 20px var(--color-primary); }
+  50%       { text-shadow: 0 0 16px var(--color-primary), 0 0 40px rgba(236, 91, 19, 0.6), 0 0 60px rgba(236, 91, 19, 0.3); }
+}
+
+.find-match-btn .find-match-btn-icon {
+  font-size: 4rem;
   color: var(--color-primary);
   margin-bottom: 0.5rem;
-  transition: color 0.15s, transform 0.15s;
+  animation: radar-spin 4s linear infinite, radar-pulse 2s ease-in-out infinite;
+  transition: color 0.3s;
 }
 
 .find-match-btn:hover .find-match-btn-icon {
   color: var(--color-neon-blue);
-  transform: rotate(12deg);
+  filter: drop-shadow(0 0 12px var(--color-neon-blue));
+  animation: radar-spin 1.5s linear infinite, radar-pulse 1s ease-in-out infinite;
 }
 
 .find-match-btn-title {
@@ -620,6 +637,7 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 1rem;
   z-index: 10;
   overflow-y: auto;
@@ -769,9 +787,13 @@
 
 /* Private Duel Section */
 .private-duel {
+  min-width: 20rem;
+  min-height:10rem;
+  width: 100%;
   background-color: var(--color-card-dark);
   border: 1px solid var(--color-border-dark);
   padding: 1rem;
+  margin-bottom: 2rem;
   border-radius: 0.75rem;
   display: flex;
   flex-direction: column;
@@ -809,7 +831,7 @@
   border: 1px solid var(--color-border-dark);
   border-radius: 0.25rem;
   padding: 0.5rem 2rem 0.5rem 0.75rem;
-  font-size: 0.625rem;
+  font-size: 1rem;
   font-family: var(--font-mono);
   color: white;
   outline: none;
@@ -939,6 +961,8 @@
   border-radius: 0.75rem;
   display: flex;
   flex-direction: column;
+  justify-self: flex-end;
+  justify-content: flex-end;
   gap: 0.5rem;
   font-family: var(--font-mono);
   flex: 1;
