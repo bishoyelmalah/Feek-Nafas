@@ -5,14 +5,14 @@ import { MatchPage } from './pages/MatchPage/MatchPage'
 import { VictoryPage } from './pages/VictoryPage/VictoryPage'
 import { LosePage } from './pages/LosePage/LosePage'
 import { LoginPage } from './pages/loginPage/loginPage'
-import {SignUpPage} from './pages/signUpPage/signUpPage'
+import {RegisterPage} from './pages/RegisterPage/RegisterPage'
 
 function App() {
   return (
     <Routes>
       <Route index element={<HomePage />}></Route>
       <Route path='/login' element={<LoginPage />} />
-      <Route path='/register' element={<SignUpPage />} />
+      <Route path='/register' element={<RegisterPage />} />
       <Route path='/findMatch' element={<FindMatchPage />}></Route>
       <Route path='/match' element={<MatchPage />}></Route>
       <Route path='/victory' element={<VictoryPage />}></Route>

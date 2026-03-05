@@ -1,9 +1,9 @@
 import { useState, type SubmitEvent } from 'react';
 import { Link } from 'react-router';
 import { supabase } from '../../services/supabase';
-import './signUpPage.css';
+import './RegisterPage.css';
 
-export function SignUpPage() {
+export function RegisterPage() {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
