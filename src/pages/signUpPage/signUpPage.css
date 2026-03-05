@@ -1,0 +1,498 @@
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+
+/* ── Base ── */
+.sign-up-page {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #0a0a0a;
+    font-family: 'Public Sans', sans-serif;
+    color: #f1f5f9;
+    overflow: hidden;
+}
+
+/* ── Background layers ── */
+.sign-up-bg-grid {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(to right, rgba(236, 91, 19, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(236, 91, 19, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.6;
+}
+
+.sign-up-bg-scanline {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 242, 255, 0.02) 50%);
+    background-size: 100% 4px;
+}
+
+.sign-up-bg-glow-left {
+    position: fixed;
+    top: -20%;
+    left: -10%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(236, 91, 19, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.sign-up-bg-glow-right {
+    position: fixed;
+    bottom: -20%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 242, 255, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* ── Card ── */
+.sign-up-card {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 460px;
+    margin: 1.5rem;
+    background: rgba(26, 19, 16, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(236, 91, 19, 0.25);
+    border-radius: 0.5rem;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 0 40px rgba(236, 91, 19, 0.1), 0 0 80px rgba(0, 0, 0, 0.6);
+}
+
+/* corner accents */
+.sign-up-card::before,
+.sign-up-card::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: #ec5b13;
+    border-style: solid;
+}
+
+.sign-up-card::before {
+    top: -1px;
+    left: -1px;
+    border-width: 2px 0 0 2px;
+    border-radius: 2px 0 0 0;
+}
+
+.sign-up-card::after {
+    bottom: -1px;
+    right: -1px;
+    border-width: 0 2px 2px 0;
+    border-radius: 0 0 2px 0;
+}
+
+/* ── Logo ── */
+.sign-up-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
+
+.sign-up-logo-icon {
+    padding: 0.375rem;
+    background-color: #ec5b13;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 15px rgba(236, 91, 19, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sign-up-logo-icon .material-symbols-outlined {
+    color: white;
+    font-size: 1.5rem;
+}
+
+.sign-up-logo-text {
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    color: white;
+    text-transform: uppercase;
+    font-style: italic;
+}
+
+.sign-up-logo-text span {
+    color: #ec5b13;
+}
+
+/* ── Header text ── */
+.sign-up-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.sign-up-tagline {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: #00f2ff;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+}
+
+.sign-up-title {
+    font-size: 1.6rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    color: white;
+    line-height: 1.2;
+}
+
+.sign-up-title span {
+    color: #ec5b13;
+    text-shadow: 0 0 12px rgba(236, 91, 19, 0.5);
+}
+
+.sign-up-subtitle {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #64748b;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Divider ── */
+.sign-up-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(236, 91, 19, 0.3), transparent);
+    margin-bottom: 2rem;
+}
+
+/* ── Form ── */
+.sign-up-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.sign-up-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.sign-up-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #94a3b8;
+}
+
+.sign-up-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.sign-up-input-icon {
+    position: absolute;
+    left: 0.85rem;
+    color: #64748b;
+    font-size: 1.1rem;
+    pointer-events: none;
+    transition: color 0.2s;
+}
+
+.sign-up-input {
+    width: 100%;
+    background: rgba(10, 10, 10, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.25rem;
+    padding: 0.75rem 0.875rem 0.75rem 2.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: white;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sign-up-input::placeholder {
+    color: #334155;
+}
+
+.sign-up-input:focus {
+    border-color: rgba(236, 91, 19, 0.6);
+    box-shadow: 0 0 12px rgba(236, 91, 19, 0.15);
+}
+
+.sign-up-input:focus + .sign-up-input-icon,
+.sign-up-input-wrapper:focus-within .sign-up-input-icon {
+    color: #ec5b13;
+}
+
+/* password toggle */
+.sign-up-input-toggle {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.sign-up-input-toggle:hover {
+    color: #ec5b13;
+}
+
+.sign-up-input-toggle .material-symbols-outlined {
+    font-size: 1.1rem;
+}
+
+/* ── Forgot link ── */
+.sign-up-forgot {
+    text-align: right;
+    margin-top: -0.5rem;
+}
+
+.sign-up-forgot a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: #475569;
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+}
+
+.sign-up-forgot a:hover {
+    color: #00f2ff;
+    text-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
+}
+
+/* ── Submit button ── */
+.sign-up-submit {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: #ec5b13;
+    border: none;
+    border-radius: 0.25rem;
+    color: white;
+    font-family: 'Public Sans', sans-serif;
+    font-weight: 900;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    box-shadow: 0 0 20px rgba(236, 91, 19, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.sign-up-submit:hover {
+    background: #d94e0c;
+    box-shadow: 0 0 30px rgba(236, 91, 19, 0.5);
+}
+
+.sign-up-submit:active {
+    transform: scale(0.98);
+}
+
+.sign-up-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.sign-up-submit .material-symbols-outlined {
+    font-size: 1.1rem;
+}
+
+/* ── Error message ── */
+.sign-up-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 0.25rem;
+    padding: 0.75rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: #f87171;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sign-up-error .material-symbols-outlined {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* ── Separator ── */
+.sign-up-separator {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.sign-up-separator-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.sign-up-separator-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: #334155;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+}
+
+/* ── Register link ── */
+.sign-up-register {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #475569;
+    margin-top: 0.25rem;
+}
+
+.sign-up-register a {
+    color: #ec5b13;
+    text-decoration: none;
+    font-weight: 700;
+    transition: color 0.2s, text-shadow 0.2s;
+}
+
+.sign-up-register a:hover {
+    color: #ff7a3d;
+    text-shadow: 0 0 10px rgba(236, 91, 19, 0.5);
+}
+
+/* ── Footer status bar ── */
+.sign-up-status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.sign-up-status-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.sign-up-status-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    color: #334155;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.sign-up-status-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: #00f2ff;
+    font-weight: 700;
+}
+
+.sign-up-status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.sign-up-status-dot::before {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
+    animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* ── Success state ── */
+.sign-up-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+    padding: 1.5rem 0;
+}
+
+.sign-up-success-icon {
+    font-size: 2.5rem;
+    color: #00f2ff;
+    text-shadow: 0 0 16px rgba(0, 242, 255, 0.6);
+}
+
+.sign-up-success-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 0.1em;
+}
+
+.sign-up-success-body {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: #64748b;
+    line-height: 1.8;
+}
+
+.sign-up-success-body a {
+    color: #ec5b13;
+    text-decoration: none;
+    font-weight: 700;
+    transition: color 0.2s;
+}
+
+.sign-up-success-body a:hover {
+    color: #ff7a3d;
+}
+
+/* ── Loading spinner ── */
+.sign-up-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

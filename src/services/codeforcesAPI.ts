@@ -7,26 +7,51 @@ interface CodeforcesProblem {
   tags?: string[];
 }
 
-export async function getRandomProblemByRating(targetRating: number) {
+interface ProblemData {
+  rating?: number,
+  topic?: string
+}
+
+export async function getAllProblems() {
   try {
-    // 1. Fetch problems (using a broad tag helps reduce the initial payload size)
-    const response = await fetch('https://codeforces.com/api/problemset.problems?tags=implementation');
+    const response = await fetch('https://codeforces.com/api/problemset.problems');
     const data = await response.json();
 
     if (data.status !== 'OK') {
       throw new Error('Codeforces API request failed');
     }
 
-    // 2. Filter the massive array by your specific rating
     const allProblems = data.result.problems;
-    const filteredProblems = allProblems.filter(
-      (problem: CodeforcesProblem) => problem.rating === targetRating
+    return allProblems;
+
+  } catch (error) {
+    console.error("Error fetching problem:", error);
+    return null;
+  }
+}
+
+const problems = await getAllProblems();
+
+export async function getProblemByRatingOrTopic({rating, topic}: ProblemData) {
+  try {
+    const filteredProblems = problems.filter(
+      (problem: CodeforcesProblem) => {
+        if (rating && topic) {
+          return problem.rating === rating && problem.tags?.includes(topic.toLowerCase());
+        } else if (rating) {
+          return problem.rating === rating;
+        } else if (topic) {
+          return problem.tags?.includes(topic.toLowerCase());
+        } else {
+          throw new Error("You must provide rating or topic at least");
+        }
+      }
     );
     
     // console.log(filteredProblems);
 
     if (filteredProblems.length === 0) {
-      throw new Error(`No problems found with rating ${targetRating}`);
+      throw new Error(`No problems found with rating ${rating} and topic ${topic}`);
     }
 
     // 3. Pick a random problem from the filtered list
@@ -47,5 +72,10 @@ export async function getRandomProblemByRating(targetRating: number) {
   }
 }
 
-const problem = await getRandomProblemByRating(800);
-console.log(problem);
+const problem1 = await getProblemByRatingOrTopic({rating: 800});
+const problem2 = await getProblemByRatingOrTopic({topic: "greedy"});
+const problem3 = await getProblemByRatingOrTopic({rating: 800, topic: "greedy"});
+
+console.log(problem1);
+console.log(problem2);
+console.log(problem3);

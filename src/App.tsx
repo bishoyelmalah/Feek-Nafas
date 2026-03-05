@@ -4,11 +4,15 @@ import { FindMatchPage } from './pages/FindMatchPage/FindMatchPage'
 import { MatchPage } from './pages/MatchPage/MatchPage'
 import { VictoryPage } from './pages/VictoryPage/VictoryPage'
 import { LosePage } from './pages/LosePage/LosePage'
+import { LoginPage } from './pages/loginPage/loginPage'
+import {SignUpPage} from './pages/signUpPage/signUpPage'
 
 function App() {
   return (
     <Routes>
-      <Route path='/home' element={<HomePage />}></Route>
+      <Route index element={<HomePage />}></Route>
+      <Route path='/login' element={<LoginPage />} />
+      <Route path='/register' element={<SignUpPage />} />
       <Route path='/findMatch' element={<FindMatchPage />}></Route>
       <Route path='/match' element={<MatchPage />}></Route>
       <Route path='/victory' element={<VictoryPage />}></Route>
