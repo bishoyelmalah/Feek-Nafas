@@ -1,5 +1,5 @@
 import './FindMatchPage.css';
-import radarImg from '../../assets/radar.png';
+// import radarImg from '../../assets/radar.png';
 
 export function FindMatchPage() {
     return (
@@ -136,18 +136,42 @@ export function FindMatchPage() {
 
                 {/* ── Center: Matchmaking Hub ── */}
                 <div className="matchmaking-center">
-                    {/* Faded background status log */}
-                    <div className="bg-status-log">
-                        <p>SEARCHING_FOR_OPPONENTS...</p>
-                        <p>PING: 24MS | REGION: EU_WEST_1</p>
-                        <p>PROTOCOL_LOBBY_V4.2.0_LOADED</p>
-                        <p>WAITING_FOR_HANDSHAKE...</p>
-                        <p>QUERYING_MATCHMAKING_SERVER_14.22.1...</p>
-                        <p>STABILIZING_NETWORK_LAYER...</p>
-                        <p>THREAT_LEVEL_CRITICAL_DETECTED</p>
-                        <p>SYTEM_CORE_ONLINE</p>
-                        <p>SEARCHING_FOR_OPPONENTS...</p>
-                        <p>LATENCY_CHECK_PASSED</p>
+
+                     {/* Private Duel */}
+                    <div className="private-duel">
+                        <div className="private-duel-header">
+                            <h3 className="private-duel-title">Private Duel</h3>
+                            <span className="material-symbols-outlined private-duel-icon">swords</span>
+                        </div>
+                        <div className="search-wrapper">
+                            <input
+                                className="search-input"
+                                placeholder="SEARCH USERNAME..."
+                                type="text"
+                            />
+                            <span className="material-symbols-outlined search-icon">search</span>
+                        </div>
+                        <div className="rivals-section">
+                            <p className="rivals-label">Recent Rivals</p>
+                            <div className="rivals-list">
+                                {/* Online rival */}
+                                <div className="rival-item">
+                                    <div className="rival-left">
+                                        <div className="rival-status-dot online" />
+                                        <span className="rival-name">SYNTH_STRIKER</span>
+                                    </div>
+                                    <button className="rival-invite-btn">Invite</button>
+                                </div>
+                                {/* Offline rival */}
+                                {/* <div className="rival-item">
+                                    <div className="rival-left">
+                                        <div className="rival-status-dot offline" />
+                                        <span className="rival-name offline">NEON_GHOST</span>
+                                    </div>
+                                    <button className="rival-offline-btn" disabled>Offline</button>
+                                </div> */}
+                            </div>
+                        </div>
                     </div>
 
                     {/* Find Match Button */}
@@ -157,10 +181,11 @@ export function FindMatchPage() {
                         <button className="find-match-btn find-match-glow">
                             <div className="find-match-btn-gradient" />
                             <div className="scanline" />
-                            <span className="">
-                                <img src={radarImg} width={72} height={72}/>
+                            <span className="material-symbols-outlined find-match-btn-icon">
+                                radar
+                                {/* <img src={radarImg} width={72} height={72}/> */}
                             </span>
-                            <h2 className="find-match-btn-title glitch-text">Find Match</h2>
+                            <h2 className="find-match-btn-title glitch-text">Start Match</h2>
                             <p className="find-match-btn-subtitle">Ranked 1v1</p>
                             <div className="btn-corner-tl" />
                             <div className="btn-corner-br" />
@@ -215,57 +240,6 @@ export function FindMatchPage() {
                     </div>
 
                     {/* Season Card */}
-                    <div className="season-card">
-                        <div className="season-card-decoration" />
-                        <div className="season-card-header">
-                            <span className="material-symbols-outlined season-card-icon">event_upcoming</span>
-                            <h4 className="season-card-title">Season End</h4>
-                        </div>
-                        <div className="season-card-body">
-                            <div className="season-countdown">
-                                <span className="season-countdown-value">12d 04h</span>
-                                <span className="season-countdown-label">Time Remaining</span>
-                            </div>
-                            <button className="season-rewards-btn">View Rewards</button>
-                        </div>
-                    </div>
-
-                    {/* Private Duel */}
-                    <div className="private-duel">
-                        <div className="private-duel-header">
-                            <h3 className="private-duel-title">Private Duel</h3>
-                            <span className="material-symbols-outlined private-duel-icon">swords</span>
-                        </div>
-                        <div className="search-wrapper">
-                            <input
-                                className="search-input"
-                                placeholder="SEARCH USERNAME..."
-                                type="text"
-                            />
-                            <span className="material-symbols-outlined search-icon">search</span>
-                        </div>
-                        <div className="rivals-section">
-                            <p className="rivals-label">Recent Rivals</p>
-                            <div className="rivals-list">
-                                {/* Online rival */}
-                                <div className="rival-item">
-                                    <div className="rival-left">
-                                        <div className="rival-status-dot online" />
-                                        <span className="rival-name">SYNTH_STRIKER</span>
-                                    </div>
-                                    <button className="rival-invite-btn">Invite</button>
-                                </div>
-                                {/* Offline rival */}
-                                <div className="rival-item">
-                                    <div className="rival-left">
-                                        <div className="rival-status-dot offline" />
-                                        <span className="rival-name offline">NEON_GHOST</span>
-                                    </div>
-                                    <button className="rival-offline-btn" disabled>Offline</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     {/* System Log */}
                     <div className="system-log">
