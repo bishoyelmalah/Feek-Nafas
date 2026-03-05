@@ -1,5 +1,11 @@
+import Header from '../../components/Header';
+import './HomePage.css';
+
 export function HomePage() {
     return (
-        <div>This is Home Page</div>
+        <>
+            <Header activeLink="arena" />
+            <div>This is Home Page</div>
+        </>
     )
 }

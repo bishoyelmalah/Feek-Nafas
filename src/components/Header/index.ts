@@ -1,0 +1,2 @@
+//Barrel  import for cleaner imports and more convenient file structure. This allows us to import Header component using 'import Header from "./components/Header";' instead of specifying the full path to Header.tsx.
+export { default } from './Header'; 
