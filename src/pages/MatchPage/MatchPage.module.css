@@ -408,7 +408,7 @@
   gap: 0.5rem;
 }
 
-.challenge-label .material-symbols-outlined {
+.challenge-label :global(.material-symbols-outlined) {
   font-size: 0.875rem;
 }
 
@@ -490,7 +490,7 @@
   transform: scale(0.98);
 }
 
-.solve-button .material-symbols-outlined {
+.solve-button :global(.material-symbols-outlined) {
   font-size: 1.25rem;
 }
 
@@ -537,7 +537,7 @@
   background-color: rgba(239, 68, 68, 0.2);
 }
 
-.action-btn .material-symbols-outlined {
+.action-btn :global(.material-symbols-outlined) {
   font-size: 1.125rem;
 }
 

@@ -1,7 +1,7 @@
-import { useState, type SubmitEvent } from 'react';
+﻿import { useState, type SubmitEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { supabase } from '../../services/supabase';
-import './loginPage.css';
+import styles from './loginPage.module.css';
 
 export function LoginPage() {
     const navigate = useNavigate();
@@ -28,56 +28,56 @@ export function LoginPage() {
     };
 
     return (
-        <div className="login-page">
+        <div className={styles['login-page']}>
             {/* Background layers */}
-            <div className="login-bg-grid" />
-            <div className="login-bg-scanline" />
-            <div className="login-bg-glow-left" />
-            <div className="login-bg-glow-right" />
+            <div className={styles['login-bg-grid']} />
+            <div className={styles['login-bg-scanline']} />
+            <div className={styles['login-bg-glow-left']} />
+            <div className={styles['login-bg-glow-right']} />
 
             {/* Card */}
-            <div className="login-card">
+            <div className={styles['login-card']}>
 
                 {/* Logo */}
-                <div className="login-logo">
-                    <div className="login-logo-icon">
+                <div className={styles['login-logo']}>
+                    <div className={styles['login-logo-icon']}>
                         <span className="material-symbols-outlined">terminal</span>
                     </div>
-                    <h1 className="login-logo-text">
+                    <h1 className={styles['login-logo-text']}>
                         FEEK<span>NAFAS</span>
                     </h1>
                 </div>
 
                 {/* Header */}
-                <div className="login-header">
-                    <p className="login-tagline">// SECURE_ACCESS_PORTAL</p>
-                    <h2 className="login-title">
+                <div className={styles['login-header']}>
+                    <p className={styles['login-tagline']}>// SECURE_ACCESS_PORTAL</p>
+                    <h2 className={styles['login-title']}>
                         ENTER THE <span>ARENA</span>
                     </h2>
-                    <p className="login-subtitle">AUTHENTICATE_TO_CONTINUE</p>
+                    <p className={styles['login-subtitle']}>AUTHENTICATE_TO_CONTINUE</p>
                 </div>
 
-                <div className="login-divider" />
+                <div className={styles['login-divider']} />
 
                 {/* Form */}
-                <form className="login-form" onSubmit={handleLogin}>
+                <form className={styles['login-form']} onSubmit={handleLogin}>
 
                     {error && (
-                        <div className="login-error">
+                        <div className={styles['login-error']}>
                             <span className="material-symbols-outlined">error</span>
                             {error}
                         </div>
                     )}
 
                     {/* Email */}
-                    <div className="login-field">
-                        <label className="login-label" htmlFor="email">
+                    <div className={styles['login-field']}>
+                        <label className={styles['login-label']} htmlFor="email">
                             TERMINAL_ID
                         </label>
-                        <div className="login-input-wrapper">
+                        <div className={styles['login-input-wrapper']}>
                             <input
                                 id="email"
-                                className="login-input"
+                                className={styles['login-input']}
                                 type="email"
                                 placeholder="operator@feekNafas.io"
                                 value={email}
@@ -85,19 +85,19 @@ export function LoginPage() {
                                 required
                                 autoComplete="email"
                             />
-                            <span className="login-input-icon material-symbols-outlined">alternate_email</span>
+                            <span className={"material-symbols-outlined " + styles['login-input-icon']}>alternate_email</span>
                         </div>
                     </div>
 
                     {/* Password */}
-                    <div className="login-field">
-                        <label className="login-label" htmlFor="password">
+                    <div className={styles['login-field']}>
+                        <label className={styles['login-label']} htmlFor="password">
                             ACCESS_KEY
                         </label>
-                        <div className="login-input-wrapper">
+                        <div className={styles['login-input-wrapper']}>
                             <input
                                 id="password"
-                                className="login-input"
+                                className={styles['login-input']}
                                 type={showPassword ? 'text' : 'password'}
                                 placeholder="••••••••••••"
                                 value={password}
@@ -105,10 +105,10 @@ export function LoginPage() {
                                 required
                                 autoComplete="current-password"
                             />
-                            <span className="login-input-icon material-symbols-outlined">lock</span>
+                            <span className={"material-symbols-outlined " + styles['login-input-icon']}>lock</span>
                             <button
                                 type="button"
-                                className="login-input-toggle"
+                                className={styles['login-input-toggle']}
                                 onClick={() => setShowPassword((p) => !p)}
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                             >
@@ -120,14 +120,14 @@ export function LoginPage() {
                     </div>
 
                     {/* Forgot password */}
-                    <div className="login-forgot">
+                    <div className={styles['login-forgot']}>
                         <a href="#">FORGOT_ACCESS_KEY?</a>
                     </div>
 
                     {/* Submit */}
-                    <button className="login-submit" type="submit" disabled={loading}>
+                    <button className={styles['login-submit']} type="submit" disabled={loading}>
                         {loading ? (
-                            <div className="login-spinner" />
+                            <div className={styles['login-spinner']} />
                         ) : (
                             <>
                                 <span className="material-symbols-outlined">login</span>
@@ -137,27 +137,27 @@ export function LoginPage() {
                     </button>
 
                     {/* Separator */}
-                    <div className="login-separator">
-                        <div className="login-separator-line" />
-                        <span className="login-separator-text">no account?</span>
-                        <div className="login-separator-line" />
+                    <div className={styles['login-separator']}>
+                        <div className={styles['login-separator-line']} />
+                        <span className={styles['login-separator-text']}>no account?</span>
+                        <div className={styles['login-separator-line']} />
                     </div>
 
                     {/* Register */}
-                    <p className="login-register">
+                    <p className={styles['login-register']}>
                         <Link to="/register">CREATE_OPERATOR_PROFILE</Link>
                     </p>
                 </form>
 
                 {/* Status bar */}
-                <div className="login-status-bar">
-                    <div className="login-status-item">
-                        <span className="login-status-label">SYSTEM_STATUS</span>
-                        <span className="login-status-value login-status-dot">ONLINE</span>
+                <div className={styles['login-status-bar']}>
+                    <div className={styles['login-status-item']}>
+                        <span className={styles['login-status-label']}>SYSTEM_STATUS</span>
+                        <span className={[styles['login-status-value'], styles['login-status-dot']].join(' ')}>ONLINE</span>
                     </div>
-                    <div className="login-status-item" style={{ textAlign: 'right' }}>
-                        <span className="login-status-label">PLAYERS_ONLINE</span>
-                        <span className="login-status-value">14,204</span>
+                    <div className={styles['login-status-item']} style={{ textAlign: 'right' }}>
+                        <span className={styles['login-status-label']}>PLAYERS_ONLINE</span>
+                        <span className={styles['login-status-value']}>14,204</span>
                     </div>
                 </div>
             </div>

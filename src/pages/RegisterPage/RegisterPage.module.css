@@ -115,7 +115,7 @@
     justify-content: center;
 }
 
-.sign-up-logo-icon .material-symbols-outlined {
+.sign-up-logo-icon :global(.material-symbols-outlined) {
     color: white;
     font-size: 1.5rem;
 }
@@ -259,7 +259,7 @@
     color: #ec5b13;
 }
 
-.sign-up-input-toggle .material-symbols-outlined {
+.sign-up-input-toggle :global(.material-symbols-outlined) {
     font-size: 1.1rem;
 }
 
@@ -321,7 +321,7 @@
     transform: none;
 }
 
-.sign-up-submit .material-symbols-outlined {
+.sign-up-submit :global(.material-symbols-outlined) {
     font-size: 1.1rem;
 }
 
@@ -340,7 +340,7 @@
     gap: 0.5rem;
 }
 
-.sign-up-error .material-symbols-outlined {
+.sign-up-error :global(.material-symbols-outlined) {
     font-size: 1rem;
     flex-shrink: 0;
 }

@@ -1,0 +1,13 @@
+/* ============================================================
+   App.css — Global styles
+   All styles for globally-used classes (className="...") belong here.
+   ============================================================ */
+
+/* ── Material Symbols Icons ────────────────────────────────── */
+.material-symbols-outlined {
+  user-select: none;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.25rem;
+}

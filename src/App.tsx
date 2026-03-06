@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router' 
+import { Routes, Route } from 'react-router'
+import './App.css'
 import { HomePage } from './pages/HomePage/HomePage'
 import { FindMatchPage } from './pages/FindMatchPage/FindMatchPage'
 import { MatchPage } from './pages/MatchPage/MatchPage'

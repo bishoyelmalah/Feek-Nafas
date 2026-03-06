@@ -328,7 +328,7 @@
   opacity: 0.1;
 }
 
-.rank-card-decoration .material-symbols-outlined {
+.rank-card-decoration :global(.material-symbols-outlined) {
   font-size: 3.75rem;
 }
 
