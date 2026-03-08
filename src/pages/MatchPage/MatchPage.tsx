@@ -1,8 +1,13 @@
 ﻿// import Footer from "../../components/Footer/Footer"
 // import Header from "../../components/Header/Header"
+import { useLocation } from 'react-router';
 import styles from './MatchPage.module.css';
 
 export function MatchPage() {
+    const { state } = useLocation();
+    const { problem } = state;
+    console.log(problem);
+
     return (
         <div className={styles['match-page']}>
             {/* <Header activeLink="arena" /> */}
@@ -99,7 +104,7 @@ export function MatchPage() {
                                         <span className="material-symbols-outlined">terminal</span>
                                         Current Challenge
                                     </h3>
-                                    <h1 className={styles['challenge-title']}>158A - Next Round</h1>
+                                    <h1 className={styles['challenge-title']}>{`${problem.contestId}${problem.index} - ${problem.name}`}</h1>
                                 </div>
                                 <div className={styles['challenge-meta']}>
                                     <span className={styles['meta-badge']}>DIFF: 800</span>
@@ -116,7 +121,7 @@ export function MatchPage() {
                                 <span className={styles['tag']}>Special Problems</span>
                             </div>
                             
-                            <a href="https://codeforces.com/problemset/problem/158/A" target="_blank" rel="noopener noreferrer" className={styles['solve-button']}>
+                            <a href={`${problem.link}`} target="_blank" rel="noopener noreferrer" className={styles['solve-button']}>
                                 <span className="material-symbols-outlined">launch</span>
                                 Solve on Codeforces
                             </a>

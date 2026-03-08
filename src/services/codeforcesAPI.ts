@@ -30,10 +30,10 @@ export async function getAllProblems() {
   }
 }
 
-const problems = await getAllProblems();
 
 export async function getProblemByRatingOrTopic({rating, topic}: ProblemData) {
   try {
+    const problems = await getAllProblems();
     const filteredProblems = problems.filter(
       (problem: CodeforcesProblem) => {
         if (rating && topic) {
@@ -72,10 +72,10 @@ export async function getProblemByRatingOrTopic({rating, topic}: ProblemData) {
   }
 }
 
-const problem1 = await getProblemByRatingOrTopic({rating: 800});
-const problem2 = await getProblemByRatingOrTopic({topic: "greedy"});
-const problem3 = await getProblemByRatingOrTopic({rating: 800, topic: "greedy"});
+// const problem1 = await getProblemByRatingOrTopic({rating: 800});
+// const problem2 = await getProblemByRatingOrTopic({topic: "greedy"});
+// const problem3 = await getProblemByRatingOrTopic({rating: 800, topic: "greedy"});
 
-console.log(problem1);
-console.log(problem2);
-console.log(problem3);
+// console.log(problem1);
+// console.log(problem2);
+// console.log(problem3);

@@ -1,8 +1,16 @@
 ﻿import styles from './FindMatchPage.module.css';
-import Header from '../../components/Header/Header'
+import Header from '../../components/Header/Header';
+import { useNavigate, type NavigateFunction } from 'react-router';
+import { getProblemByRatingOrTopic } from '../../services/codeforcesAPI';
 // import radarImg from '../../assets/radar.png';
 
+const findMatch = async (nav: NavigateFunction) => {
+    const problem = await getProblemByRatingOrTopic({rating: 800});
+    await nav('/match', { state: {problem} });
+}
+
 export function FindMatchPage() {
+    const nav = useNavigate();
     return (
         <div className={styles['find-match-page']}>
             <Header />
@@ -142,7 +150,7 @@ export function FindMatchPage() {
                     <div className={styles['find-match-btn-wrapper']}>
                         <div className={styles['btn-outer-ring']} />
                         <div className={styles['btn-inner-ring']} />
-                        <button className={[styles['find-match-btn'], styles['find-match-glow']].join(' ')}>
+                        <button className={[styles['find-match-btn'], styles['find-match-glow']].join(' ')} onClick={()=>{findMatch(nav)}}>
                             <div className={styles['find-match-btn-gradient']} />
                             <div className={styles['scanline']} />
                             <span className={"material-symbols-outlined " + styles['find-match-btn-icon']}>
