@@ -1,11 +1,11 @@
-﻿import Footer from "../../components/Footer/Footer"
-import Header from "../../components/Header/Header"
+﻿// import Footer from "../../components/Footer/Footer"
+// import Header from "../../components/Header/Header"
 import styles from './MatchPage.module.css';
 
 export function MatchPage() {
     return (
         <div className={styles['match-page']}>
-            <Header activeLink="arena" />
+            {/* <Header activeLink="arena" /> */}
             
             <main className={styles['match-main']}>
                 {/* HUD: Countdown & Players */}
@@ -124,8 +124,8 @@ export function MatchPage() {
 
                         <div className={styles['action-buttons']}>
                             <button className={[styles['action-btn'], styles['secondary']].join(' ')}>
-                                <span className="material-symbols-outlined">visibility</span>
-                                Spectate Others
+                                <span className="material-symbols-outlined">refresh</span>
+                                Refresh
                             </button>
                             <button className={[styles['action-btn'], styles['danger']].join(' ')}>
                                 <span className="material-symbols-outlined">logout</span>
@@ -135,7 +135,7 @@ export function MatchPage() {
                     </div>
 
                     {/* Right: Live Feed */}
-                    <div className={styles['live-feed']}>
+                    {/* <div className={styles['live-feed']}>
                         <div className={styles['feed-card']}>
                             <div className={styles['feed-header']}>
                                 <h4 className={styles['feed-title']}>
@@ -187,11 +187,11 @@ export function MatchPage() {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </main>
 
-            <Footer/>
+            {/* <Footer/> */}
         </div>
     )
 }
