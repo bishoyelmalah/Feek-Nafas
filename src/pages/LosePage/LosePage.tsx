@@ -5,8 +5,6 @@
 // }
 
 import React from 'react';
-import Header from '../../components/Header/Header';
-import Footer from '../../components/Footer/Footer';
 import styles from './LosePage.module.css';
 
 const LosePage: React.FC = () => {
@@ -17,7 +15,6 @@ const LosePage: React.FC = () => {
       <div className={styles.gradientOverlay}></div>
 
       {/* Global Header */}
-      <Header />
 
       {/* Main Content */}
       <main className={styles.mainContent}>
@@ -98,7 +95,6 @@ const LosePage: React.FC = () => {
       </main>
 
       {/* Global Footer */}
-      <Footer />
 
       {/* Decorative Corners and Flares */}
       <div className={styles.cornerTopLeft}></div>

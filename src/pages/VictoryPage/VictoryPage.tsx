@@ -5,8 +5,8 @@
 // }
 
 import React from 'react';
-import Header from '../../components/Header/Header';
-import Footer from '../../components/Footer/Footer';
+// import Header from '../../components/Header/Header';
+// import Footer from '../../components/Footer/Footer';
 import styles from './VictoryPage.module.css';
 
 const VictoryPage: React.FC = () => {
@@ -17,7 +17,6 @@ const VictoryPage: React.FC = () => {
       <div className={styles.gradientOverlay}></div>
 
       {/* Global Header */}
-      <Header />
 
       {/* Main Content */}
       <main className={styles.mainContent}>
@@ -98,7 +97,6 @@ const VictoryPage: React.FC = () => {
       </main>
 
       {/* Global Footer */}
-      <Footer />
 
       {/* Decorative Corners */}
       <div className={styles.cornerTopLeft}></div>
