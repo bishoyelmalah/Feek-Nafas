@@ -21,7 +21,7 @@ export function LoginPage() {
         if (authError) {
             setError(authError.message.toUpperCase());
         } else {
-            navigate('/');
+            navigate('/home');
         }
 
         setLoading(false);

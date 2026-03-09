@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router'
 import './App.css'
 import { LandingPage } from './pages/LandingPage/LandingPage'
-// import { HomePage } from './pages/HomePage/HomePage'
+import { HomePage } from './pages/HomePage/HomePage'
 import { FindMatchPage } from './pages/FindMatchPage/FindMatchPage'
 import { MatchPage } from './pages/MatchPage/MatchPage'
 import { VictoryPage } from './pages/VictoryPage/VictoryPage'
@@ -13,6 +13,7 @@ function App() {
   return (
     <Routes>
       <Route index element={<LandingPage />}></Route>
+      <Route path='/home' element={<HomePage/>} />
       <Route path='/login' element={<LoginPage />} />
       <Route path='/register' element={<RegisterPage />} />
       <Route path='/findMatch' element={<FindMatchPage />}></Route>

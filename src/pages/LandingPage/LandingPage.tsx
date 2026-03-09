@@ -1,8 +1,10 @@
 import styles from './LandingPage.module.css';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
+import { useNavigate } from 'react-router';
 
 export function LandingPage() {
+    const navigate = useNavigate();
   return (
     <div className={styles.pageWrapper}>
 
@@ -53,7 +55,10 @@ export function LandingPage() {
               and outlive the competition in the high-stakes digital arena.
             </p>
             <div className={styles.heroCtas}>
-              <button className={styles.primaryBtn}>
+              <button className={styles.primaryBtn} onClick={(e)=>{
+                e.preventDefault();
+                navigate('/register');
+              }}>
                 <span>Initialize Combat</span>
                 <span className={`material-symbols-outlined ${styles.primaryBtnIcon}`}>bolt</span>
               </button>
