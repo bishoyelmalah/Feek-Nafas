@@ -3,7 +3,11 @@ each player has his own private channel (e.g inbox_userUUID) with the matches da
 if player_1 wants to create a match:
     player_1 adds a row in Matches table and set the status to pending
 
+
     player_1 enter the lobby
+
+    if player_1 for any reason quit the lobby or pressed "Cancel invitation":
+        the row should be deleted 
 
     player_2 will listen to that new row and get an invitation to join the match
 
