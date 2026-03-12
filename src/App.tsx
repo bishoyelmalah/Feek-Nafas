@@ -8,6 +8,7 @@ import { VictoryPage } from './pages/VictoryPage/VictoryPage'
 import { LosePage } from './pages/LosePage/LosePage'
 import { LoginPage } from './pages/loginPage/loginPage'
 import {RegisterPage} from './pages/RegisterPage/RegisterPage'
+import TheLandingPage from './pages/TheLandingPage/the_landing_page'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Route path='/match' element={<MatchPage />}></Route>
       <Route path='/victory' element={<VictoryPage />}></Route>
       <Route path='/lose' element={<LosePage />}></Route>
+      <Route path='/the_landing_page' element={<TheLandingPage />}></Route>
     </Routes>
   )
 }
