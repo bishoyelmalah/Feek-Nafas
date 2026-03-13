@@ -1,138 +1,133 @@
-﻿// import Footer from "../../components/Footer/Footer"
-// import Header from "../../components/Header/Header"
-import { useLocation } from 'react-router';
-import styles from './MatchPage.module.css';
+﻿import Footer from "../../components/Footer/Footer"
+import Header from "../../components/Header/Header"
+import './MatchPage.css'
 
 export function MatchPage() {
-    const { state } = useLocation();
-    const { problem } = state;
-    console.log(problem);
-
     return (
-        <div className={styles['match-page']}>
-            {/* <Header activeLink="arena" /> */}
+        <div className="match-page">
+            <Header activeLink="arena" />
             
-            <main className={styles['match-main']}>
+            <main className="match-main">
                 {/* HUD: Countdown & Players */}
-                <div className={styles['match-hud']}>
+                <div className="match-hud">
                     {/* Player A (User) */}
-                    <div className={[styles['player-card'], styles['player-a']].join(' ')}>
-                        <div className={styles['player-info']}>
-                            <div className={styles['player-avatar-container']}>
-                                <div className={[styles['player-avatar'], styles['blue-border']].join(' ')}>
+                    <div className="player-card player-a">
+                        <div className="player-info">
+                            <div className="player-avatar-container">
+                                <div className="player-avatar blue-border">
                                     <img 
                                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcSM1JyCgADutBmUal13KYePGDj08Do90Z2zgAeUp9R2VqFq3wAhR8GsAdZXGZTSuutZx0brGzt9_pSsScFju4iwXzh4EDGZuAoCqFm4cXngbLtTRbTHE-EJVXv2GquZ6WbgQhhNKrKfVEszX_TOxWgY8wU9DJFxWG1ueTI_ObIaJ0IS4SNEZeJP1ibgFZZ0zOzsHkSeRXUvCEi6yHozWr8t8kDH9RKiZGgSvlruDo53Bc5B0C87nqhIdbIIYJXU7m0TSF-uX35Ds" 
                                         alt="Player A avatar"
                                     />
                                 </div>
-                                <div className={styles['online-indicator']}></div>
+                                <div className="online-indicator"></div>
                             </div>
-                            <div className={styles['player-details']}>
-                                <span className={[styles['player-name'], styles['blue-text']].join(' ')}>Player A (You)</span>
-                                <div className={styles['player-stats']}>
-                                    <span className={[styles['rank-badge'], styles['blue-badge']].join(' ')}>Candidate Master</span>
-                                    <span className={styles['rating']}>1840</span>
+                            <div className="player-details">
+                                <span className="player-name blue-text">Player A (You)</span>
+                                <div className="player-stats">
+                                    <span className="match-rank-badge blue-badge">Candidate Master</span>
+                                    <span className="rating">1840</span>
                                 </div>
                             </div>
-                            <div className={styles['player-status']}>
-                                <span className={[styles['status-text'], styles['thinking']].join(' ')}>Thinking</span>
+                            <div className="player-status">
+                                <span className="status-text thinking">Thinking</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Timer HUD */}
-                    <div className={styles['timer-container']}>
-                        <div className={styles['timer-display']}>
-                            <span className={styles['timer-value']}>14:20</span>
-                            <p className={styles['timer-label']}>Time Remaining</p>
+                    <div className="timer-container">
+                        <div className="timer-display">
+                            <span className="timer-value">14:20</span>
+                            <p className="timer-label">Time Remaining</p>
                         </div>
                     </div>
 
                     {/* Player B (Opponent) */}
-                    <div className={[styles['player-card'], styles['player-b']].join(' ')}>
-                        <div className={styles['player-info']}>
-                            <div className={styles['player-status']}>
-                                <span className={[styles['status-text'], styles['submitting']].join(' ')}>Submitting...</span>
+                    <div className="player-card player-b">
+                        <div className="player-info">
+                            <div className="player-status">
+                                <span className="status-text submitting">Submitting...</span>
                             </div>
-                            <div className={[styles['player-details'], styles['right']].join(' ')}>
-                                <span className={[styles['player-name'], styles['orange-text']].join(' ')}>Player B</span>
-                                <div className={styles['player-stats']}>
-                                    <span className={styles['rating']}>1910</span>
-                                    <span className={[styles['rank-badge'], styles['orange-badge']].join(' ')}>Master</span>
+                            <div className="player-details right">
+                                <span className="player-name orange-text">Player B</span>
+                                <div className="player-stats">
+                                    <span className="rating">1910</span>
+                                    <span className="match-rank-badge orange-badge">Master</span>
                                 </div>
                             </div>
-                            <div className={styles['player-avatar-container']}>
-                                <div className={[styles['player-avatar'], styles['orange-border']].join(' ')}>
+                            <div className="player-avatar-container">
+                                <div className="player-avatar orange-border">
                                     <img 
                                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnkP0tPBbWUufigD2mPunXbt4EYjBqJJgv7Uq6uYj01D-AH8FVNHK2Df06ZMf9RTOINJzZwneretI5Z6G09nsHGJ7bdxqbLyPhnZHQfKj4OfN_rUHSoReSnYA9JVVesrBi_gKVpHcZ5Lq6VehWiDvoGxh1OI_66BtggFz9zGVGB3jKzw0B4OcFxWiqSv8QX5NiidXC6FQxBspR2Wwbg52l6NTo5ja3Uf3hLQ1svBSBmC8YcN5HAKC6lQFZW8nCuQN_MZaQ1wfDluw" 
                                         alt="Player B avatar"
                                     />
                                 </div>
-                                <div className={styles['online-indicator']}></div>
+                                <div className="online-indicator"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Tug of War Bar */}
-                <div className={styles['momentum-section']}>
-                    <div className={styles['momentum-labels']}>
-                        <div className={styles['momentum-player']}>
-                            <span className={[styles['momentum-title'], styles['blue-text']].join(' ')}>Momentum</span>
-                            <span className={styles['momentum-value']}>50%</span>
+                <div className="momentum-section">
+                    <div className="momentum-labels">
+                        <div className="momentum-player">
+                            <span className="momentum-title blue-text">Momentum</span>
+                            <span className="momentum-value">50%</span>
                         </div>
-                        <div className={[styles['momentum-player'], styles['right']].join(' ')}>
-                            <span className={[styles['momentum-title'], styles['orange-text']].join(' ')}>Momentum</span>
-                            <span className={styles['momentum-value']}>50%</span>
+                        <div className="momentum-player right">
+                            <span className="momentum-title orange-text">Momentum</span>
+                            <span className="momentum-value">50%</span>
                         </div>
                     </div>
-                    <div className={styles['momentum-bar']}>
-                        <div className={[styles['momentum-fill'], styles['blue-momentum']].join(' ')} style={{ width: '50%' }}></div>
-                        <div className={[styles['momentum-fill'], styles['orange-momentum']].join(' ')} style={{ width: '50%' }}></div>
-                        <div className={styles['momentum-marker']}></div>
+                    <div className="momentum-bar">
+                        <div className="momentum-fill blue-momentum" style={{ width: '50%' }}></div>
+                        <div className="momentum-fill orange-momentum" style={{ width: '50%' }}></div>
+                        <div className="momentum-marker"></div>
                     </div>
                 </div>
 
                 {/* Main Content Area */}
-                <div className={styles['match-content']}>
+                <div className="match-content">
                     {/* Left: Challenge Info */}
-                    <div className={styles['challenge-section']}>
-                        <div className={styles['challenge-card']}>
-                            <div className={styles['challenge-header']}>
+                    <div className="challenge-section">
+                        <div className="challenge-card">
+                            <div className="challenge-header">
                                 <div>
-                                    <h3 className={styles['challenge-label']}>
+                                    <h3 className="challenge-label">
                                         <span className="material-symbols-outlined">terminal</span>
                                         Current Challenge
                                     </h3>
-                                    <h1 className={styles['challenge-title']}>{`${problem.contestId}${problem.index} - ${problem.name}`}</h1>
+                                    <h1 className="challenge-title">158A - Next Round</h1>
                                 </div>
-                                <div className={styles['challenge-meta']}>
-                                    <span className={styles['meta-badge']}>DIFF: 800</span>
-                                    <span className={styles['meta-badge']}>POINTS: 500</span>
+                                <div className="challenge-meta">
+                                    <span className="meta-badge">DIFF: 800</span>
+                                    <span className="meta-badge">POINTS: 500</span>
                                 </div>
                             </div>
                             
-                            <p className={styles['challenge-description']}>
+                            <p className="challenge-description">
                                 Contestant who earns a score equal to or greater than the k-th place finisher's score will advance to the next round, as long as the contestant earns a positive score...
                             </p>
                             
-                            <div className={styles['challenge-tags']}>
-                                <span className={styles['tag']}>Implementation</span>
-                                <span className={styles['tag']}>Special Problems</span>
+                            <div className="challenge-tags">
+                                <span className="tag">Implementation</span>
+                                <span className="tag">Special Problems</span>
                             </div>
                             
-                            <a href={`${problem.link}`} target="_blank" rel="noopener noreferrer" className={styles['solve-button']}>
+                            <a href="https://codeforces.com/problemset/problem/158/A" target="_blank" rel="noopener noreferrer" className="solve-button">
                                 <span className="material-symbols-outlined">launch</span>
                                 Solve on Codeforces
                             </a>
                         </div>
 
-                        <div className={styles['action-buttons']}>
-                            <button className={[styles['action-btn'], styles['secondary']].join(' ')}>
-                                <span className="material-symbols-outlined">refresh</span>
-                                Refresh
+                        <div className="action-buttons">
+                            <button className="action-btn secondary">
+                                <span className="material-symbols-outlined">visibility</span>
+                                Spectate Others
                             </button>
-                            <button className={[styles['action-btn'], styles['danger']].join(' ')}>
+                            <button className="action-btn danger">
                                 <span className="material-symbols-outlined">logout</span>
                                 Return to Lobby
                             </button>
@@ -140,63 +135,63 @@ export function MatchPage() {
                     </div>
 
                     {/* Right: Live Feed */}
-                    {/* <div className={styles['live-feed']}>
-                        <div className={styles['feed-card']}>
-                            <div className={styles['feed-header']}>
-                                <h4 className={styles['feed-title']}>
-                                    <span className={styles['live-indicator']}></span>
+                    <div className="live-feed">
+                        <div className="feed-card">
+                            <div className="feed-header">
+                                <h4 className="feed-title">
+                                    <span className="live-indicator"></span>
                                     Live Match Feed
                                 </h4>
-                                <span className={styles['session-id']}>SESSION: #AF92-X</span>
+                                <span className="session-id">SESSION: #AF92-X</span>
                             </div>
-                            <div className={styles['feed-content']}>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:15:02]</span>
-                                    <span className={styles['feed-text']}>Match protocol initialized.</span>
+                            <div className="feed-content">
+                                <div className="feed-entry">
+                                    <span className="feed-time">[14:15:02]</span>
+                                    <span className="feed-text">Match protocol initialized.</span>
                                 </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:15:05]</span>
-                                    <span className={[styles['feed-player'], styles['blue-text']].join(' ')}>Player A</span>
-                                    <span className={styles['feed-text-italic']}>connected to Codeforces API.</span>
+                                <div className="feed-entry">
+                                    <span className="feed-time">[14:15:05]</span>
+                                    <span className="feed-player blue-text">Player A</span>
+                                    <span className="feed-text-italic">connected to Codeforces API.</span>
                                 </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:15:08]</span>
-                                    <span className={[styles['feed-player'], styles['orange-text']].join(' ')}>Player B</span>
-                                    <span className={styles['feed-text-italic']}>connected to Codeforces API.</span>
+                                <div className="feed-entry">
+                                    <span className="feed-time">[14:15:08]</span>
+                                    <span className="feed-player orange-text">Player B</span>
+                                    <span className="feed-text-italic">connected to Codeforces API.</span>
                                 </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:15:10]</span>
-                                    <span className={styles['feed-system']}>SYSTEM:</span>
-                                    <span className={styles['feed-text-white']}>Match Started! Problem set released.</span>
+                                <div className="feed-entry">
+                                    <span className="feed-time">[14:15:10]</span>
+                                    <span className="feed-system">SYSTEM:</span>
+                                    <span className="feed-text-white">Match Started! Problem set released.</span>
                                 </div>
-                                <div className={[styles['feed-entry'], styles['column']].join(' ')}>
-                                    <span className={styles['feed-time']}>[14:18:22]</span>
-                                    <div className={styles['feed-submission']}>
-                                        <span className={[styles['feed-player'], styles['orange-text']].join(' ')}>Player B</span>
-                                        <span className={styles['submission-text']}>Attempting submission for Test Case 1...</span>
+                                <div className="feed-entry column">
+                                    <span className="feed-time">[14:18:22]</span>
+                                    <div className="feed-submission">
+                                        <span className="feed-player orange-text">Player B</span>
+                                        <span className="submission-text">Attempting submission for Test Case 1...</span>
                                     </div>
                                 </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:19:45]</span>
-                                    <span className={[styles['feed-player'], styles['blue-text']].join(' ')}>Player A</span>
-                                    <span className={styles['feed-text-italic']}>viewing problem description.</span>
+                                <div className="feed-entry">
+                                    <span className="feed-time">[14:19:45]</span>
+                                    <span className="feed-player blue-text">Player A</span>
+                                    <span className="feed-text-italic">viewing problem description.</span>
                                 </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:20:00]</span>
-                                    <span className={styles['feed-alert']}>MATCH ALERT:</span>
-                                    <span className={styles['feed-text-alert']}>T-minus 14 minutes remaining.</span>
+                                <div className="feed-entry">
+                                    <span className="feed-time">[14:20:00]</span>
+                                    <span className="feed-alert">MATCH ALERT:</span>
+                                    <span className="feed-text-alert">T-minus 14 minutes remaining.</span>
                                 </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:20:01]</span>
-                                    <span className={styles['feed-cursor']}></span>
+                                <div className="feed-entry">
+                                    <span className="feed-time">[14:20:01]</span>
+                                    <span className="feed-cursor"></span>
                                 </div>
                             </div>
                         </div>
-                    </div> */}
+                    </div>
                 </div>
             </main>
 
-            {/* <Footer/> */}
+            <Footer/>
         </div>
     )
 }

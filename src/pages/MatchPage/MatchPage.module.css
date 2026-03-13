@@ -142,7 +142,7 @@
   margin-top: 0.25rem;
 }
 
-.rank-badge {
+.match-rank-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -468,6 +468,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  width: 92%;
   background-color: #ec5b13;
   color: white;
   font-weight: 900;
