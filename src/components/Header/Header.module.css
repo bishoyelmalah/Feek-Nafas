@@ -8,6 +8,7 @@ header {
   border-bottom: 1px solid rgba(236, 91, 19, 0.2);
   background-color: rgba(10, 10, 10, 0.8);
   backdrop-filter: blur(12px);
+  font-family: var(--font-display);
 }
 
 .header-content {
