@@ -28,7 +28,10 @@ export function RegisterPage() {
         const { error: authError } = await supabase.auth.signUp({
             email,
             password,
-            options: { data: { username } },
+            options: { 
+                data: { username },
+                emailRedirectTo: 'https://feek-nafas.vercel.app/home'
+            },
         });
 
         if (authError) {
