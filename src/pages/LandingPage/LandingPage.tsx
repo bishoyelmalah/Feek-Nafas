@@ -11,9 +11,9 @@ import shahdAvatar from '../../assets/Developers_avatars/Shahd_avatar.jpg';
 
 const contributors = [
   {
-    name: 'Bishoy Mina',
+    name: 'Bishoy El Malah',
     avatar: bishoyAvatar,
-    linkedin: 'https://www.l  nkedin.com/in/bishoyelmalah/',
+    linkedin: 'https://www.linkedin.com/in/bishoyelmalah/',
     github: 'https://github.com/bishoyelmalah',
   },
   {
@@ -29,7 +29,7 @@ const contributors = [
     github: 'https://github.com/Paula387',
   },
   {
-    name: 'Farah Ahmed Magdy',
+    name: 'Farah Ahmed',
     avatar: farahAvatar,
     linkedin: 'https://www.linkedin.com/in/farah-ahmed-magdy/',
     github: 'https://github.com/farah-ah',
