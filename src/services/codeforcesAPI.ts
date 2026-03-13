@@ -79,3 +79,6 @@ export async function getProblemByRatingOrTopic({rating, topic}: ProblemData) {
 // console.log(problem1);
 // console.log(problem2);
 // console.log(problem3);
+// const problem = await fetch(`https://codeforces.com/contest/${problem1?.contestId}/problem/${problem1?.index}`)
+
+// console.log(problem);

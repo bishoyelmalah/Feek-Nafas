@@ -4,12 +4,20 @@
 //     )
 // }
 
-import React from 'react';
+import React, { useEffect } from 'react';
 // import Header from '../../components/Header/Header';
 // import Footer from '../../components/Footer/Footer';
 import styles from './VictoryPage.module.css';
+import victorySound from '../../assets/sounds/victory_sound.mp3';
+
+const victorySoundEffect = new Audio(victorySound);
+
 
 const VictoryPage: React.FC = () => {
+  useEffect(()=>{
+    victorySoundEffect.play()
+  }, [])
+
   return (
     <div className={styles.victoryContainer}>
       {/* Cyberpunk Grid Background */}
