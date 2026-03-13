@@ -1,0 +1,29 @@
+each player has his own private channel (e.g inbox_userUUID) with the matches database that listens to any new row with his name as player_2_handle
+
+if player_1 wants to create a match:
+    player_1 adds a row in Matches table and set the status to pending
+
+
+    player_1 enter the lobby
+
+    if player_1 for any reason quit the lobby or pressed "Cancel invitation":
+        the row should be deleted 
+
+    player_2 will listen to that new row and get an invitation to join the match
+
+    if player_2 accepts: 
+        then they will subscribe to channel with match uuid as its name and the state changes to in_progress
+
+        player_2 enter the lobby
+
+        by using supabase realtime presence:
+            when 2 players are in the room:
+                start the match
+
+        since they are subscribed to the same channel then 
+        when one player finishs: 
+            the result changes to win for the player who finished first and to lose the other player
+
+            the status changes to finished
+
+            both players unsubscribe from the channel

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Feek Nafas | Match Arena</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#0a0a0a", // Deeper dark for e-sports feel
+                        "accent-blue": "#00f2ff",
+                        "surface-dark": "#1a110c",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .grid-bg {
+            background-image: linear-gradient(to right, rgba(236, 91, 19, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(236, 91, 19, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .cyber-glow-orange {
+            box-shadow: 0 0 15px rgba(236, 91, 19, 0.3);
+        }
+        .cyber-glow-blue {
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white min-h-screen overflow-x-hidden">
+<div class="relative min-h-screen grid-bg">
+<!-- Header / Top Navigation -->
+<header class="flex items-center justify-between border-b border-primary/20 bg-background-dark/80 backdrop-blur-md px-6 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="text-primary">
+<svg class="size-8" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M39.5563 34.1455V13.8546C39.5563 15.708 36.8773 17.3437 32.7927 18.3189C30.2914 18.916 27.263 19.2655 24 19.2655C20.737 19.2655 17.7086 18.916 15.2073 18.3189C11.1227 17.3437 8.44365 15.708 8.44365 13.8546V34.1455C8.44365 35.9988 11.1227 37.6346 15.2073 38.6098C17.7086 39.2069 20.737 39.5564 24 39.5564C27.263 39.5564 30.2914 39.2069 32.7927 38.6098C36.8773 37.6346 39.5563 35.9988 39.5563 34.1455Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M10.4485 13.8519C10.4749 13.9271 10.6203 14.246 11.379 14.7361C12.298 15.3298 13.7492 15.9145 15.6717 16.3735C18.0007 16.9296 20.8712 17.2655 24 17.2655C27.1288 17.2655 29.9993 16.9296 32.3283 16.3735C34.2508 15.9145 35.702 15.3298 36.621 14.7361C37.3796 14.246 37.5251 13.9271 37.5515 13.8519C37.5287 13.7876 37.4333 13.5973 37.0635 13.2931C36.5266 12.8516 35.6288 12.3647 34.343 11.9175C31.79 11.0295 28.1333 10.4437 24 10.4437C19.8667 10.4437 16.2099 11.0295 13.657 11.9175C12.3712 12.3647 11.4734 12.8516 10.9365 13.2931C10.5667 13.5973 10.4713 13.7876 10.4485 13.8519ZM37.5563 18.7877C36.3176 19.3925 34.8502 19.8839 33.2571 20.2642C30.5836 20.9025 27.3973 21.2655 24 21.2655C20.6027 21.2655 17.4164 20.9025 14.7429 20.2642C13.1498 19.8839 11.6824 19.3925 10.4436 18.7877V34.1275C10.4515 34.1545 10.5427 34.4867 11.379 35.027C12.298 35.6207 13.7492 36.2054 15.6717 36.6644C18.0007 37.2205 20.8712 37.5564 24 37.5564C27.1288 37.5564 29.9993 37.2205 32.3283 36.6644C34.2508 36.2054 35.702 35.6207 36.621 35.027C37.4573 34.4867 37.5485 34.1546 37.5563 34.1275V18.7877ZM41.5563 13.8546V34.1455C41.5563 36.1078 40.158 37.5042 38.7915 38.3869C37.3498 39.3182 35.4192 40.0389 33.2571 40.5551C30.5836 41.1934 27.3973 41.5564 24 41.5564C20.6027 41.5564 17.4164 41.1934 14.7429 40.5551C12.5808 40.0389 10.6502 39.3182 9.20848 38.3869C7.84205 37.5042 6.44365 36.1078 6.44365 34.1455L6.44365 13.8546C6.44365 12.2684 7.37223 11.0454 8.39581 10.2036C9.43325 9.3505 10.8137 8.67141 12.343 8.13948C15.4203 7.06909 19.5418 6.44366 24 6.44366C28.4582 6.44366 32.5797 7.06909 35.657 8.13948C37.1863 8.67141 38.5667 9.3505 39.6042 10.2036C40.6278 11.0454 41.5563 12.2684 41.5563 13.8546Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-white text-xl font-black tracking-tighter uppercase italic">Feek Nafas</h2>
+</div>
+<div class="flex gap-6 items-center">
+<nav class="hidden md:flex gap-8">
+<a class="text-primary font-bold text-sm tracking-widest uppercase" href="#">Match Live</a>
+<a class="text-slate-400 hover:text-white font-medium text-sm tracking-widest uppercase transition-colors" href="#">Lobby</a>
+<a class="text-slate-400 hover:text-white font-medium text-sm tracking-widest uppercase transition-colors" href="#">History</a>
+</nav>
+<div class="h-8 w-px bg-primary/20"></div>
+<div class="flex gap-3">
+<button class="size-10 flex items-center justify-center rounded-lg bg-surface-dark border border-primary/30 text-primary hover:bg-primary/10 transition-all">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="size-10 rounded-full border-2 border-primary bg-primary/20 overflow-hidden">
+<img alt="User avatar" class="size-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUCPRorFXS54VfolU9vxHLknF2pmi0UBijcQkqTdIQ8L2mFpmOXbrUsM1OTkbgD8TIy_ZykWi8_akAbtQwQ-GJb7zIlUSrO0yn5i-t8pj4kmgkj3PfhzCc2uo-DXtYGYCliwB8qofsThuf7YwDJQummXnI7zJG-koFgB3-8hkVCBgdyGtH3Xyod-rO05RlTaNwhU7Ben9GBaVy8mjo4n-V8t1ZVyz0xQYj18kBe5sRTEOtCNWWZ27cuSxKAE77-z3MCqCoVc_VQYM"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-6 py-8 flex flex-col gap-10">
+<!-- HUD: Countdown & Players -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+<!-- Player A (User) -->
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-4 bg-surface-dark/60 p-4 rounded-xl border-l-4 border-accent-blue cyber-glow-blue">
+<div class="relative">
+<div class="size-16 rounded-lg overflow-hidden border border-accent-blue/50">
+<img class="size-full" data-alt="Cyberpunk pixel art avatar of player A" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcSM1JyCgADutBmUal13KYePGDj08Do90Z2zgAeUp9R2VqFq3wAhR8GsAdZXGZTSuutZx0brGzt9_pSsScFju4iwXzh4EDGZuAoCqFm4cXngbLtTRbTHE-EJVXv2GquZ6WbgQhhNKrKfVEszX_TOxWgY8wU9DJFxWG1ueTI_ObIaJ0IS4SNEZeJP1ibgFZZ0zOzsHkSeRXUvCEi6yHozWr8t8kDH9RKiZGgSvlruDo53Bc5B0C87nqhIdbIIYJXU7m0TSF-uX35Ds"/>
+</div>
+<div class="absolute -bottom-1 -right-1 size-4 bg-green-500 rounded-full border-2 border-background-dark"></div>
+</div>
+<div class="flex flex-col">
+<span class="text-accent-blue font-black uppercase tracking-tight text-lg">Player A (You)</span>
+<div class="flex items-center gap-2">
+<span class="bg-accent-blue/20 text-accent-blue text-[10px] font-bold px-2 py-0.5 rounded border border-accent-blue/30 uppercase">Candidate Master</span>
+<span class="text-slate-400 font-mono text-sm">1840</span>
+</div>
+</div>
+<div class="ml-auto flex flex-col items-end">
+<span class="text-accent-blue text-xs font-bold uppercase animate-pulse">Thinking</span>
+</div>
+</div>
+</div>
+<!-- Timer HUD -->
+<div class="flex flex-col items-center gap-2 order-first md:order-none">
+<div class="bg-primary/10 border border-primary/50 px-8 py-2 rounded-xl text-center backdrop-blur-sm cyber-glow-orange">
+<span class="text-5xl font-black text-primary font-mono tracking-widest tabular-nums">14:20</span>
+<p class="text-[10px] text-primary/70 uppercase tracking-[0.3em] font-bold mt-1">Time Remaining</p>
+</div>
+</div>
+<!-- Player B (Opponent) -->
+<div class="flex flex-col gap-4">
+<div class="flex flex-row-reverse items-center gap-4 bg-surface-dark/60 p-4 rounded-xl border-r-4 border-primary cyber-glow-orange text-right">
+<div class="relative">
+<div class="size-16 rounded-lg overflow-hidden border border-primary/50">
+<img class="size-full" data-alt="Cyberpunk pixel art avatar of player B" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnkP0tPBbWUufigD2mPunXbt4EYjBqJJgv7Uq6uYj01D-AH8FVNHK2Df06ZMf9RTOINJzZwneretI5Z6G09nsHGJ7bdxqbLyPhnZHQfKj4OfN_rUHSoReSnYA9JVVesrBi_gKVpHcZ5Lq6VehWiDvoGxh1OI_66BtggFz9zGVGB3jKzw0B4OcFxWiqSv8QX5NiidXC6FQxBspR2Wwbg52l6NTo5ja3Uf3hLQ1svBSBmC8YcN5HAKC6lQFZW8nCuQN_MZaQ1wfDluw"/>
+</div>
+<div class="absolute -bottom-1 -left-1 size-4 bg-green-500 rounded-full border-2 border-background-dark"></div>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-primary font-black uppercase tracking-tight text-lg">Player B</span>
+<div class="flex items-center gap-2">
+<span class="text-slate-400 font-mono text-sm">1910</span>
+<span class="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded border border-primary/30 uppercase">Master</span>
+</div>
+</div>
+<div class="mr-auto flex flex-col items-start">
+<span class="text-white/40 text-xs font-bold uppercase italic">Submitting...</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Tug of War Bar -->
+<div class="w-full space-y-2">
+<div class="flex justify-between items-end px-2">
+<div class="flex flex-col">
+<span class="text-accent-blue text-xs font-black uppercase">Momentum</span>
+<span class="text-white text-xl font-black">50%</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-primary text-xs font-black uppercase">Momentum</span>
+<span class="text-white text-xl font-black">50%</span>
+</div>
+</div>
+<div class="h-4 w-full bg-surface-dark rounded-full overflow-hidden border border-white/5 p-1 flex relative">
+<div class="h-full bg-accent-blue cyber-glow-blue rounded-l-full transition-all duration-700" style="width: 50%;"></div>
+<div class="h-full bg-primary cyber-glow-orange rounded-r-full transition-all duration-700" style="width: 50%;"></div>
+<!-- Marker -->
+<div class="absolute top-0 bottom-0 left-1/2 -ml-0.5 w-1 bg-white z-10 shadow-[0_0_10px_white]"></div>
+</div>
+</div>
+<!-- Main Content Area -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left: Challenge Info -->
+<div class="lg:col-span-8 space-y-6">
+<div class="bg-surface-dark/40 border border-white/5 rounded-2xl p-8 backdrop-blur-sm relative overflow-hidden group">
+<!-- Background Glow Decoration -->
+<div class="absolute -top-24 -right-24 size-48 bg-primary/10 blur-[100px] rounded-full"></div>
+<div class="flex justify-between items-start relative z-10">
+<div>
+<h3 class="text-primary text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">terminal</span>
+                                    Current Challenge
+                                </h3>
+<h1 class="text-4xl font-black text-white mb-4 italic">158A - Next Round</h1>
+</div>
+<div class="flex flex-col items-end gap-2">
+<span class="bg-white/5 border border-white/10 px-4 py-1 rounded text-xs font-bold text-slate-400">DIFF: 800</span>
+<span class="bg-white/5 border border-white/10 px-4 py-1 rounded text-xs font-bold text-slate-400">POINTS: 500</span>
+</div>
+</div>
+<p class="text-slate-300 text-lg leading-relaxed mb-8 max-w-2xl">
+                            Contestant who earns a score equal to or greater than the k-th place finisher's score will advance to the next round, as long as the contestant earns a positive score...
+                        </p>
+<div class="flex flex-wrap gap-3 mb-10">
+<span class="bg-primary/5 text-primary text-[10px] font-bold px-3 py-1 rounded-full border border-primary/20 uppercase">Implementation</span>
+<span class="bg-primary/5 text-primary text-[10px] font-bold px-3 py-1 rounded-full border border-primary/20 uppercase">Special Problems</span>
+</div>
+<a class="inline-flex items-center justify-center gap-3 w-full bg-primary hover:bg-primary/90 text-white font-black py-5 px-8 rounded-xl transition-all uppercase tracking-widest cyber-glow-orange group-hover:scale-[1.01] active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">launch</span>
+                            Solve on Codeforces
+                        </a>
+</div>
+<!-- HUD Footer Actions -->
+<div class="flex gap-4">
+<button class="flex-1 flex items-center justify-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white py-4 rounded-xl transition-all font-bold uppercase tracking-tighter">
+<span class="material-symbols-outlined text-lg">visibility</span>
+                            Spectate Others
+                        </button>
+<button class="flex-1 flex items-center justify-center gap-2 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 py-4 rounded-xl transition-all font-bold uppercase tracking-tighter">
+<span class="material-symbols-outlined text-lg">logout</span>
+                            Return to Lobby
+                        </button>
+</div>
+</div>
+<!-- Right: Live Feed -->
+<div class="lg:col-span-4 flex flex-col h-full">
+<div class="bg-surface-dark border border-white/10 rounded-2xl flex flex-col flex-1 overflow-hidden">
+<div class="border-b border-white/10 p-4 flex items-center justify-between bg-white/5">
+<h4 class="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+<span class="size-2 bg-red-500 rounded-full animate-pulse"></span>
+                                Live Match Feed
+                            </h4>
+<span class="text-[10px] font-mono text-slate-500">SESSION: #AF92-X</span>
+</div>
+<div class="p-4 space-y-4 font-mono text-sm overflow-y-auto max-h-[500px]">
+<div class="flex gap-3">
+<span class="text-slate-600">[14:15:02]</span>
+<span class="text-slate-300">Match protocol initialized.</span>
+</div>
+<div class="flex gap-3">
+<span class="text-slate-600">[14:15:05]</span>
+<span class="text-accent-blue font-bold">Player A</span>
+<span class="text-slate-400 italic">connected to Codeforces API.</span>
+</div>
+<div class="flex gap-3">
+<span class="text-slate-600">[14:15:08]</span>
+<span class="text-primary font-bold">Player B</span>
+<span class="text-slate-400 italic">connected to Codeforces API.</span>
+</div>
+<div class="flex gap-3">
+<span class="text-slate-600">[14:15:10]</span>
+<span class="text-yellow-500 font-bold">SYSTEM:</span>
+<span class="text-white">Match Started! Problem set released.</span>
+</div>
+<div class="flex gap-3 items-start">
+<span class="text-slate-600">[14:18:22]</span>
+<div class="flex flex-col">
+<span class="text-primary font-bold">Player B</span>
+<span class="text-white/60 bg-white/5 p-2 rounded mt-1 border border-white/10">Attempting submission for Test Case 1...</span>
+</div>
+</div>
+<div class="flex gap-3">
+<span class="text-slate-600">[14:19:45]</span>
+<span class="text-accent-blue font-bold">Player A</span>
+<span class="text-slate-400 italic">viewing problem description.</span>
+</div>
+<div class="flex gap-3">
+<span class="text-slate-600">[14:20:00]</span>
+<span class="text-red-500 font-black">MATCH ALERT:</span>
+<span class="text-white underline decoration-red-500 underline-offset-4">T-minus 14 minutes remaining.</span>
+</div>
+<!-- Cursor Indicator -->
+<div class="flex gap-3 items-center">
+<span class="text-slate-600">[14:20:01]</span>
+<span class="size-2 bg-primary animate-bounce"></span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Status Bar -->
+<footer class="fixed bottom-0 w-full bg-surface-dark border-t border-primary/20 px-6 py-2 flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest z-50">
+<div class="flex gap-6">
+<span>Latency: 24ms</span>
+<span>Server: USE-1 (Virginia)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-primary">FEEK NAFAS ARENA</span>
+<span class="size-1.5 bg-green-500 rounded-full"></span>
+<span class="text-green-500">Encrypted</span>
+</div>
+</footer>
+</div>
+</body></html>

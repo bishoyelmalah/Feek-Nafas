@@ -1,0 +1,20 @@
+to handle player invitations
+the player is subscribed to private channel (e.g inbox_userUUID)
+to lister to any changes in Matches table
+
+useEffect() -> when user open the website to grab last match where his username is assigned to player_2_handle and let the inbox_userUUID triggers the function
+
+if match_status == finished or match_status == declined:
+    it is an old match
+if match_status == in_progress:
+    it is live match but the user might have pressed quit by accident
+    he should go to the match screen
+if match_status == pending:
+    another player send him an invitation while he was offline
+
+    if match_uuid is still there:
+        player joins the lobby and can start the match
+    else:
+        this means that the other player sends the invitation but quit or canceled it 
+
+        send a message "Sorry, this match isn't here or is canceled"
