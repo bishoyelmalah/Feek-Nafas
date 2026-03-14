@@ -9,6 +9,11 @@ export function MatchPage() {
     const { problem } = state;
     console.log(problem);
 
+    const handleRefresh = async () => {
+        const isCorrect = true
+        if (isCorrect) navigate('/victory');
+};
+
     return (
         <div className={styles['match-page']}>
             {/* <Header activeLink="arena" /> */}
@@ -129,7 +134,7 @@ export function MatchPage() {
                         </div>
 
                         <div className={styles['action-buttons']}>
-                            <button className={[styles['action-btn'], styles['secondary']].join(' ')}>
+                            <button   onClick={handleRefresh} className={[styles['action-btn'], styles['secondary']].join(' ')}>
                                 <span className="material-symbols-outlined">refresh</span>
                                 Refresh
                             </button>
