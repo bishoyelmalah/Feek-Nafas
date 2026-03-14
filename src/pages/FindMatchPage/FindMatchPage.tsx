@@ -150,7 +150,7 @@ export function FindMatchPage() {
                     <div className={styles['find-match-btn-wrapper']}>
                         <div className={styles['btn-outer-ring']} />
                         <div className={styles['btn-inner-ring']} />
-                        <button className={[styles['find-match-btn'], styles['find-match-glow']].join(' ')} onClick={()=>{findMatch(nav)}}>
+                        <button className={[styles['find-match-btn'], styles['find-match-glow']].join(' ')} onClick={()=>{nav('/getReady')}}>
                             <div className={styles['find-match-btn-gradient']} />
                             <div className={styles['scanline']} />
                             <span className={"material-symbols-outlined " + styles['find-match-btn-icon']}>
