@@ -12,5 +12,5 @@ player_1 (username)
 player_2 (username)
 match_status (pending, declined, in_progress, finished)
 codeforces_problem
-result (e.g for player_1: win, for player_2: lose)
+result (e.g bool for player_1)
 
