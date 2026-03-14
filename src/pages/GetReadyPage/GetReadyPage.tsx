@@ -1,5 +1,5 @@
 import styles from './GetReadyPage.module.css';
-import { useLocation, useNavigate, type NavigateFunction } from 'react-router';
+import { useNavigate, type NavigateFunction } from 'react-router';
 import { useEffect, useState } from 'react';
 import { getProblemByRatingOrTopic } from '../../services/codeforcesAPI';
 import lobbySound from '../../assets/sounds/lobby_sound.mp3'
@@ -29,6 +29,7 @@ export function GetReadyPage() {
     const [ isp1ready , setIsp1ready ] = useState(false);
     const [ isp2ready , setIsp2ready] = useState(false);
     const [timer , setTimer] = useState(3);
+    const ready = isp1ready && isp2ready;
 
 const findMatch = async (nav: NavigateFunction) => {
     const problem = await getProblemByRatingOrTopic({rating: 800});
@@ -42,30 +43,22 @@ const findMatch = async (nav: NavigateFunction) => {
     const handlePlayer2Ready = () => {
         setIsp2ready(!isp2ready);
     }
-    const ready = isp1ready && isp2ready;
     useEffect(()=>{
         if(!ready) return;
             const x = setInterval(() => {
-                setTimer((prev) => {
-                    if(prev <= 1){
-                        clearInterval(x)
-                        findMatch(nav)
-                        return 0;
-                    }else{
-                        return prev - 1;
-                    }
-                } )
+                setTimer((prev) => prev <= 1 ? 0 : prev - 1);
             },1000)
             return () => clearInterval(x);
         },[ready])
 
     useEffect(() => {
-        console.log('timer:', timer);
+        if(timer === 0) findMatch(nav);
     }, [timer]);
 
     useEffect(() => {
+        audio.loop = true;
         audio.play()
-        return audio.pause();
+        return () => audio.pause();
     },[])
     return (
 
@@ -103,7 +96,9 @@ const findMatch = async (nav: NavigateFunction) => {
 
                     <div className={styles.vsColumn}>
                         <div className={styles.vsOrb}>
-                            <span className={`${styles.vsGlow} ${styles.vsText}`}>VS</span>
+                            <span className={`${styles.vsGlow} ${styles.vsText}`}>
+                                {ready ? timer : 'VS'}
+                            </span>
                         </div>
                         <div className={styles.matchMeta}>
                             <div className={styles.metaLine} />
