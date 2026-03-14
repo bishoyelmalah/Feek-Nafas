@@ -1,13 +1,13 @@
-// export function LosePage() {
-//     return (
-//         <div>This is Lose Page</div>
-//     )
-// }
-
 import React from 'react';
 import styles from './LosePage.module.css';
+import { useEffect } from 'react';
+import loseSound from '../../assets/sounds/lose_sound.mp3';
 
+const loseSoundEffect = new Audio(loseSound);
 const LosePage: React.FC = () => {
+  useEffect(() => {
+    loseSoundEffect.play();
+  }, [])
   return (
     <div className={styles.loseContainer}>
       {/* Cyberpunk Grid Background */}

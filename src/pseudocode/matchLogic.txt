@@ -1,8 +1,7 @@
 each player has his own private channel (e.g inbox_userUUID) with the matches database that listens to any new row with his name as player_2_handle
 
 if player_1 wants to create a match:
-    player_1 adds a row in Matches table and set the status to pending
-
+    player_1 adds a row in Matches table and set the status to pending (postgres_changes)
 
     player_1 enter the lobby
 
@@ -21,7 +20,7 @@ if player_1 wants to create a match:
                 start the match
 
         since they are subscribed to the same channel then 
-        when one player finishs: 
+        when one player finishs: (Broadcast)
             the result changes to win for the player who finished first and to lose the other player
 
             the status changes to finished
