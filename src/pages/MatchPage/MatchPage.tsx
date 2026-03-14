@@ -1,9 +1,10 @@
 ﻿// import Footer from "../../components/Footer/Footer"
 // import Header from "../../components/Header/Header"
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import styles from './MatchPage.module.css';
 
 export function MatchPage() {
+    const navigate = useNavigate();
     const { state } = useLocation();
     const { problem } = state;
     console.log(problem);
@@ -135,6 +136,18 @@ export function MatchPage() {
                             <button className={[styles['action-btn'], styles['danger']].join(' ')}>
                                 <span className="material-symbols-outlined">logout</span>
                                 Return to Lobby
+                            </button>
+                            <button
+                                className={[styles['action-btn'], styles['secondary']].join(' ')}
+                                onClick={() => navigate('/victory')}
+                            >
+                                Victory
+                            </button>
+                            <button
+                                className={[styles['action-btn'], styles['danger']].join(' ')}
+                                onClick={() => navigate('/lose')}
+                            >
+                                Lose
                             </button>
                         </div>
                     </div>
