@@ -12,7 +12,7 @@ export function MatchPage() {
     const handleRefresh = async () => {
         const isCorrect = true
         if (isCorrect) navigate('/victory');
-};
+    };
 
     return (
         <div className={styles['match-page']}>
