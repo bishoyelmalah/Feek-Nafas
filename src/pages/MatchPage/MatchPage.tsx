@@ -1,12 +1,13 @@
-﻿// import Footer from "../../components/Footer/Footer"
-// import Header from "../../components/Header/Header"
+﻿import styles from './MatchPage.module.css';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { createChatRoom, receiveMessage, sendMessage } from '../../services/chatService';
-import styles from './MatchPage.module.css';
-import { type SubmitEvent } from 'react';
 import { RealtimeChannel } from '@supabase/supabase-js';
+
+import { type SubmitEvent } from 'react';
 import { type ChatMessage } from '../../types/ChatMessage';
+
+import { getMatch } from '../../services/matchService';
 
 
 
@@ -14,11 +15,11 @@ export function MatchPage() {
     const navigate = useNavigate();
     const { state } = useLocation();
     const channelRef = useRef<RealtimeChannel | null>(null);
-    const { problem } = state;
-    // console.log(problem);
-
     const [chatInput, setChatInput] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
+    
+    const { problem } = state;
+
 
     const handleRefresh = async () => {
         const isCorrect = true

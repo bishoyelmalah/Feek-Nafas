@@ -62,13 +62,20 @@ export async function getProblemByRatingOrTopic({rating, topic}: ProblemData) {
   }
 }
 
-// const problem1 = await getProblemByRatingOrTopic({rating: 800});
-// const problem2 = await getProblemByRatingOrTopic({topic: "greedy"});
-// const problem3 = await getProblemByRatingOrTopic({rating: 800, topic: "greedy"});
+export const checkSubmission = async (handle: string, contestId: string, problem: string, minutes = 5) => {
+  // calculate time from 5 minutes in seconds
+  const currentTimeSeconds = Math.floor(Date.now() / 1000);
+  const timeLimitSeconds = currentTimeSeconds - (minutes * 60);
 
-// console.log(problem1);
-// console.log(problem2);
-// console.log(problem3);
-// const problem = await fetch(`https://codeforces.com/contest/${problem1?.contestId}/problem/${problem1?.index}`)
+  const response = await fetch(`https://codeforces.com/api/contest.status?contestId=${contestId}&handle=${handle}&count=1`)
+  
+  const data = await response.json();
+  const problemIndex = data.result[0].problem.index; 
+  const submissionTime = data.result[0].creationTimeSeconds;
 
-// console.log(problem);
+  if (submissionTime >= timeLimitSeconds && problem === problemIndex) {
+    const submission = data.result[0].verdict;
+    return submission;
+  }
+  return null;
+}
