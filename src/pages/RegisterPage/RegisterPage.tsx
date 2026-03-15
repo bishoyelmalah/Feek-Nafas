@@ -1,6 +1,6 @@
 ﻿import { useState, type SubmitEvent } from 'react';
 import { Link } from 'react-router';
-import { supabase } from '../../services/supabase';
+import { supabase } from '../../lib/supabase';
 import styles from './RegisterPage.module.css';
 
 export function RegisterPage() {

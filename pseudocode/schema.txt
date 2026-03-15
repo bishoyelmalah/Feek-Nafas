@@ -1,16 +1,28 @@
-Table Users:
-uuid
-name
-email
-username
-codeforces_handle (to check submissions)
-feek_nafas_score
+users:
+    id uuid pk
+    email text unique not null
+    username text unique not null
+    codeforces_handle text unique not null
+    feek_nafas_score int default 0
+    created_at timestamptz
+    updated_at timestamptz
 
-Table Matches:
-uuid
-player_1 (username)
-player_2 (username)
-match_status (pending, declined, in_progress, finished)
-codeforces_problem
-result (e.g bool for player_1)
+matches:
+    id uuid pk
+    player1_id uuid fk users(id)
+    player2_id uuid fk users(id)
+    status enum(pending, declined, in_progress, finished, canceled)
+    contest_id int
+    problem_index text
+    winner_user_id uuid null fk users(id)
+    finished_at timestamptz null
+    created_at timestamptz
+
+match_inviations:
+    id uuid pk
+    from_user_id uuid fk users(id)
+    to_user_id uuid fk users(id)
+    status enum(pending, accepted, declined, expired)
+    match_id uuid null fk matches(id)
+    created_at timestamptz
 

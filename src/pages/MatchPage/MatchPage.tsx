@@ -4,14 +4,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { createChatRoom, receiveMessage, sendMessage } from '../../services/chatService';
 import styles from './MatchPage.module.css';
+import { type SubmitEvent } from 'react';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { type ChatMessage } from '../../types/ChatMessage';
 
-type ChatMessage = {
-    id: number;
-    sender: 'you' | 'opponent' | 'system';
-    text: string;
-    time: string;
-};
+
 
 export function MatchPage() {
     const navigate = useNavigate();
@@ -28,7 +25,7 @@ export function MatchPage() {
         if (isCorrect) navigate('/victory');
     };
 
-    const handleSendMessage = (e) => {
+    const handleSendMessage = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         sendMessage(channelRef.current, chatInput, "bishoy")
         setMessages(prev => 
@@ -44,7 +41,7 @@ export function MatchPage() {
         const channel = createChatRoom('chat-room');
         channelRef.current = channel;
 
-        receiveMessage(channel, (msg)=>{
+        receiveMessage(channel, (msg: any)=>{
             setMessages((prev) => [
                 ...prev,
                 {id: 2, sender: 'opponent', text: msg.payload.message, time: 'time'}

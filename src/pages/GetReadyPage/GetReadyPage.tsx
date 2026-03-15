@@ -1,7 +1,7 @@
 import styles from './GetReadyPage.module.css';
 import { useNavigate, type NavigateFunction } from 'react-router';
 import { useEffect, useState } from 'react';
-import { getProblemByRatingOrTopic } from '../../services/codeforcesAPI';
+import { getProblemByRatingOrTopic } from '../../services/codeforcesService';
 import lobbySound from '../../assets/sounds/lobby_sound.mp3'
 
 const player = {
@@ -31,10 +31,10 @@ export function GetReadyPage() {
     const [timer , setTimer] = useState(3);
     const ready = isp1ready && isp2ready;
 
-const findMatch = async (nav: NavigateFunction) => {
-    const problem = await getProblemByRatingOrTopic({rating: 800});
-    await nav('/match', { state: {problem} });
-}
+    const findMatch = async (nav: NavigateFunction) => {
+        const problem = await getProblemByRatingOrTopic({rating: 800});
+        await nav('/match', { state: {problem} });
+    }
 
 
     const handlePlayer1Ready = () => {

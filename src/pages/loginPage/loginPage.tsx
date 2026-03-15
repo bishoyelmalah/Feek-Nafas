@@ -1,6 +1,6 @@
 ﻿import { useState, type SubmitEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { supabase } from '../../services/supabase';
+import { supabase } from '../../lib/supabase';
 import styles from './loginPage.module.css';
 
 export function LoginPage() {

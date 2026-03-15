@@ -1,12 +1,12 @@
 import type { RealtimeChannel } from "@supabase/supabase-js";
-import { supabase } from "./supabase";
+import { supabase } from "../lib/supabase";
 
 export const createChatRoom = (roomId: string) => {
     const channel = supabase.channel(roomId);
     return channel;
 }
 
-export const receiveMessage = async (channel: RealtimeChannel ,callback: Function) => {
+export const receiveMessage = async (channel: RealtimeChannel, callback: (payload: any) => void) => {
     channel.on(
         'broadcast',
         {event: 'shout'},
