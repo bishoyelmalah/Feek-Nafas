@@ -1,16 +1,6 @@
-interface CodeforcesProblem {
-  name: string;
-  contestId: number;
-  index: string;
-  type?: string;
-  rating?: number;
-  tags?: string[];
-}
+import { type CodeforcesProblem } from "../types/CodeforcesProblem";
+import { type ProblemData } from "../types/ProblemData";
 
-interface ProblemData {
-  rating?: number,
-  topic?: string
-}
 
 export async function getAllProblems() {
   try {
