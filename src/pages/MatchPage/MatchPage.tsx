@@ -1,20 +1,61 @@
 ﻿// import Footer from "../../components/Footer/Footer"
 // import Header from "../../components/Header/Header"
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
+import { createChatRoom, receiveMessage, sendMessage } from '../../services/chatService';
 import styles from './MatchPage.module.css';
+import { RealtimeChannel } from '@supabase/supabase-js';
+
+type ChatMessage = {
+    id: number;
+    sender: 'you' | 'opponent' | 'system';
+    text: string;
+    time: string;
+};
 
 export function MatchPage() {
     const navigate = useNavigate();
     const { state } = useLocation();
+    const channelRef = useRef<RealtimeChannel | null>(null);
     const { problem } = state;
-    console.log(problem);
+    // console.log(problem);
 
-    
+    const [chatInput, setChatInput] = useState('');
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
 
     const handleRefresh = async () => {
         const isCorrect = true
         if (isCorrect) navigate('/victory');
     };
+
+    const handleSendMessage = (e) => {
+        e.preventDefault();
+        sendMessage(channelRef.current, chatInput, "bishoy")
+        setMessages(prev => 
+            [...prev, {
+                id: 2, sender: 'you', text: chatInput, time: 'time'
+                }
+            ]
+        )
+        setChatInput('');
+    }
+
+    useEffect(()=>{
+        const channel = createChatRoom('chat-room');
+        channelRef.current = channel;
+
+        receiveMessage(channel, (msg)=>{
+            setMessages((prev) => [
+                ...prev,
+                {id: 2, sender: 'opponent', text: msg.payload.message, time: 'time'}
+            ])
+            // console.log(payload);
+        })
+
+        return () => {
+            channel.unsubscribe();
+        }
+    }, [])
 
     return (
         <div className={styles['match-page']}>
@@ -159,60 +200,88 @@ export function MatchPage() {
                         </div>
                     </div>
 
-                    {/* Right: Live Feed */}
-                    {/* <div className={styles['live-feed']}>
+                    {/* Right: Match Chat */}
+                    <div className={styles['live-feed']}>
                         <div className={styles['feed-card']}>
                             <div className={styles['feed-header']}>
                                 <h4 className={styles['feed-title']}>
                                     <span className={styles['live-indicator']}></span>
-                                    Live Match Feed
+                                    Match Chat
                                 </h4>
-                                <span className={styles['session-id']}>SESSION: #AF92-X</span>
+                                <span className={styles['session-id']}>ROOM: #AF92-X</span>
                             </div>
                             <div className={styles['feed-content']}>
+                                {messages.map((message) => {
+                                    const isYou = message.sender === 'you';
+                                    const isSystem = message.sender === 'system';
+                                    const senderLabel = isSystem
+                                        ? 'SYSTEM'
+                                        : isYou
+                                            ? 'You'
+                                            : 'Player B';
+
+                                    return (
+                                        <div
+                                            key={message.id}
+                                            className={[
+                                                styles['chat-entry'],
+                                                isYou
+                                                    ? styles['chat-entry-right']
+                                                    : isSystem
+                                                        ? styles['chat-entry-center']
+                                                        : styles['chat-entry-left'],
+                                            ].join(' ')}
+                                        >
+                                            <div
+                                                className={[
+                                                    styles['chat-bubble'],
+                                                    isYou
+                                                        ? styles['chat-bubble-you']
+                                                        : isSystem
+                                                            ? styles['chat-bubble-system']
+                                                            : styles['chat-bubble-opponent'],
+                                                ].join(' ')}
+                                            >
+                                                <div className={styles['chat-meta']}>
+                                                    <span
+                                                        className={[
+                                                            styles['feed-player'],
+                                                            isYou
+                                                                ? styles['blue-text']
+                                                                : isSystem
+                                                                    ? styles['feed-system']
+                                                                    : styles['orange-text'],
+                                                        ].join(' ')}
+                                                    >
+                                                        {senderLabel}
+                                                    </span>
+                                                    <span className={styles['feed-time']}>{`[${message.time}]`}</span>
+                                                </div>
+                                                <p className={styles['chat-text']}>{message.text}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                                 <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:15:02]</span>
-                                    <span className={styles['feed-text']}>Match protocol initialized.</span>
-                                </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:15:05]</span>
-                                    <span className={[styles['feed-player'], styles['blue-text']].join(' ')}>Player A</span>
-                                    <span className={styles['feed-text-italic']}>connected to Codeforces API.</span>
-                                </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:15:08]</span>
-                                    <span className={[styles['feed-player'], styles['orange-text']].join(' ')}>Player B</span>
-                                    <span className={styles['feed-text-italic']}>connected to Codeforces API.</span>
-                                </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:15:10]</span>
-                                    <span className={styles['feed-system']}>SYSTEM:</span>
-                                    <span className={styles['feed-text-white']}>Match Started! Problem set released.</span>
-                                </div>
-                                <div className={[styles['feed-entry'], styles['column']].join(' ')}>
-                                    <span className={styles['feed-time']}>[14:18:22]</span>
-                                    <div className={styles['feed-submission']}>
-                                        <span className={[styles['feed-player'], styles['orange-text']].join(' ')}>Player B</span>
-                                        <span className={styles['submission-text']}>Attempting submission for Test Case 1...</span>
-                                    </div>
-                                </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:19:45]</span>
-                                    <span className={[styles['feed-player'], styles['blue-text']].join(' ')}>Player A</span>
-                                    <span className={styles['feed-text-italic']}>viewing problem description.</span>
-                                </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:20:00]</span>
-                                    <span className={styles['feed-alert']}>MATCH ALERT:</span>
-                                    <span className={styles['feed-text-alert']}>T-minus 14 minutes remaining.</span>
-                                </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:20:01]</span>
                                     <span className={styles['feed-cursor']}></span>
                                 </div>
                             </div>
+
+                            <form className={styles['chat-form']} onSubmit={handleSendMessage}>
+                                <input
+                                    type="text"
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    className={styles['chat-input']}
+                                    placeholder="Type your message..."
+                                    aria-label="Type your message"
+                                />
+                                <button type="submit" className={styles['chat-send-button']}>
+                                    Send
+                                </button>
+                            </form>
                         </div>
-                    </div> */}
+                    </div>
                 </div>
             </main>
 
