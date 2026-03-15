@@ -1,9 +1,10 @@
 users:
     id uuid pk
-    email text unique not null
+    name text not null
     username text unique not null
+    email text unique not null
     codeforces_handle text unique not null
-    feek_nafas_score int default 0
+    score int default 0
     created_at timestamptz
     updated_at timestamptz
 
@@ -15,8 +16,9 @@ matches:
     contest_id int
     problem_index text
     winner_user_id uuid null fk users(id)
-    finished_at timestamptz null
     created_at timestamptz
+    finished_at timestamptz null
+    updated_at timestamptz
 
 match_inviations:
     id uuid pk
