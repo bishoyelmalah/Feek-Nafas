@@ -1,13 +1,14 @@
 ﻿import styles from './MatchPage.module.css';
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { createChatRoom, receiveMessage, sendMessage } from '../../services/chatService';
 import { RealtimeChannel } from '@supabase/supabase-js';
+// import { getMatch } from '../../services/matchService';
 
 import { type SubmitEvent } from 'react';
 import { type ChatMessage } from '../../types/ChatMessage';
-
-import { getMatch } from '../../services/matchService';
+import { checkSubmission } from '../../services/codeforcesService';
+// import { type MatchData } from '../../types/MatchData';
 
 
 
@@ -17,13 +18,16 @@ export function MatchPage() {
     const channelRef = useRef<RealtimeChannel | null>(null);
     const [chatInput, setChatInput] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
+    // const [problem, setProblem] = useState<MatchData | null>(null);
     
     const { problem } = state;
-
+    const matchId = "d1111111-1111-4111-8111-111111111111";
+    const handle = "bishoy.elmalah";
 
     const handleRefresh = async () => {
-        const isCorrect = true
-        if (isCorrect) navigate('/victory');
+        const result = await checkSubmission(handle, "2185", "A");
+        // console.log(result);
+        if (result) navigate('/victory');
     };
 
     const handleSendMessage = (e: SubmitEvent<HTMLFormElement>) => {
@@ -39,7 +43,7 @@ export function MatchPage() {
     }
 
     useEffect(()=>{
-        const channel = createChatRoom('chat-room');
+        const channel = createChatRoom(`chat-room-${matchId}`);
         channelRef.current = channel;
 
         receiveMessage(channel, (msg: any)=>{
@@ -49,6 +53,13 @@ export function MatchPage() {
             ])
             // console.log(payload);
         })
+
+        // const handleMatchData = async () => {
+        //     const matchData = await getMatch(matchId);
+        //     setProblem(matchData);
+        // };
+
+        // void handleMatchData();
 
         return () => {
             channel.unsubscribe();
@@ -151,7 +162,11 @@ export function MatchPage() {
                                         <span className="material-symbols-outlined">terminal</span>
                                         Current Challenge
                                     </h3>
-                                    <h1 className={styles['challenge-title']}>{`${problem.contestId}${problem.index} - ${problem.name}`}</h1>
+                                    <h1 className={styles['challenge-title']}>
+                                        {problem
+                                            ? `${problem.contest_id}${problem.problem_index}`
+                                            : 'Loading challenge...'}
+                                    </h1>
                                 </div>
                                 <div className={styles['challenge-meta']}>
                                     <span className={styles['meta-badge']}>DIFF: 800</span>
@@ -168,7 +183,13 @@ export function MatchPage() {
                                 <span className={styles['tag']}>Special Problems</span>
                             </div>
                             
-                            <a href={`${problem.link}`} target="_blank" rel="noopener noreferrer" className={styles['solve-button']}>
+                            <a
+                                href={problem ? `https://codeforces.com/contest/${problem.contest_id}/problem/${problem.problem_index}` : '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles['solve-button']}
+                                aria-disabled={!problem}
+                            >
                                 <span className="material-symbols-outlined">launch</span>
                                 Solve on Codeforces
                             </a>
