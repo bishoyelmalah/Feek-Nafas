@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../services/authService';
+import { AuthContext } from '../../contexts/AuthContext';
 import styles from './Header.module.css';
+import { useAuth } from '../../services/authService';
 
 interface HeaderProps {
   activeLink?: 'arena' | 'leaderboard' | 'challenges' | 'profile';
 }
 
-function Header ({ activeLink = 'arena' }: HeaderProps){
+function Header({ activeLink = 'arena' }: HeaderProps) {
   const navigate = useNavigate();
+  const authContext = useAuth();
 
   const handleLogout = async () => {
     await logout();
@@ -59,9 +62,11 @@ function Header ({ activeLink = 'arena' }: HeaderProps){
             <button className={styles['icon-btn']}>
               <span className="material-symbols-outlined">settings</span>
             </button>
-            <button className={styles['icon-btn']} onClick={handleLogout} title="Logout">
-              <span className="material-symbols-outlined">logout</span>
-            </button>
+            {authContext?.session && (
+              <button className={styles['icon-btn']} onClick={handleLogout} title="Logout">
+                <span className="material-symbols-outlined">logout</span>
+              </button>
+            )}
             <div className={styles['user-avatar']}>
               <img
                 alt="Cyberpunk female player avatar with neon highlights"
