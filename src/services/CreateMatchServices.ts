@@ -12,6 +12,9 @@ export const CreateMatchServices = async (
   if(userError || !opponent){
     throw new Error("User not found")
   }
+  if(opponent.id === currentUserId){
+    throw new Error("You can't invite yourself");
+  } 
   const {data, error} = await supabase
   .from ("matches")
   .insert([
