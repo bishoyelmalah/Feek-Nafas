@@ -200,7 +200,10 @@ export function MatchPage() {
                                 <span className="material-symbols-outlined">refresh</span>
                                 Refresh
                             </button>
-                            <button className={[styles['action-btn'], styles['danger']].join(' ')}>
+                            <button 
+                                className={[styles['action-btn'], styles['danger']].join(' ')}
+                                onClick={() => navigate('/home')}
+                            >
                                 <span className="material-symbols-outlined">logout</span>
                                 Return to Lobby
                             </button>
