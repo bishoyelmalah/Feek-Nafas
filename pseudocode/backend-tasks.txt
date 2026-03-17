@@ -1,3 +1,4 @@
+this is another change
 Auth Services:
     - separate auth services (sign up, sign in) into separate file
     - when the user sign up it should be added to the "Users" table with the same uuid he was assigned

@@ -1,10 +1,12 @@
 ﻿import { useState, type SubmitEvent } from 'react';
 import { Link } from 'react-router';
-import { supabase } from '../../lib/supabase';
+import { signUp } from '../../services/authService';
+import { insertUserProfile } from '../../services/authService';
 import styles from './RegisterPage.module.css';
 
 export function RegisterPage() {
     const [username, setUsername] = useState('');
+    const [handle, setHandle] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -14,32 +16,50 @@ export function RegisterPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
 
+    const handleInsertion = async (userId: string) => {
+        return insertUserProfile({
+            id: userId,
+            name: username,
+            username,
+            email,
+            codeforcesHandle: handle,
+        });
+    };
+
     const handleSignUp = async (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
-
         if (password !== confirmPassword) {
             setError('PASSWORDS DO NOT MATCH');
             return;
         }
-
         setLoading(true);
-
-        const { error: authError } = await supabase.auth.signUp({
+        
+        const { error: authError, userId } = await signUp({
             email,
             password,
-            options: { 
-                data: { username },
-                emailRedirectTo: 'https://feek-nafas.vercel.app/home'
-            },
         });
 
         if (authError) {
             setError(authError.message.toUpperCase());
-        } else {
-            setSuccess(true);
+            setLoading(false);
+            return;
         }
 
+        if (!userId) {
+            setError('USER_ID_NOT_FOUND_AFTER_SIGNUP');
+            setLoading(false);
+            return;
+        }
+
+        const { error: insertError } = await handleInsertion(userId);
+        if (insertError) {
+            setError(insertError.message.toUpperCase());
+            setLoading(false);
+            return;
+        }
+
+        setSuccess(true);
         setLoading(false);
     };
 
@@ -98,14 +118,14 @@ export function RegisterPage() {
                     {/* Username */}
                     <div className={styles['sign-up-field']}>
                         <label className={styles['sign-up-label']} htmlFor="username">
-                            CALLSIGN
+                            UserName
                         </label>
                         <div className={styles['sign-up-input-wrapper']}>
                             <input
                                 id="username"
                                 className={styles['sign-up-input']}
                                 type="text"
-                                placeholder="RAVEN_04"
+                                placeholder="Name"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 required
@@ -114,11 +134,29 @@ export function RegisterPage() {
                             <span className={"material-symbols-outlined " + styles['sign-up-input-icon']}>badge</span>
                         </div>
                     </div>
+                    <div className={styles['sign-up-field']}>
+                        <label className={styles['sign-up-label']} htmlFor="handle">
+                            Codeforces Handle
+                        </label>
+                        <div className={styles['sign-up-input-wrapper']}>
+                            <input
+                                id="handle"
+                                className={styles['sign-up-input']}
+                                type="text"
+                                placeholder="Handle"
+                                value={handle}
+                                onChange={(e) => setHandle(e.target.value)}
+                                required
+                                autoComplete="nickname"
+                            />
+                            <span className={"material-symbols-outlined " + styles['sign-up-input-icon']}>badge</span>
+                        </div>
+                    </div>
 
                     {/* Email */}
                     <div className={styles['sign-up-field']}>
                         <label className={styles['sign-up-label']} htmlFor="email">
-                            TERMINAL_ID
+                            Email
                         </label>
                         <div className={styles['sign-up-input-wrapper']}>
                             <input

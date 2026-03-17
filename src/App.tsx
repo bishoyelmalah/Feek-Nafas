@@ -18,7 +18,7 @@ function App() {
       <Route path='/login' element={<LoginPage />} />
       <Route path='/register' element={<RegisterPage />} />
       <Route path='/findMatch' element={<FindMatchPage />}></Route>
-      <Route path='/getReady' element={<GetReadyPage />}></Route>
+      <Route path='/getReady/:id' element={<GetReadyPage />}></Route>
       <Route path='/match' element={<MatchPage />}></Route>
       <Route path='/victory' element={<VictoryPage />}></Route>
       <Route path='/lose' element={<LosePage />}></Route>
