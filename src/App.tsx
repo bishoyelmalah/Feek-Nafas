@@ -7,21 +7,23 @@ import { MatchPage } from './pages/MatchPage/MatchPage'
 import { VictoryPage } from './pages/VictoryPage/VictoryPage'
 import { LosePage } from './pages/LosePage/LosePage'
 import { LoginPage } from './pages/loginPage/loginPage'
-import {RegisterPage} from './pages/RegisterPage/RegisterPage'
+import { RegisterPage } from './pages/RegisterPage/RegisterPage'
 import { GetReadyPage } from './pages/GetReadyPage/GetReadyPage'
+import { ProtectedRoute } from './components/ProtectedRoute'
+import { PublicRoute } from './components/PublicRoute'
 
 function App() {
   return (
     <Routes>
-      <Route index element={<LandingPage />}></Route>
-      <Route path='/home' element={<HomePage/>} />
-      <Route path='/login' element={<LoginPage />} />
-      <Route path='/register' element={<RegisterPage />} />
-      <Route path='/findMatch' element={<FindMatchPage />}></Route>
-      <Route path='/getReady' element={<GetReadyPage />}></Route>
-      <Route path='/match' element={<MatchPage />}></Route>
-      <Route path='/victory' element={<VictoryPage />}></Route>
-      <Route path='/lose' element={<LosePage />}></Route>
+      <Route index element={<PublicRoute><LandingPage /></PublicRoute>}></Route>
+      <Route path='/home' element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+      <Route path='/login' element={<PublicRoute><LoginPage /></PublicRoute>} />
+      <Route path='/register' element={<PublicRoute><RegisterPage /></PublicRoute>} />
+      <Route path='/findMatch' element={<ProtectedRoute><FindMatchPage /></ProtectedRoute>}></Route>
+      <Route path='/getReady' element={<ProtectedRoute><GetReadyPage /></ProtectedRoute>}></Route>
+      <Route path='/match' element={<ProtectedRoute><MatchPage /></ProtectedRoute>}></Route>
+      <Route path='/victory' element={<ProtectedRoute><VictoryPage /></ProtectedRoute>}></Route>
+      <Route path='/lose' element={<ProtectedRoute><LosePage /></ProtectedRoute>}></Route>
     </Routes>
   )
 }

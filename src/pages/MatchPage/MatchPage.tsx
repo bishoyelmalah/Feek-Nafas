@@ -1,4 +1,4 @@
-﻿// import Footer from "../../components/Footer/Footer"
+// import Footer from "../../components/Footer/Footer"
 // import Header from "../../components/Header/Header"
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
@@ -178,7 +178,10 @@ export function MatchPage() {
                                 <span className="material-symbols-outlined">refresh</span>
                                 Refresh
                             </button>
-                            <button className={[styles['action-btn'], styles['danger']].join(' ')}>
+                            <button 
+                                className={[styles['action-btn'], styles['danger']].join(' ')}
+                                onClick={() => navigate('/home')}
+                            >
                                 <span className="material-symbols-outlined">logout</span>
                                 Return to Lobby
                             </button>
