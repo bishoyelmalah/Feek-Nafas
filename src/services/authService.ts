@@ -1,7 +1,7 @@
 import { useContext , useEffect , useState , createContext, Children} from 'react';
 import { supabase } from '../lib/supabase';
 import type { Session } from '@supabase/supabase-js';
-
+import type {SignUpPayload , SignInPayload , InsertUserPayload , ServiceError} from '../types/AuthServices'
 
 type AuthContextType = {
     session: Session | null;
@@ -18,27 +18,7 @@ export const AuthContextProvider = ({ children: _children }: { children: ReactNo
 
 }
 
-type SignUpPayload = {
-    email: string;
-    password: string;
-};
 
-type SignInPayload = {
-    email: string;
-    password: string;
-};
-
-type InsertUserPayload = {
-    id: string;
-    name: string;
-    username: string;
-    email: string;
-    codeforcesHandle: string;
-};
-
-type ServiceError = {
-    message: string;
-};
 
 export const insertUserProfile = async ({
     id,
