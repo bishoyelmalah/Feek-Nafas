@@ -1120,3 +1120,26 @@
   0%, 100% { top: 0; }
   50%       { top: calc(100% - 2px); }
 }
+/* ── Error Message────────────────────────────────────────────── */
+.error-message {
+    color: #ff4d4d;
+    font-size: 14px;
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    background-color: rgba(255, 0, 0, 0.1);
+    border-left: 3px solid #ff4d4d;
+    font-family: var(--font-display); 
+}
+/* ── loading screen────────────────────────────────────────────── */
+.loading-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: var(--color-bg-dark); 
+    color: var(--color-primary); 
+    font-family: var(--font-display);
+    font-size: 24px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
