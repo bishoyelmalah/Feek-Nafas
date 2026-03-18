@@ -1,6 +1,6 @@
 ﻿import styles from './MatchPage.module.css';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router';
+import { useNavigate, useLocation, useParams } from 'react-router';
 import { createChatRoom, receiveMessage, sendMessage } from '../../services/chatService';
 import { RealtimeChannel } from '@supabase/supabase-js';
 // import { getMatch } from '../../services/matchService';
@@ -21,7 +21,7 @@ export function MatchPage() {
     // const [problem, setProblem] = useState<MatchData | null>(null);
     
     const { problem } = state;
-    const matchId = "d1111111-1111-4111-8111-111111111111";
+    const {id: matchId} = useParams();
     const handle = "bishoy.elmalah";
 
     const handleRefresh = async () => {

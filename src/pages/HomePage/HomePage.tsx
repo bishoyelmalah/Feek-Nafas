@@ -1,19 +1,46 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../../components/Footer/Footer';
 import Header from '../../components/Header/Header';
 import styles from './HomePage.module.css'; 
+import { useAuth } from '../../services/authService';
+
+import { createInbox, removeInbox } from '../../services/invitationService';
+import { type MatchData } from '../../types/MatchData';
 
 export function HomePage() {
     const navigate = useNavigate();
+    const { userId } = useAuth();
+    const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
+    const [notification, setNotification ] = useState<MatchData>();
 
     const handleFindMatch = () => {
         navigate('/findMatch');
     };
 
+    useEffect(() => {
+        if (!userId) {
+            return;
+        }
+
+        const inboxChannel = createInbox(userId, (invitation: MatchData) => {
+            setHasUnreadNotification(true);
+            setNotification(invitation);
+        });
+
+        return () => {
+            removeInbox(inboxChannel);
+        };
+    }, [userId]);
+
     return (
         <>
-            <Header activeLink="arena" />
+            <Header
+                activeLink="arena"
+                notificationCount={hasUnreadNotification ? 1 : 0}
+                onNotificationOpened={() => setHasUnreadNotification(false)}
+                notification={notification}
+            />
 
             <main className={styles.contentSpacing}>
                 <section className={styles.heroSection}>

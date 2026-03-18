@@ -1,6 +1,7 @@
 import styles from './GetReadyPage.module.css';
 import { useNavigate, type NavigateFunction } from 'react-router';
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router';
 import lobbySound from '../../assets/sounds/lobby_sound.mp3'
 import { getMatch } from '../../services/matchService';
 
@@ -25,6 +26,7 @@ const opponent = {
 };
 const audio = new Audio(lobbySound);
 export function GetReadyPage() {
+    const {id} = useParams();
     const nav = useNavigate();
     const [ isp1ready , setIsp1ready ] = useState(false);
     const [ isp2ready , setIsp2ready] = useState(false);
@@ -34,7 +36,7 @@ export function GetReadyPage() {
 
     const findMatch = async (nav: NavigateFunction) => {
         const problem = await getMatch(matchId);
-        await nav('/match', { state: {problem} });
+        await nav(`/match/${id}`, { state: {problem} });
         // nav('/match');
     }
 

@@ -20,8 +20,8 @@ function App() {
       <Route path='/login' element={<PublicRoute><LoginPage /></PublicRoute>} />
       <Route path='/register' element={<PublicRoute><RegisterPage /></PublicRoute>} />
       <Route path='/findMatch' element={<ProtectedRoute><FindMatchPage /></ProtectedRoute>}></Route>
-      <Route path='/getReady' element={<ProtectedRoute><GetReadyPage /></ProtectedRoute>}></Route>
-      <Route path='/match' element={<ProtectedRoute><MatchPage /></ProtectedRoute>}></Route>
+      <Route path='/getReady/:id' element={<ProtectedRoute><GetReadyPage /></ProtectedRoute>}></Route>
+      <Route path='/match/:id' element={<ProtectedRoute><MatchPage /></ProtectedRoute>}></Route>
       <Route path='/victory' element={<ProtectedRoute><VictoryPage /></ProtectedRoute>}></Route>
       <Route path='/lose' element={<ProtectedRoute><LosePage /></ProtectedRoute>}></Route>
     </Routes>
