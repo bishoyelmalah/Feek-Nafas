@@ -1,3 +1,5 @@
+import type { Session } from '@supabase/supabase-js';
+
 export type SignUpPayload = {
     email: string;
     password: string;
@@ -18,4 +20,9 @@ export type InsertUserPayload = {
 
 export type ServiceError = {
     message: string;
+};
+export type AuthContextType = {
+    session: Session | null;
+    userId: string | null;
+    loading: boolean;
 };
