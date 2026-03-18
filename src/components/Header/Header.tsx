@@ -1,7 +1,5 @@
-import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../services/authService';
-import { AuthContext } from '../../contexts/AuthContext';
 import styles from './Header.module.css';
 import { useAuth } from '../../services/authService';
 
