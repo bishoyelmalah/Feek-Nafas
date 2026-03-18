@@ -15,8 +15,8 @@ export const createInbox = (userId: string, onNewNotification?: (text: MatchData
         (payload) => {
             const matchDetails: MatchData = payload.new as MatchData;
             onNewNotification?.(matchDetails);
-            alert("you have a new match!");
-            console.log(matchDetails);
+            // alert("you have a new match!");
+            // console.log(matchDetails);
         }
     ).subscribe();
 

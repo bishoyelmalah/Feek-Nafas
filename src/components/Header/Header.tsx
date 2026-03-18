@@ -9,7 +9,7 @@ interface HeaderProps {
   activeLink?: 'arena' | 'leaderboard' | 'challenges' | 'profile';
   notificationCount?: number;
   onNotificationOpened?: () => void;
-  notification?: MatchData
+  notification?: string
 }
 
 function Header({
@@ -90,7 +90,7 @@ function Header({
               {isNotificationModalOpen && (
                 <div className={styles['notification-modal']}>
                   <div className={styles['notification-title']}>New Notification</div>
-                  <div className={styles['notification-body']}>You have a new match invitation from {notification?.player1_id}</div>
+                  <div className={styles['notification-body']}>{notification}</div>
                   <div className={styles['notification-actions']}>
                     <button className={styles['notification-accept-btn']} onClick={handleAcceptNotification}>
                       Accept

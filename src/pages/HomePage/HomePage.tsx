@@ -7,12 +7,15 @@ import { useAuth } from '../../services/authService';
 
 import { createInbox, removeInbox } from '../../services/invitationService';
 import { type MatchData } from '../../types/MatchData';
+import { getOpponentDetails } from '../../utils/getOpponentDetails';
+import type { User } from '../../types/UserData';
+import type { PostgrestSingleResponse } from '@supabase/supabase-js';
 
 export function HomePage() {
     const navigate = useNavigate();
     const { userId } = useAuth();
     const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
-    const [notification, setNotification ] = useState<MatchData>();
+    const [notification, setNotification ] = useState<string>();
 
     const handleFindMatch = () => {
         navigate('/findMatch');
@@ -23,9 +26,10 @@ export function HomePage() {
             return;
         }
 
-        const inboxChannel = createInbox(userId, (invitation: MatchData) => {
+        const inboxChannel = createInbox(userId, async (invitation: MatchData) => {
             setHasUnreadNotification(true);
-            setNotification(invitation);
+            const opponent: User | undefined = await getOpponentDetails(invitation.player1_id);
+            setNotification(`You have a new match invitation from ${opponent?.username}`);
         });
 
         return () => {
