@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import lobbySound from '../../assets/sounds/lobby_sound.mp3'
 import { getMatch } from '../../services/matchService';
+import { createMatch } from '../../services/createMatchService';
 
 const player = {
     name: 'Ahmed_Warrior',
@@ -26,17 +27,16 @@ const opponent = {
 };
 const audio = new Audio(lobbySound);
 export function GetReadyPage() {
-    const {id} = useParams();
+    const {id: matchId} = useParams();
     const nav = useNavigate();
     const [ isp1ready , setIsp1ready ] = useState(false);
     const [ isp2ready , setIsp2ready] = useState(false);
     const [timer , setTimer] = useState(3);
     const ready = isp1ready && isp2ready;
-    const matchId = "d1111111-1111-4111-8111-111111111111";
 
     const findMatch = async (nav: NavigateFunction) => {
-        const matchDetails = await getMatch(matchId);
-        await nav(`/match/${id}`, { state: {matchDetails} });
+        const matchDetails = await getMatch(matchId as string);
+        await nav(`/match/${matchId}`, { state: {matchDetails} });
         // nav('/match');
     }
 
@@ -47,8 +47,12 @@ export function GetReadyPage() {
     const handlePlayer2Ready = () => {
         setIsp2ready(!isp2ready);
     }
+    const handleCreateMatch = async () => {
+        await createMatch(matchId as string);
+    }
     useEffect(()=>{
         if(!ready) return;
+            handleCreateMatch();
             const x = setInterval(() => {
                 setTimer((prev) => prev <= 1 ? 0 : prev - 1);
             },1000)

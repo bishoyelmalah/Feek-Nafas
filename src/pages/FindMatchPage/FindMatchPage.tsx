@@ -2,7 +2,7 @@
 import Header from '../../components/Header/Header';
 import { useNavigate } from 'react-router';
 import { useState, useEffect } from 'react';
-import { CreateMatchServices } from '../../services/CreateMatchServices';
+import { CreateMatchServices } from '../../services/findMatchService';
 import { supabase } from '../../lib/supabase';
 // import radarImg from '../../assets/radar.png';
 

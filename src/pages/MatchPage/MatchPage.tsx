@@ -10,7 +10,8 @@ import { type SubmitEvent } from 'react';
 import { type ChatMessage } from '../../types/ChatMessage';
 import { checkSubmission } from '../../services/codeforcesService';
 import { getUserHandle } from '../../services/userService';
-// import { type MatchData } from '../../types/MatchData';
+import { getOpponentDetails } from '../../utils/getOpponentDetails';
+import { startMatch } from '../../services/matchService';
 
 
 
@@ -21,6 +22,7 @@ export function MatchPage() {
     const [chatInput, setChatInput] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [handle, setHandle] = useState('');
+    const [opponentHandle, setOpponentHandle] = useState<string>('');
     // const [problem, setProblem] = useState<MatchData | null>(null);
     
     const {userId} = useAuth();
@@ -46,12 +48,20 @@ export function MatchPage() {
     }
 
     useEffect(() => {
+        console.log(matchDetails);
         const fetchHandle = async () => {
             const userHandle = await getUserHandle(userId as string);
             setHandle(userHandle);
         };
         if (userId) fetchHandle();
-    }, [userId]);
+
+        const fetchOpponentHandle = async () => {
+            const opponent = await getOpponentDetails(matchDetails.player2_id);
+            const handle = opponent?.codeforces_handle as string;
+            setOpponentHandle(handle);
+        }
+        if (matchDetails.player2_id) fetchOpponentHandle();
+    }, [userId, matchDetails.player2_id]);
 
     useEffect(()=>{
         const channel = createChatRoom(`chat-room-${matchId}`);
@@ -77,6 +87,10 @@ export function MatchPage() {
         }
     }, [])
 
+    useEffect(()=>{
+        startMatch(matchId as string);
+    }, []);
+
     return (
         <div className={styles['match-page']}>
             {/* <Header activeLink="arena" /> */}
@@ -97,15 +111,15 @@ export function MatchPage() {
                                 <div className={styles['online-indicator']}></div>
                             </div>
                             <div className={styles['player-details']}>
-                                <span className={[styles['player-name'], styles['blue-text']].join(' ')}>Player A (You)</span>
+                                <span className={[styles['player-name'], styles['blue-text']].join(' ')}>{handle} (You)</span>
                                 <div className={styles['player-stats']}>
                                     <span className={[styles['rank-badge'], styles['blue-badge']].join(' ')}>Candidate Master</span>
                                     <span className={styles['rating']}>1840</span>
                                 </div>
                             </div>
-                            <div className={styles['player-status']}>
+                            {/* <div className={styles['player-status']}>
                                 <span className={[styles['status-text'], styles['thinking']].join(' ')}>Thinking</span>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 
@@ -120,11 +134,11 @@ export function MatchPage() {
                     {/* Player B (Opponent) */}
                     <div className={[styles['player-card'], styles['player-b']].join(' ')}>
                         <div className={styles['player-info']}>
-                            <div className={styles['player-status']}>
+                            {/* <div className={styles['player-status']}>
                                 <span className={[styles['status-text'], styles['submitting']].join(' ')}>Submitting...</span>
-                            </div>
+                            </div> */}
                             <div className={[styles['player-details'], styles['right']].join(' ')}>
-                                <span className={[styles['player-name'], styles['orange-text']].join(' ')}>Player B</span>
+                                <span className={[styles['player-name'], styles['orange-text']].join(' ')}>{opponentHandle}</span>
                                 <div className={styles['player-stats']}>
                                     <span className={styles['rating']}>1910</span>
                                     <span className={[styles['rank-badge'], styles['orange-badge']].join(' ')}>Master</span>
