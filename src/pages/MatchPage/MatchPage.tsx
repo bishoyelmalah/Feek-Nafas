@@ -20,7 +20,7 @@ export function MatchPage() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     // const [problem, setProblem] = useState<MatchData | null>(null);
     
-    const { problem } = state;
+    const { matchDetails } = state;
     const {id: matchId} = useParams();
     const handle = "bishoy.elmalah";
 
@@ -163,8 +163,8 @@ export function MatchPage() {
                                         Current Challenge
                                     </h3>
                                     <h1 className={styles['challenge-title']}>
-                                        {problem
-                                            ? `${problem.contest_id}${problem.problem_index}`
+                                        {matchDetails
+                                            ? `${matchDetails.contest_id}${matchDetails.problem_index}`
                                             : 'Loading challenge...'}
                                     </h1>
                                 </div>
@@ -184,11 +184,11 @@ export function MatchPage() {
                             </div>
                             
                             <a
-                                href={problem ? `https://codeforces.com/contest/${problem.contest_id}/problem/${problem.problem_index}` : '#'}
+                                href={matchDetails ? `https://codeforces.com/contest/${matchDetails.contest_id}/problem/${matchDetails.problem_index}` : '#'}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className={styles['solve-button']}
-                                aria-disabled={!problem}
+                                aria-disabled={!matchDetails}
                             >
                                 <span className="material-symbols-outlined">launch</span>
                                 Solve on Codeforces

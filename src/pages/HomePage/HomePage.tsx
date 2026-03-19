@@ -16,6 +16,7 @@ export function HomePage() {
     const { userId } = useAuth();
     const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
     const [notification, setNotification ] = useState<string>();
+    const [matchId, setMatchId] = useState('');
 
     const handleFindMatch = () => {
         navigate('/findMatch');
@@ -29,6 +30,7 @@ export function HomePage() {
         const inboxChannel = createInbox(userId, async (invitation: MatchData) => {
             setHasUnreadNotification(true);
             const opponent: User | undefined = await getOpponentDetails(invitation.player1_id);
+            setMatchId(invitation.id);
             setNotification(`You have a new match invitation from ${opponent?.username}`);
         });
 
@@ -44,6 +46,7 @@ export function HomePage() {
                 notificationCount={hasUnreadNotification ? 1 : 0}
                 onNotificationOpened={() => setHasUnreadNotification(false)}
                 notification={notification}
+                matchId={matchId}
             />
 
             <main className={styles.contentSpacing}>

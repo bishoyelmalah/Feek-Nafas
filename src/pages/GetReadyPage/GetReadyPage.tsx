@@ -35,8 +35,8 @@ export function GetReadyPage() {
     const matchId = "d1111111-1111-4111-8111-111111111111";
 
     const findMatch = async (nav: NavigateFunction) => {
-        const problem = await getMatch(matchId);
-        await nav(`/match/${id}`, { state: {problem} });
+        const matchDetails = await getMatch(matchId);
+        await nav(`/match/${id}`, { state: {matchDetails} });
         // nav('/match');
     }
 

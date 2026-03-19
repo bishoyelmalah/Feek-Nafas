@@ -26,3 +26,11 @@ export const createInbox = (userId: string, onNewNotification?: (text: MatchData
 export const removeInbox = (channel: RealtimeChannel) => {
     supabase.removeChannel(channel);
 }
+
+export const acceptInvitation = (matchId: string) => {
+
+}
+
+export const declineInvitation = async (matchId: string) => {
+    await supabase.from('matches').update({status: 'declined'}).eq('id', matchId);
+}

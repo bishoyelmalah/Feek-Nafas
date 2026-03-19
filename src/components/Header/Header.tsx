@@ -4,11 +4,13 @@ import { logout } from '../../services/authService';
 import styles from './Header.module.css';
 import { useAuth } from '../../services/authService';
 import { type MatchData } from '../../types/MatchData';
+import { declineInvitation } from '../../services/invitationService';
 
 interface HeaderProps {
   activeLink?: 'arena' | 'leaderboard' | 'challenges' | 'profile';
   notificationCount?: number;
   onNotificationOpened?: () => void;
+  matchId?: string,
   notification?: string
 }
 
@@ -16,6 +18,7 @@ function Header({
   activeLink = 'arena',
   notificationCount = 0,
   onNotificationOpened,
+  matchId,
   notification
 }: HeaderProps) {
   const navigate = useNavigate();
@@ -37,6 +40,7 @@ function Header({
 
   const handleDeclineNotification = () => {
     setIsNotificationModalOpen(false);
+    declineInvitation(matchId as string);
   };
 
   const handleLogout = async () => {
