@@ -1,17 +1,9 @@
-import { useContext } from 'react';
 import { supabase } from '../lib/supabase';
-import type { SignUpPayload, SignInPayload, InsertUserPayload, ServiceError, AuthContextType } from '../types/AuthServices'
-import { AuthContext } from '../contexts/AuthContext';
+import type { SignUpPayload, SignInPayload, InsertUserPayload, ServiceError } from '../types/AuthServices'
 
 
 // 3. Add a helper hook to use this context easily
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthContextProvider');
-  }
-  return context;
-};
+
 
 
 export const insertUserProfile = async ({

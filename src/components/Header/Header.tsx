@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../services/authService';
 import styles from './Header.module.css';
-import { useAuth } from '../../services/authService';
-import { type MatchData } from '../../types/MatchData';
-import { declineInvitation } from '../../services/invitationService';
-
+import { useAuth } from '../../hooks/useAuth';
+import { acceptInvitation, declineInvitation } from '../../services/invitationService';
 interface HeaderProps {
   activeLink?: 'arena' | 'leaderboard' | 'challenges' | 'profile';
   notificationCount?: number;
@@ -36,6 +34,8 @@ function Header({
 
   const handleAcceptNotification = () => {
     setIsNotificationModalOpen(false);
+    acceptInvitation(matchId as string);
+    navigate(`/getReady/${matchId}`);
   };
 
   const handleDeclineNotification = () => {

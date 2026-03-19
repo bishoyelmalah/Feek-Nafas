@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import Footer from '../../components/Footer/Footer';
 import Header from '../../components/Header/Header';
 import styles from './HomePage.module.css'; 
-import { useAuth } from '../../services/authService';
+import { useAuth } from '../../hooks/useAuth';
 
 import { createInbox, removeInbox } from '../../services/invitationService';
 import { type MatchData } from '../../types/MatchData';
 import { getOpponentDetails } from '../../utils/getOpponentDetails';
 import type { User } from '../../types/UserData';
-import type { PostgrestSingleResponse } from '@supabase/supabase-js';
 
 export function HomePage() {
     const navigate = useNavigate();

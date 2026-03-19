@@ -7,7 +7,7 @@ export const createInbox = (userId: string, onNewNotification?: (text: MatchData
     channel.on(
         'postgres_changes',
         {
-            event: '*', 
+            event: 'INSERT', 
             schema: 'public', 
             table: 'matches',
             filter: `player2_id=eq.${userId}`
@@ -27,8 +27,8 @@ export const removeInbox = (channel: RealtimeChannel) => {
     supabase.removeChannel(channel);
 }
 
-export const acceptInvitation = (matchId: string) => {
-
+export const acceptInvitation = async (matchId: string) => {
+    await supabase.from('matches').update({status: 'accepted'}).eq('id', matchId);
 }
 
 export const declineInvitation = async (matchId: string) => {

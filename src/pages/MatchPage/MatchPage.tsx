@@ -3,11 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router';
 import { createChatRoom, receiveMessage, sendMessage } from '../../services/chatService';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { useAuth } from '../../hooks/useAuth';
 // import { getMatch } from '../../services/matchService';
 
 import { type SubmitEvent } from 'react';
 import { type ChatMessage } from '../../types/ChatMessage';
 import { checkSubmission } from '../../services/codeforcesService';
+import { getUserHandle } from '../../services/userService';
 // import { type MatchData } from '../../types/MatchData';
 
 
@@ -18,14 +20,15 @@ export function MatchPage() {
     const channelRef = useRef<RealtimeChannel | null>(null);
     const [chatInput, setChatInput] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [handle, setHandle] = useState('');
     // const [problem, setProblem] = useState<MatchData | null>(null);
     
+    const {userId} = useAuth();
     const { matchDetails } = state;
     const {id: matchId} = useParams();
-    const handle = "bishoy.elmalah";
 
     const handleRefresh = async () => {
-        const result = await checkSubmission(handle, "2185", "A");
+        const result = await checkSubmission(handle, matchDetails.contest_id, matchDetails.problem_index);
         // console.log(result);
         if (result) navigate('/victory');
     };
@@ -41,6 +44,14 @@ export function MatchPage() {
         )
         setChatInput('');
     }
+
+    useEffect(() => {
+        const fetchHandle = async () => {
+            const userHandle = await getUserHandle(userId as string);
+            setHandle(userHandle);
+        };
+        if (userId) fetchHandle();
+    }, [userId]);
 
     useEffect(()=>{
         const channel = createChatRoom(`chat-room-${matchId}`);

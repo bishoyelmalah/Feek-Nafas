@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../services/authService';
+import { useAuth } from '../hooks/useAuth';
 
 export const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     const { session, loading } = useAuth();
