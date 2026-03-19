@@ -1,12 +1,16 @@
-// import Footer from "../../components/Footer/Footer"
-// import Header from "../../components/Header/Header"
+﻿import styles from './MatchPage.module.css';
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { useNavigate, useLocation, useParams } from 'react-router';
 import { createChatRoom, receiveMessage, sendMessage } from '../../services/chatService';
-import styles from './MatchPage.module.css';
-import { type SubmitEvent } from 'react';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { useAuth } from '../../hooks/useAuth';
+// import { getMatch } from '../../services/matchService';
+
+import { type SubmitEvent } from 'react';
 import { type ChatMessage } from '../../types/ChatMessage';
+import { checkSubmission } from '../../services/codeforcesService';
+import { getUserHandle } from '../../services/userService';
+// import { type MatchData } from '../../types/MatchData';
 
 
 
@@ -14,15 +18,19 @@ export function MatchPage() {
     const navigate = useNavigate();
     const { state } = useLocation();
     const channelRef = useRef<RealtimeChannel | null>(null);
-    const { problem } = state;
-    // console.log(problem);
-
     const [chatInput, setChatInput] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [handle, setHandle] = useState('');
+    // const [problem, setProblem] = useState<MatchData | null>(null);
+    
+    const {userId} = useAuth();
+    const { matchDetails } = state;
+    const {id: matchId} = useParams();
 
     const handleRefresh = async () => {
-        const isCorrect = true
-        if (isCorrect) navigate('/victory');
+        const result = await checkSubmission(handle, matchDetails.contest_id, matchDetails.problem_index);
+        // console.log(result);
+        if (result) navigate('/victory');
     };
 
     const handleSendMessage = (e: SubmitEvent<HTMLFormElement>) => {
@@ -37,8 +45,16 @@ export function MatchPage() {
         setChatInput('');
     }
 
+    useEffect(() => {
+        const fetchHandle = async () => {
+            const userHandle = await getUserHandle(userId as string);
+            setHandle(userHandle);
+        };
+        if (userId) fetchHandle();
+    }, [userId]);
+
     useEffect(()=>{
-        const channel = createChatRoom('chat-room');
+        const channel = createChatRoom(`chat-room-${matchId}`);
         channelRef.current = channel;
 
         receiveMessage(channel, (msg: any)=>{
@@ -48,6 +64,13 @@ export function MatchPage() {
             ])
             // console.log(payload);
         })
+
+        // const handleMatchData = async () => {
+        //     const matchData = await getMatch(matchId);
+        //     setProblem(matchData);
+        // };
+
+        // void handleMatchData();
 
         return () => {
             channel.unsubscribe();
@@ -150,7 +173,11 @@ export function MatchPage() {
                                         <span className="material-symbols-outlined">terminal</span>
                                         Current Challenge
                                     </h3>
-                                    <h1 className={styles['challenge-title']}>{`${problem.contestId}${problem.index} - ${problem.name}`}</h1>
+                                    <h1 className={styles['challenge-title']}>
+                                        {matchDetails
+                                            ? `${matchDetails.contest_id}${matchDetails.problem_index}`
+                                            : 'Loading challenge...'}
+                                    </h1>
                                 </div>
                                 <div className={styles['challenge-meta']}>
                                     <span className={styles['meta-badge']}>DIFF: 800</span>
@@ -167,7 +194,13 @@ export function MatchPage() {
                                 <span className={styles['tag']}>Special Problems</span>
                             </div>
                             
-                            <a href={`${problem.link}`} target="_blank" rel="noopener noreferrer" className={styles['solve-button']}>
+                            <a
+                                href={matchDetails ? `https://codeforces.com/contest/${matchDetails.contest_id}/problem/${matchDetails.problem_index}` : '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles['solve-button']}
+                                aria-disabled={!matchDetails}
+                            >
                                 <span className="material-symbols-outlined">launch</span>
                                 Solve on Codeforces
                             </a>

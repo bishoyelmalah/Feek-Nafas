@@ -1,15 +1,47 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../services/authService';
 import styles from './Header.module.css';
-import { useAuth } from '../../services/authService';
-
+import { useAuth } from '../../hooks/useAuth';
+import { acceptInvitation, declineInvitation } from '../../services/invitationService';
 interface HeaderProps {
   activeLink?: 'arena' | 'leaderboard' | 'challenges' | 'profile';
+  notificationCount?: number;
+  onNotificationOpened?: () => void;
+  matchId?: string,
+  notification?: string
 }
 
-function Header({ activeLink = 'arena' }: HeaderProps) {
+function Header({
+  activeLink = 'arena',
+  notificationCount = 0,
+  onNotificationOpened,
+  matchId,
+  notification
+}: HeaderProps) {
   const navigate = useNavigate();
   const authContext = useAuth();
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+
+  const handleNotificationClick = () => {
+    const nextOpenState = !isNotificationModalOpen;
+    setIsNotificationModalOpen(nextOpenState);
+
+    if (nextOpenState && notificationCount > 0) {
+      onNotificationOpened?.();
+    }
+  };
+
+  const handleAcceptNotification = () => {
+    setIsNotificationModalOpen(false);
+    acceptInvitation(matchId as string);
+    navigate(`/getReady/${matchId}`);
+  };
+
+  const handleDeclineNotification = () => {
+    setIsNotificationModalOpen(false);
+    declineInvitation(matchId as string);
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -54,9 +86,26 @@ function Header({ activeLink = 'arena' }: HeaderProps) {
             </div>
           </div>
           <div className={styles['header-actions']}>
-            <button className={styles['icon-btn']}>
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
+            <div className={styles['notification-wrapper']}>
+              <button className={styles['icon-btn']} onClick={handleNotificationClick}>
+                <span className="material-symbols-outlined">notifications</span>
+                {notificationCount > 0 && <span className={styles['notification-badge']}>1</span>}
+              </button>
+              {isNotificationModalOpen && (
+                <div className={styles['notification-modal']}>
+                  <div className={styles['notification-title']}>New Notification</div>
+                  <div className={styles['notification-body']}>{notification}</div>
+                  <div className={styles['notification-actions']}>
+                    <button className={styles['notification-accept-btn']} onClick={handleAcceptNotification}>
+                      Accept
+                    </button>
+                    <button className={styles['notification-decline-btn']} onClick={handleDeclineNotification}>
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
             <button className={styles['icon-btn']}>
               <span className="material-symbols-outlined">settings</span>
             </button>

@@ -1,8 +1,9 @@
 import styles from './GetReadyPage.module.css';
 import { useNavigate, type NavigateFunction } from 'react-router';
 import { useEffect, useState } from 'react';
-import { getProblemByRatingOrTopic } from '../../services/codeforcesService';
+import { useParams } from 'react-router';
 import lobbySound from '../../assets/sounds/lobby_sound.mp3'
+import { getMatch } from '../../services/matchService';
 
 const player = {
     name: 'Ahmed_Warrior',
@@ -25,15 +26,18 @@ const opponent = {
 };
 const audio = new Audio(lobbySound);
 export function GetReadyPage() {
+    const {id} = useParams();
     const nav = useNavigate();
     const [ isp1ready , setIsp1ready ] = useState(false);
     const [ isp2ready , setIsp2ready] = useState(false);
     const [timer , setTimer] = useState(3);
     const ready = isp1ready && isp2ready;
+    const matchId = "d1111111-1111-4111-8111-111111111111";
 
     const findMatch = async (nav: NavigateFunction) => {
-        const problem = await getProblemByRatingOrTopic({rating: 800});
-        await nav('/match', { state: {problem} });
+        const matchDetails = await getMatch(matchId);
+        await nav(`/match/${id}`, { state: {matchDetails} });
+        // nav('/match');
     }
 
 
