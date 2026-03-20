@@ -1,5 +1,5 @@
 import styles from './GetReadyPage.module.css';
-import { useNavigate, type NavigateFunction } from 'react-router';
+import { useNavigate, useLocation, type NavigateFunction } from 'react-router';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import lobbySound from '../../assets/sounds/lobby_sound.mp3'
@@ -28,6 +28,8 @@ const audio = new Audio(lobbySound);
 export function GetReadyPage() {
     const {id: matchId} = useParams();
     const nav = useNavigate();
+    const { state } = useLocation();
+    const selectedDuration = (state as { selectedDuration?: number } | null)?.selectedDuration ?? 30;
     const [ isp1ready , setIsp1ready ] = useState(false);
     const [ isp2ready , setIsp2ready] = useState(false);
     const [timer , setTimer] = useState(3);
@@ -35,7 +37,7 @@ export function GetReadyPage() {
 
     const findMatch = async (nav: NavigateFunction) => {
         const matchDetails = await getMatch(matchId as string);
-        await nav(`/match/${matchId}`, { state: {matchDetails} });
+        await nav(`/match/${matchId}`, { state: {matchDetails, selectedDuration} });
         // nav('/match');
     }
 
@@ -150,7 +152,7 @@ export function GetReadyPage() {
                         </div>
                         <div>
                             <p className={styles.hudLabel}>Match Duration</p>
-                            <p className={styles.hudValue}>5:00 MINUTES</p>
+                            <p className={styles.hudValue}>{selectedDuration}:00 MINUTES</p>
                         </div>
                     </article>
                     <article className={styles.hudCard}>

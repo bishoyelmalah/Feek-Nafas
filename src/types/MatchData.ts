@@ -5,6 +5,7 @@ export interface MatchData {
     status: string,
     contest_id: string,
     problem_index: string,
+    duration?: number,
     winner_user_id: string,
     created_at?: string,
     finished_at?: string,

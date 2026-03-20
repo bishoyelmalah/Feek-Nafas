@@ -5,6 +5,7 @@ export const CreateMatchServices = async (
   opponentUsername : string,
   contestId: string,
   problemIndex: string,
+  duration: number
 ) => {
   const {data : opponent, error: userError} = await supabase
   .from ("users")
@@ -25,7 +26,8 @@ export const CreateMatchServices = async (
       player2_id: opponent.id,
       status: "pending",
       contest_id: contestId,
-      problem_index: problemIndex
+      problem_index: problemIndex,
+      duration
     }
   ])
   .select()

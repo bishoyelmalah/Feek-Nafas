@@ -16,8 +16,10 @@ const [error, setError] = useState('');
 const [currentUserId, setCurrentUserId] = useState('');
 const ratingOptions = ['Any', '800', '1000', '1200', '1400', '1600', '1800', '2000'];
 const topicOptions = ['Any', 'Implementation', 'Math', 'Greedy', 'DP', 'Graphs'];
+const durationOptions = [15, 30, 45, 60];
 const [selectedRating, setSelectedRating] = useState('Any');
 const [selectedTopic, setSelectedTopic] = useState('Any');
+const [selectedDuration, setSelectedDuration] = useState(30);
 useEffect(() => { 
     const getCurrentUser = async() =>{
         try{
@@ -73,8 +75,8 @@ useEffect(() => {
                     topic: selectedTopic === 'Any' ? undefined : selectedTopic
                 });
 
-                const match = await CreateMatchServices(currentUserId, searchUsername, problem?.contestId, problem?.index);
-                nav(`/getReady/${(match as any).id}`);
+                const match = await CreateMatchServices(currentUserId, searchUsername, problem?.contestId, problem?.index, selectedDuration);
+                nav(`/getReady/${(match as any).id}`, { state: { selectedDuration } });
             } catch (err: any){
                 setError(err.message || 'Failed to create match');
             } finally {
@@ -122,7 +124,7 @@ useEffect(() => {
                         </div>
                     </div>
 
-                    <div className={[styles['filter-section'], styles['topic-filter-section']].join(' ')}>
+                    <div className={styles['filter-section']}>
                         <div className={styles['sidebar-header']}>
                             <h3 className={styles['sidebar-title']}>Problem Topic</h3>
                             <span className={styles['sidebar-version']}>SELECT_02</span>
@@ -134,13 +136,35 @@ useEffect(() => {
                                     type="button"
                                     className={[
                                         styles['filter-option-btn'],
-                                        styles['topic-option-btn'],
                                         selectedTopic === topic ? styles['active'] : ''
                                     ].join(' ')}
                                     onClick={() => setSelectedTopic(topic)}
                                     aria-pressed={selectedTopic === topic}
                                 >
                                     {topic}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className={styles['filter-section']}>
+                        <div className={styles['sidebar-header']}>
+                            <h3 className={styles['sidebar-title']}>Problem Duration</h3>
+                            <span className={styles['sidebar-version']}>SELECT_03</span>
+                        </div>
+                        <div className={styles['filter-options']}>
+                            {durationOptions.map((duration) => (
+                                <button
+                                    key={duration}
+                                    type="button"
+                                    className={[
+                                        styles['filter-option-btn'],
+                                        selectedDuration === duration ? styles['active'] : ''
+                                    ].join(' ')}
+                                    onClick={() => setSelectedDuration(duration)}
+                                    aria-pressed={selectedDuration === duration}
+                                >
+                                    {duration}m
                                 </button>
                             ))}
                         </div>

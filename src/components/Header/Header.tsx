@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../services/authService';
 import styles from './Header.module.css';
@@ -21,6 +21,26 @@ function Header({
   const navigate = useNavigate();
   const authContext = useAuth();
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
+
+  const displayUsername =
+    (authContext?.session?.user?.user_metadata?.username as string | undefined) ??
+    authContext?.session?.user?.email?.split('@')[0] ??
+    'Player';
+
+  useEffect(() => {
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (!profileMenuRef.current?.contains(event.target as Node)) {
+        setIsProfileModalOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleDocumentClick);
+    return () => {
+      document.removeEventListener('mousedown', handleDocumentClick);
+    };
+  }, []);
 
   const handleNotificationClick = () => {
     const nextOpenState = !isNotificationModalOpen;
@@ -45,6 +65,10 @@ function Header({
   const handleLogout = async () => {
     await logout();
     navigate('/login');
+  };
+
+  const handleSettingsClick = () => {
+    setIsProfileModalOpen(false);
   };
   return (
     <header>
@@ -92,7 +116,11 @@ function Header({
               </button>
               {isNotificationModalOpen && (
                 <div className={styles['notification-modal']}>
-                  {notifications?.map((notification) => {
+                  { notifications?.length === 0 ? 
+                  <div className={styles['notification-message']}>
+                      <div className={styles['notification-title']}>No Notifications</div>
+                  </div>
+                  : notifications?.map((notification) => {
                     return (
                       <div className={styles['notification-message']}>
                       <div className={styles['notification-title']}>New Match Invitation</div>
@@ -111,19 +139,39 @@ function Header({
                 </div>
               )}
             </div>
-            <button className={styles['icon-btn']}>
-              <span className="material-symbols-outlined">settings</span>
-            </button>
-            {authContext?.session && (
-              <button className={styles['icon-btn']} onClick={handleLogout} title="Logout">
-                <span className="material-symbols-outlined">logout</span>
+            <div className={styles['profile-wrapper']} ref={profileMenuRef}>
+              <button
+                className={styles['profile-trigger']}
+                onClick={() => setIsProfileModalOpen((prev) => !prev)}
+                title="Profile menu"
+              >
+                <span className={styles['username']}>{displayUsername}</span>
+                <div className={styles['user-avatar']}>
+                  <img
+                    alt="Cyberpunk female player avatar with neon highlights"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCL8aMK3OzFo7PkzF72qgEEZmkBXunrRdqoPfzsPOOWAA2KdUaCswjzTej_BhhTPKVKqTO-GVcwYOVMadRGVogZYiB0p33yvEit163VmW04lOGDJ-wzKqvjb-cTKExcpB0fzy-psRQVnPcxDTk5n8pSBjIhqtGdj_sycNWUnUbDa-M6Dl5euX9kPoECe1IKG47SqwBpOhOGwG11CfYVWDcDi2M-ilReVqB_s0AKD_DZxWSxHEcUuhXoc023jhaOHpCYa2HStNCBwGg"
+                  />
+                </div>
               </button>
-            )}
-            <div className={styles['user-avatar']}>
-              <img
-                alt="Cyberpunk female player avatar with neon highlights"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCL8aMK3OzFo7PkzF72qgEEZmkBXunrRdqoPfzsPOOWAA2KdUaCswjzTej_BhhTPKVKqTO-GVcwYOVMadRGVogZYiB0p33yvEit163VmW04lOGDJ-wzKqvjb-cTKExcpB0fzy-psRQVnPcxDTk5n8pSBjIhqtGdj_sycNWUnUbDa-M6Dl5euX9kPoECe1IKG47SqwBpOhOGwG11CfYVWDcDi2M-ilReVqB_s0AKD_DZxWSxHEcUuhXoc023jhaOHpCYa2HStNCBwGg"
-              />
+
+              {isProfileModalOpen && (
+                <div className={styles['profile-modal']}>
+                  <button className={styles['profile-modal-btn']} onClick={handleSettingsClick}>
+                    <span className="material-symbols-outlined">settings</span>
+                    Settings
+                  </button>
+                  {authContext?.session && (
+                    <button
+                      className={styles['profile-modal-btn']}
+                      onClick={handleLogout}
+                      title="Logout"
+                    >
+                      <span className="material-symbols-outlined">logout</span>
+                      Logout
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

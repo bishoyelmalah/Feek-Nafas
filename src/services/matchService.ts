@@ -8,7 +8,11 @@ export const getMatch = async (matchId: string) => {
 }
 
 export const startMatch = async (matchId: string) => {
-    await supabase.from('matches').update({status: 'in_progress'}).eq('id', matchId);
+    await supabase
+        .from('matches')
+        .update({status: 'in_progress'})
+        .eq('id', matchId)
+        .eq('status', 'accepted');
 }
 
 export const finishMatch = async (matchId: string, winnerId: string) => {
@@ -26,4 +30,24 @@ export const createSubmissionChannel = (name: string, callback: () => void) => {
         }
     ).subscribe()
     return channel;
+}
+
+export const getStartTime = async (matchId: string) => {
+    const { data } = await supabase
+        .from('matches')
+        .select('updated_at')
+        .eq('id', matchId)
+        .single();
+
+    return data?.updated_at ?? undefined;
+}
+
+export const getMatchDuration = async (matchId: string) => {
+    const { data } = await supabase
+        .from('matches')
+        .select('duration')
+        .eq('id', matchId)
+        .single();
+
+    return data?.duration ?? 30;
 }

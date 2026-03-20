@@ -14,12 +14,14 @@ import { checkSubmission } from '../../services/codeforcesService';
 import { getUserHandle } from '../../services/userService';
 import { getOpponentDetails } from '../../utils/getOpponentDetails';
 import { startMatch, finishMatch, createSubmissionChannel } from '../../services/matchService';
+import { useMatchTimer } from '../../hooks/useMatchTimer';
 
 
 
 export function MatchPage() {
     const navigate = useNavigate();
     const { state } = useLocation();
+    const routeState = state as { matchDetails?: any } | null;
     const channelRef = useRef<RealtimeChannel | null>(null);
     const submissionChannelRef = useRef<RealtimeChannel | null>(null);
     const [chatInput, setChatInput] = useState('');
@@ -30,11 +32,20 @@ export function MatchPage() {
     // const [problem, setProblem] = useState<MatchData | null>(null);
     
     const {userId} = useAuth();
-    const { matchDetails } = state;
+    const matchDetails = routeState?.matchDetails;
     const {id: matchId} = useParams();
 
+    useEffect(() => {
+        if (!matchDetails) {
+            navigate('/home');
+        }
+    }, [matchDetails, navigate]);
+    
+    const {timeLeft, durationInMinutes} = useMatchTimer(matchId);
+
     const handleRefresh = async () => {
-        const result = await checkSubmission(handle, matchDetails.contest_id, matchDetails.problem_index);
+        if (!matchDetails) return;
+        const result = await checkSubmission(handle, matchDetails.contest_id, matchDetails.problem_index, durationInMinutes);
         // console.log(result);
         if (result) {
             submissionChannelRef.current?.send({
@@ -61,7 +72,7 @@ export function MatchPage() {
     }
 
     useEffect(() => {
-        console.log(matchDetails);
+        // console.log(matchDetails);
         const fetchHandle = async () => {
             const userHandle = await getUserHandle(userId as string);
             setHandle(userHandle);
@@ -69,14 +80,16 @@ export function MatchPage() {
         if (userId) fetchHandle();
 
         const fetchOpponentHandle = async () => {
+            if (!matchDetails) return;
             const opponent = await getOpponentDetails(matchDetails.player2_id);
             const handle = opponent?.codeforces_handle as string;
             setOpponentHandle(handle);
         }
-        if (matchDetails.player2_id) fetchOpponentHandle();
-    }, [userId, matchDetails.player2_id]);
+        if (matchDetails?.player2_id) fetchOpponentHandle();
+    }, [userId, matchDetails]);
 
     useEffect(()=>{
+        if (!matchId) return;
         const channel = createChatRoom(`chat-room-${matchId}`);
         channelRef.current = channel;
 
@@ -97,11 +110,16 @@ export function MatchPage() {
             channel.unsubscribe();
             submissionChannel.unsubscribe();
         }
-    }, [])
+    }, [matchId])
 
     useEffect(()=>{
-        startMatch(matchId as string);
-    }, []);
+        if (!matchId) return;
+        startMatch(matchId);
+    }, [matchId]);
+
+    if (!matchDetails) {
+        return null;
+    }
 
     if (isFinished.finished) {
         if (isFinished.win) {
@@ -146,7 +164,7 @@ export function MatchPage() {
                     {/* Timer HUD */}
                     <div className={styles['timer-container']}>
                         <div className={styles['timer-display']}>
-                            <span className={styles['timer-value']}>14:20</span>
+                            <span className={styles['timer-value']}>{timeLeft}</span>
                             <p className={styles['timer-label']}>Time Remaining</p>
                         </div>
                     </div>
@@ -178,7 +196,7 @@ export function MatchPage() {
                 </div>
 
                 {/* Tug of War Bar */}
-                <div className={styles['momentum-section']}>
+                {/* <div className={styles['momentum-section']}>
                     <div className={styles['momentum-labels']}>
                         <div className={styles['momentum-player']}>
                             <span className={[styles['momentum-title'], styles['blue-text']].join(' ')}>Momentum</span>
@@ -194,7 +212,7 @@ export function MatchPage() {
                         <div className={[styles['momentum-fill'], styles['orange-momentum']].join(' ')} style={{ width: '50%' }}></div>
                         <div className={styles['momentum-marker']}></div>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Main Content Area */}
                 <div className={styles['match-content']}>
@@ -252,7 +270,7 @@ export function MatchPage() {
                                 <span className="material-symbols-outlined">logout</span>
                                 Return to Lobby
                             </button>
-                            <button
+                            {/* <button
                                 className={[styles['action-btn'], styles['secondary']].join(' ')}
                                 onClick={() => navigate('/victory')}
                             >
@@ -263,7 +281,7 @@ export function MatchPage() {
                                 onClick={() => navigate('/lose')}
                             >
                                 Lose
-                            </button>
+                            </button> */}
                         </div>
                     </div>
 
