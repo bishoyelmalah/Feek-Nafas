@@ -2,7 +2,10 @@ import { supabase } from "../lib/supabase";
 
 export const CreateMatchServices = async (
   currentUserId : string,
-  opponentUsername : string
+  opponentUsername : string,
+  contestId: string,
+  problemIndex: string,
+  duration: number
 ) => {
   const {data : opponent, error: userError} = await supabase
   .from ("users")
@@ -21,7 +24,10 @@ export const CreateMatchServices = async (
     {
       player1_id: currentUserId,
       player2_id: opponent.id,
-      status: "pending"
+      status: "pending",
+      contest_id: contestId,
+      problem_index: problemIndex,
+      duration
     }
   ])
   .select()

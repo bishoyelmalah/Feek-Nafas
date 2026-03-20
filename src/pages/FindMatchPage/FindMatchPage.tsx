@@ -2,8 +2,9 @@
 import Header from '../../components/Header/Header';
 import { useNavigate } from 'react-router';
 import { useState, useEffect } from 'react';
-import { CreateMatchServices } from '../../services/CreateMatchServices';
+import { CreateMatchServices } from '../../services/findMatchService';
 import { supabase } from '../../lib/supabase';
+import { getProblemByRatingOrTopic } from '../../services/codeforcesService';
 // import radarImg from '../../assets/radar.png';
 
 export function FindMatchPage() {
@@ -13,6 +14,12 @@ const [searchUsername, setSearchUsername] = useState ('');
 const [isLoading, setIsLoading] = useState(false);
 const [error, setError] = useState('');
 const [currentUserId, setCurrentUserId] = useState('');
+const ratingOptions = ['Any', '800', '1000', '1200', '1400', '1600', '1800', '2000'];
+const topicOptions = ['Any', 'Implementation', 'Math', 'Greedy', 'DP', 'Graphs'];
+const durationOptions = [15, 30, 45, 60];
+const [selectedRating, setSelectedRating] = useState('Any');
+const [selectedTopic, setSelectedTopic] = useState('Any');
+const [selectedDuration, setSelectedDuration] = useState(30);
 useEffect(() => { 
     const getCurrentUser = async() =>{
         try{
@@ -63,8 +70,13 @@ useEffect(() => {
             setError('');
 
             try{
-             const match = await CreateMatchServices(currentUserId, searchUsername);
-             nav(`/getReady/${(match as any).id}`);
+                const problem = await getProblemByRatingOrTopic({
+                    rating: selectedRating === 'Any' ? undefined : parseInt(selectedRating), 
+                    topic: selectedTopic === 'Any' ? undefined : selectedTopic
+                });
+
+                const match = await CreateMatchServices(currentUserId, searchUsername, problem?.contestId, problem?.index, selectedDuration);
+                nav(`/getReady/${(match as any).id}`, { state: { selectedDuration } });
             } catch (err: any){
                 setError(err.message || 'Failed to create match');
             } finally {
@@ -89,62 +101,72 @@ useEffect(() => {
 
                 {/* ── Left Sidebar: Recent Matches ── */}
                 <div className={styles['sidebar-left']}>
-                    <div className={styles['sidebar-header']}>
-                        <h3 className={styles['sidebar-title']}>Recent Encounters</h3>
-                        <span className={styles['sidebar-version']}>HISTORY_V2.4</span>
+                    <div className={styles['filter-section']}>
+                        <div className={styles['sidebar-header']}>
+                            <h3 className={styles['sidebar-title']}>Problem Rating</h3>
+                            <span className={styles['sidebar-version']}>SELECT_01</span>
+                        </div>
+                        <div className={styles['filter-options']}>
+                            {ratingOptions.map((rating) => (
+                                <button
+                                    key={rating}
+                                    type="button"
+                                    className={[
+                                        styles['filter-option-btn'],
+                                        selectedRating === rating ? styles['active'] : ''
+                                    ].join(' ')}
+                                    onClick={() => setSelectedRating(rating)}
+                                    aria-pressed={selectedRating === rating}
+                                >
+                                    {rating}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
-                    <div className={styles['match-list']}>
-                        {/* Victory */}
-                        <div className={[styles['match-card'], styles['victory']].join(' ')}>
-                            <div className={styles['match-card-content']}>
-                                <span className={[styles['match-card-result'], styles['victory']].join(' ')}>Victory</span>
-                                <span className={styles['match-card-username']}>Z3RO_PULSE</span>
-                                <span className={styles['match-card-map']}>Map: Neo Tokyo</span>
-                            </div>
-                            <div className={styles['match-card-meta']}>
-                                <p className={[styles['match-card-rp'], styles['victory']].join(' ')}>+24 RP</p>
-                                <p className={styles['match-card-time']}>2m ago</p>
-                            </div>
+                    <div className={styles['filter-section']}>
+                        <div className={styles['sidebar-header']}>
+                            <h3 className={styles['sidebar-title']}>Problem Topic</h3>
+                            <span className={styles['sidebar-version']}>SELECT_02</span>
                         </div>
-
-                        {/* Defeat */}
-                        <div className={[styles['match-card'], styles['defeat']].join(' ')}>
-                            <div className={styles['match-card-content']}>
-                                <span className={[styles['match-card-result'], styles['defeat']].join(' ')}>Defeat</span>
-                                <span className={styles['match-card-username']}>GHOST_SHELL</span>
-                                <span className={styles['match-card-map']}>Map: Sector 7</span>
-                            </div>
-                            <div className={styles['match-card-meta']}>
-                                <p className={[styles['match-card-rp'], styles['defeat']].join(' ')}>-18 RP</p>
-                                <p className={styles['match-card-time']}>15m ago</p>
-                            </div>
+                        <div className={styles['filter-options']}>
+                            {topicOptions.map((topic) => (
+                                <button
+                                    key={topic}
+                                    type="button"
+                                    className={[
+                                        styles['filter-option-btn'],
+                                        selectedTopic === topic ? styles['active'] : ''
+                                    ].join(' ')}
+                                    onClick={() => setSelectedTopic(topic)}
+                                    aria-pressed={selectedTopic === topic}
+                                >
+                                    {topic}
+                                </button>
+                            ))}
                         </div>
+                    </div>
 
-                        {/* Victory */}
-                        <div className={[styles['match-card'], styles['victory']].join(' ')}>
-                            <div className={styles['match-card-content']}>
-                                <span className={[styles['match-card-result'], styles['victory']].join(' ')}>Victory</span>
-                                <span className={styles['match-card-username']}>K1LL_SWITCH</span>
-                                <span className={styles['match-card-map']}>Map: The Void</span>
-                            </div>
-                            <div className={styles['match-card-meta']}>
-                                <p className={[styles['match-card-rp'], styles['victory']].join(' ')}>+21 RP</p>
-                                <p className={styles['match-card-time']}>42m ago</p>
-                            </div>
+                    <div className={styles['filter-section']}>
+                        <div className={styles['sidebar-header']}>
+                            <h3 className={styles['sidebar-title']}>Problem Duration</h3>
+                            <span className={styles['sidebar-version']}>SELECT_03</span>
                         </div>
-
-                        {/* Victory (dim) */}
-                        <div className={[styles['match-card'], styles['victory'], styles['dim']].join(' ')}>
-                            <div className={styles['match-card-content']}>
-                                <span className={[styles['match-card-result'], styles['victory']].join(' ')}>Victory</span>
-                                <span className={styles['match-card-username']}>VOID_WALKER</span>
-                                <span className={styles['match-card-map']}>Map: Neon Grid</span>
-                            </div>
-                            <div className={styles['match-card-meta']}>
-                                <p className={[styles['match-card-rp'], styles['victory']].join(' ')}>+26 RP</p>
-                                <p className={styles['match-card-time']}>1h ago</p>
-                            </div>
+                        <div className={styles['filter-options']}>
+                            {durationOptions.map((duration) => (
+                                <button
+                                    key={duration}
+                                    type="button"
+                                    className={[
+                                        styles['filter-option-btn'],
+                                        selectedDuration === duration ? styles['active'] : ''
+                                    ].join(' ')}
+                                    onClick={() => setSelectedDuration(duration)}
+                                    aria-pressed={selectedDuration === duration}
+                                >
+                                    {duration}m
+                                </button>
+                            ))}
                         </div>
                     </div>
 

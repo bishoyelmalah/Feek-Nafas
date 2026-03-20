@@ -129,6 +129,64 @@ nav a:not(.active):hover {
   position: relative;
 }
 
+.profile-wrapper {
+  position: relative;
+}
+
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.125rem;
+}
+
+.username {
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
+.profile-modal {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 8.5rem;
+  padding: 0.375rem;
+  border: 1px solid rgba(236, 91, 19, 0.4);
+  border-radius: 0.5rem;
+  background-color: rgba(10, 10, 10, 0.98);
+  box-shadow: 0 0 15px rgba(236, 91, 19, 0.25);
+  z-index: 60;
+}
+
+.profile-modal-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: #cbd5e1;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.profile-modal-btn:hover {
+  background-color: rgba(148, 163, 184, 0.18);
+}
+
+.profile-modal-btn :global(.material-symbols-outlined) {
+  font-size: 1rem;
+}
+
 .icon-btn {
   padding: 0.5rem;
   color: #94a3b8;
@@ -170,6 +228,10 @@ nav a:not(.active):hover {
   background-color: rgba(10, 10, 10, 0.98);
   box-shadow: 0 0 15px rgba(236, 91, 19, 0.25);
   z-index: 60;
+}
+
+.notification-message {
+  margin-bottom: 1rem;
 }
 
 .notification-title {

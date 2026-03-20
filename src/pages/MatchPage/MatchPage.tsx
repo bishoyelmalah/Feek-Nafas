@@ -1,4 +1,6 @@
 ﻿import styles from './MatchPage.module.css';
+import { VictoryPage } from '../VictoryPage/VictoryPage';
+import { LosePage } from '../LosePage/LosePage';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router';
 import { createChatRoom, receiveMessage, sendMessage } from '../../services/chatService';
@@ -10,27 +12,51 @@ import { type SubmitEvent } from 'react';
 import { type ChatMessage } from '../../types/ChatMessage';
 import { checkSubmission } from '../../services/codeforcesService';
 import { getUserHandle } from '../../services/userService';
-// import { type MatchData } from '../../types/MatchData';
+import { getOpponentDetails } from '../../utils/getOpponentDetails';
+import { startMatch, finishMatch, createSubmissionChannel } from '../../services/matchService';
+import { useMatchTimer } from '../../hooks/useMatchTimer';
 
 
 
 export function MatchPage() {
     const navigate = useNavigate();
     const { state } = useLocation();
+    const routeState = state as { matchDetails?: any } | null;
     const channelRef = useRef<RealtimeChannel | null>(null);
+    const submissionChannelRef = useRef<RealtimeChannel | null>(null);
     const [chatInput, setChatInput] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [handle, setHandle] = useState('');
+    const [opponentHandle, setOpponentHandle] = useState<string>('');
+    const [isFinished, setIsFinished] = useState<{finished: boolean, win: boolean}>({finished: false, win: false});
     // const [problem, setProblem] = useState<MatchData | null>(null);
     
     const {userId} = useAuth();
-    const { matchDetails } = state;
+    const matchDetails = routeState?.matchDetails;
     const {id: matchId} = useParams();
 
+    useEffect(() => {
+        if (!matchDetails) {
+            navigate('/home');
+        }
+    }, [matchDetails, navigate]);
+    
+    const {timeLeft, durationInMinutes} = useMatchTimer(matchId);
+
     const handleRefresh = async () => {
-        const result = await checkSubmission(handle, matchDetails.contest_id, matchDetails.problem_index);
+        if (!matchDetails) return;
+        const result = await checkSubmission(handle, matchDetails.contest_id, matchDetails.problem_index, durationInMinutes);
         // console.log(result);
-        if (result) navigate('/victory');
+        if (result) {
+            submissionChannelRef.current?.send({
+                type: 'broadcast',
+                event: 'shout',
+                payload: {winnerId: userId}
+            })
+            setIsFinished({finished: true, win: true});
+            finishMatch(matchId as string, userId as string);
+        } 
+            
     };
 
     const handleSendMessage = (e: SubmitEvent<HTMLFormElement>) => {
@@ -38,7 +64,7 @@ export function MatchPage() {
         sendMessage(channelRef.current, chatInput, "bishoy")
         setMessages(prev => 
             [...prev, {
-                id: 2, sender: 'you', text: chatInput, time: 'time'
+                id: messages.length, sender: 'you', text: chatInput, time: 'time'
                 }
             ]
         )
@@ -46,14 +72,24 @@ export function MatchPage() {
     }
 
     useEffect(() => {
+        // console.log(matchDetails);
         const fetchHandle = async () => {
             const userHandle = await getUserHandle(userId as string);
             setHandle(userHandle);
         };
         if (userId) fetchHandle();
-    }, [userId]);
+
+        const fetchOpponentHandle = async () => {
+            if (!matchDetails) return;
+            const opponent = await getOpponentDetails(matchDetails.player2_id);
+            const handle = opponent?.codeforces_handle as string;
+            setOpponentHandle(handle);
+        }
+        if (matchDetails?.player2_id) fetchOpponentHandle();
+    }, [userId, matchDetails]);
 
     useEffect(()=>{
+        if (!matchId) return;
         const channel = createChatRoom(`chat-room-${matchId}`);
         channelRef.current = channel;
 
@@ -65,17 +101,33 @@ export function MatchPage() {
             // console.log(payload);
         })
 
-        // const handleMatchData = async () => {
-        //     const matchData = await getMatch(matchId);
-        //     setProblem(matchData);
-        // };
-
-        // void handleMatchData();
-
+        const submissionChannel = createSubmissionChannel(`submission-${matchId}`, () => {
+                setIsFinished({finished: true, win: false});
+                // console.log(isFinished);
+        })
+        submissionChannelRef.current = submissionChannel;
         return () => {
             channel.unsubscribe();
+            submissionChannel.unsubscribe();
         }
-    }, [])
+    }, [matchId])
+
+    useEffect(()=>{
+        if (!matchId) return;
+        startMatch(matchId);
+    }, [matchId]);
+
+    if (!matchDetails) {
+        return null;
+    }
+
+    if (isFinished.finished) {
+        if (isFinished.win) {
+            return <VictoryPage />
+        } else {
+            return <LosePage />
+        }
+    }
 
     return (
         <div className={styles['match-page']}>
@@ -97,22 +149,22 @@ export function MatchPage() {
                                 <div className={styles['online-indicator']}></div>
                             </div>
                             <div className={styles['player-details']}>
-                                <span className={[styles['player-name'], styles['blue-text']].join(' ')}>Player A (You)</span>
+                                <span className={[styles['player-name'], styles['blue-text']].join(' ')}>{handle} (You)</span>
                                 <div className={styles['player-stats']}>
                                     <span className={[styles['rank-badge'], styles['blue-badge']].join(' ')}>Candidate Master</span>
                                     <span className={styles['rating']}>1840</span>
                                 </div>
                             </div>
-                            <div className={styles['player-status']}>
+                            {/* <div className={styles['player-status']}>
                                 <span className={[styles['status-text'], styles['thinking']].join(' ')}>Thinking</span>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 
                     {/* Timer HUD */}
                     <div className={styles['timer-container']}>
                         <div className={styles['timer-display']}>
-                            <span className={styles['timer-value']}>14:20</span>
+                            <span className={styles['timer-value']}>{timeLeft}</span>
                             <p className={styles['timer-label']}>Time Remaining</p>
                         </div>
                     </div>
@@ -120,11 +172,11 @@ export function MatchPage() {
                     {/* Player B (Opponent) */}
                     <div className={[styles['player-card'], styles['player-b']].join(' ')}>
                         <div className={styles['player-info']}>
-                            <div className={styles['player-status']}>
+                            {/* <div className={styles['player-status']}>
                                 <span className={[styles['status-text'], styles['submitting']].join(' ')}>Submitting...</span>
-                            </div>
+                            </div> */}
                             <div className={[styles['player-details'], styles['right']].join(' ')}>
-                                <span className={[styles['player-name'], styles['orange-text']].join(' ')}>Player B</span>
+                                <span className={[styles['player-name'], styles['orange-text']].join(' ')}>{opponentHandle}</span>
                                 <div className={styles['player-stats']}>
                                     <span className={styles['rating']}>1910</span>
                                     <span className={[styles['rank-badge'], styles['orange-badge']].join(' ')}>Master</span>
@@ -144,7 +196,7 @@ export function MatchPage() {
                 </div>
 
                 {/* Tug of War Bar */}
-                <div className={styles['momentum-section']}>
+                {/* <div className={styles['momentum-section']}>
                     <div className={styles['momentum-labels']}>
                         <div className={styles['momentum-player']}>
                             <span className={[styles['momentum-title'], styles['blue-text']].join(' ')}>Momentum</span>
@@ -160,7 +212,7 @@ export function MatchPage() {
                         <div className={[styles['momentum-fill'], styles['orange-momentum']].join(' ')} style={{ width: '50%' }}></div>
                         <div className={styles['momentum-marker']}></div>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Main Content Area */}
                 <div className={styles['match-content']}>
@@ -218,7 +270,7 @@ export function MatchPage() {
                                 <span className="material-symbols-outlined">logout</span>
                                 Return to Lobby
                             </button>
-                            <button
+                            {/* <button
                                 className={[styles['action-btn'], styles['secondary']].join(' ')}
                                 onClick={() => navigate('/victory')}
                             >
@@ -229,7 +281,7 @@ export function MatchPage() {
                                 onClick={() => navigate('/lose')}
                             >
                                 Lose
-                            </button>
+                            </button> */}
                         </div>
                     </div>
 
