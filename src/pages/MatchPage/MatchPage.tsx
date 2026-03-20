@@ -1,4 +1,6 @@
 ﻿import styles from './MatchPage.module.css';
+import { VictoryPage } from '../VictoryPage/VictoryPage';
+import { LosePage } from '../LosePage/LosePage';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router';
 import { createChatRoom, receiveMessage, sendMessage } from '../../services/chatService';
@@ -11,7 +13,7 @@ import { type ChatMessage } from '../../types/ChatMessage';
 import { checkSubmission } from '../../services/codeforcesService';
 import { getUserHandle } from '../../services/userService';
 import { getOpponentDetails } from '../../utils/getOpponentDetails';
-import { startMatch } from '../../services/matchService';
+import { startMatch, finishMatch, createSubmissionChannel } from '../../services/matchService';
 
 
 
@@ -19,10 +21,12 @@ export function MatchPage() {
     const navigate = useNavigate();
     const { state } = useLocation();
     const channelRef = useRef<RealtimeChannel | null>(null);
+    const submissionChannelRef = useRef<RealtimeChannel | null>(null);
     const [chatInput, setChatInput] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [handle, setHandle] = useState('');
     const [opponentHandle, setOpponentHandle] = useState<string>('');
+    const [isFinished, setIsFinished] = useState<{finished: boolean, win: boolean}>({finished: false, win: false});
     // const [problem, setProblem] = useState<MatchData | null>(null);
     
     const {userId} = useAuth();
@@ -32,7 +36,16 @@ export function MatchPage() {
     const handleRefresh = async () => {
         const result = await checkSubmission(handle, matchDetails.contest_id, matchDetails.problem_index);
         // console.log(result);
-        if (result) navigate('/victory');
+        if (result) {
+            submissionChannelRef.current?.send({
+                type: 'broadcast',
+                event: 'shout',
+                payload: {winnerId: userId}
+            })
+            setIsFinished({finished: true, win: true});
+            finishMatch(matchId as string, userId as string);
+        } 
+            
     };
 
     const handleSendMessage = (e: SubmitEvent<HTMLFormElement>) => {
@@ -40,7 +53,7 @@ export function MatchPage() {
         sendMessage(channelRef.current, chatInput, "bishoy")
         setMessages(prev => 
             [...prev, {
-                id: 2, sender: 'you', text: chatInput, time: 'time'
+                id: messages.length, sender: 'you', text: chatInput, time: 'time'
                 }
             ]
         )
@@ -75,21 +88,28 @@ export function MatchPage() {
             // console.log(payload);
         })
 
-        // const handleMatchData = async () => {
-        //     const matchData = await getMatch(matchId);
-        //     setProblem(matchData);
-        // };
-
-        // void handleMatchData();
-
+        const submissionChannel = createSubmissionChannel(`submission-${matchId}`, () => {
+                setIsFinished({finished: true, win: false});
+                // console.log(isFinished);
+        })
+        submissionChannelRef.current = submissionChannel;
         return () => {
             channel.unsubscribe();
+            submissionChannel.unsubscribe();
         }
     }, [])
 
     useEffect(()=>{
         startMatch(matchId as string);
     }, []);
+
+    if (isFinished.finished) {
+        if (isFinished.win) {
+            return <VictoryPage />
+        } else {
+            return <LosePage />
+        }
+    }
 
     return (
         <div className={styles['match-page']}>

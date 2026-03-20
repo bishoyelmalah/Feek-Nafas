@@ -10,3 +10,20 @@ export const getMatch = async (matchId: string) => {
 export const startMatch = async (matchId: string) => {
     await supabase.from('matches').update({status: 'in_progress'}).eq('id', matchId);
 }
+
+export const finishMatch = async (matchId: string, winnerId: string) => {
+    const timeNow = new Date();
+    await supabase.from('matches').update({status: 'finished', winner_user_id: winnerId, finished_at: timeNow}).eq('id', matchId);
+}
+
+export const createSubmissionChannel = (name: string, callback: () => void) => {
+    const channel = supabase.channel(name);
+    channel.on(
+        'broadcast',
+        {event: 'shout'},
+        () => {
+            callback();
+        }
+    ).subscribe()
+    return channel;
+}
