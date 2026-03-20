@@ -5,17 +5,17 @@ import Header from '../../components/Header/Header';
 import styles from './HomePage.module.css'; 
 import { useAuth } from '../../hooks/useAuth';
 
-import { createInbox, removeInbox } from '../../services/invitationService';
+import { createInbox, removeInbox, checkMatchInvitations } from '../../services/invitationService';
 import { type MatchData } from '../../types/MatchData';
 import { getOpponentDetails } from '../../utils/getOpponentDetails';
 import type { User } from '../../types/UserData';
+import { type Notification } from '../../types/Notification';
 
 export function HomePage() {
     const navigate = useNavigate();
     const { userId } = useAuth();
     const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
-    const [notification, setNotification ] = useState<string>();
-    const [matchId, setMatchId] = useState('');
+    const [notifications, setNotifications ] = useState<Notification[]>([]);
 
     const handleFindMatch = () => {
         navigate('/findMatch');
@@ -25,12 +25,32 @@ export function HomePage() {
         if (!userId) {
             return;
         }
-
         const inboxChannel = createInbox(userId, async (invitation: MatchData) => {
             setHasUnreadNotification(true);
             const opponent: User | undefined = await getOpponentDetails(invitation.player1_id);
-            setMatchId(invitation.id);
-            setNotification(`You have a new match invitation from ${opponent?.username}`);
+            setNotifications((prev) => [...prev, {
+                body: `You have a new match invitation from ${opponent?.username}`,
+                matchId: invitation.id
+            }]);
+        });
+
+        checkMatchInvitations(userId, async (matches: MatchData[]) => {
+            if (!matches?.length) {
+                return;
+            }
+
+            const invitations = await Promise.all(
+                matches.map(async (match: MatchData) => {
+                    const opponent = await getOpponentDetails(match.player1_id);
+                    return {
+                        body: `You have a new match invitation from ${opponent?.username}`,
+                        matchId: match.id
+                    };
+                })
+            );
+
+            setHasUnreadNotification(true);
+            setNotifications((prev) => [...prev, ...invitations]);
         });
 
         return () => {
@@ -44,8 +64,7 @@ export function HomePage() {
                 activeLink="arena"
                 notificationCount={hasUnreadNotification ? 1 : 0}
                 onNotificationOpened={() => setHasUnreadNotification(false)}
-                notification={notification}
-                matchId={matchId}
+                notifications={notifications}
             />
 
             <main className={styles.contentSpacing}>

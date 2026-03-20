@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import lobbySound from '../../assets/sounds/lobby_sound.mp3'
 import { getMatch } from '../../services/matchService';
-import { createMatch } from '../../services/createMatchService';
 
 const player = {
     name: 'Ahmed_Warrior',
@@ -47,12 +46,8 @@ export function GetReadyPage() {
     const handlePlayer2Ready = () => {
         setIsp2ready(!isp2ready);
     }
-    const handleCreateMatch = async () => {
-        await createMatch(matchId as string);
-    }
     useEffect(()=>{
         if(!ready) return;
-            handleCreateMatch();
             const x = setInterval(() => {
                 setTimer((prev) => prev <= 1 ? 0 : prev - 1);
             },1000)
@@ -68,8 +63,8 @@ export function GetReadyPage() {
         audio.play()
         return () => audio.pause();
     },[])
-    return (
 
+    return (
         <div className={styles.page}>
             <div className={styles.cyberGrid} />
             <main className={styles.main}>

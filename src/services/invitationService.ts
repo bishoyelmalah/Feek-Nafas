@@ -34,3 +34,9 @@ export const acceptInvitation = async (matchId: string) => {
 export const declineInvitation = async (matchId: string) => {
     await supabase.from('matches').update({status: 'declined'}).eq('id', matchId);
 }
+
+export const checkMatchInvitations = async (userId: string, payload: (matches: any) => void) => {
+    const response = await supabase.from('matches').select().eq('player2_id', userId).eq('status', 'pending');
+    console.log(response.data);
+    payload(response.data);
+}

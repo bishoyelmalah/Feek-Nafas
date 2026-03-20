@@ -4,20 +4,19 @@ import { logout } from '../../services/authService';
 import styles from './Header.module.css';
 import { useAuth } from '../../hooks/useAuth';
 import { acceptInvitation, declineInvitation } from '../../services/invitationService';
+import { type Notification } from '../../types/Notification';
 interface HeaderProps {
   activeLink?: 'arena' | 'leaderboard' | 'challenges' | 'profile';
   notificationCount?: number;
   onNotificationOpened?: () => void;
-  matchId?: string,
-  notification?: string
+  notifications?: Notification[]
 }
 
 function Header({
   activeLink = 'arena',
   notificationCount = 0,
   onNotificationOpened,
-  matchId,
-  notification
+  notifications
 }: HeaderProps) {
   const navigate = useNavigate();
   const authContext = useAuth();
@@ -32,15 +31,15 @@ function Header({
     }
   };
 
-  const handleAcceptNotification = () => {
+  const handleAcceptNotification = (matchId: string) => {
     setIsNotificationModalOpen(false);
-    acceptInvitation(matchId as string);
+    acceptInvitation(matchId);
     navigate(`/getReady/${matchId}`);
   };
 
-  const handleDeclineNotification = () => {
+  const handleDeclineNotification = (matchId: string) => {
     setIsNotificationModalOpen(false);
-    declineInvitation(matchId as string);
+    declineInvitation(matchId);
   };
 
   const handleLogout = async () => {
@@ -89,20 +88,26 @@ function Header({
             <div className={styles['notification-wrapper']}>
               <button className={styles['icon-btn']} onClick={handleNotificationClick}>
                 <span className="material-symbols-outlined">notifications</span>
-                {notificationCount > 0 && <span className={styles['notification-badge']}>1</span>}
+                {notificationCount > 0 && <span className={styles['notification-badge']}>{notifications?.length}</span>}
               </button>
               {isNotificationModalOpen && (
                 <div className={styles['notification-modal']}>
-                  <div className={styles['notification-title']}>New Notification</div>
-                  <div className={styles['notification-body']}>{notification}</div>
-                  <div className={styles['notification-actions']}>
-                    <button className={styles['notification-accept-btn']} onClick={handleAcceptNotification}>
-                      Accept
-                    </button>
-                    <button className={styles['notification-decline-btn']} onClick={handleDeclineNotification}>
-                      Decline
-                    </button>
+                  {notifications?.map((notification) => {
+                    return (
+                      <div className={styles['notification-message']}>
+                      <div className={styles['notification-title']}>New Match Invitation</div>
+                      <div className={styles['notification-body']}>{notification.body}</div>
+                      <div className={styles['notification-actions']}>
+                        <button className={styles['notification-accept-btn']} onClick={()=>handleAcceptNotification(notification.matchId)}>
+                          Accept
+                        </button>
+                        <button className={styles['notification-decline-btn']} onClick={()=>handleDeclineNotification(notification.matchId)}>
+                          Decline
+                        </button>
+                    </div>
                   </div>
+                    )
+                  })}
                 </div>
               )}
             </div>

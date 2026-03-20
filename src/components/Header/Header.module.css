@@ -172,6 +172,10 @@ nav a:not(.active):hover {
   z-index: 60;
 }
 
+.notification-message {
+  margin-bottom: 1rem;
+}
+
 .notification-title {
   font-size: 0.75rem;
   font-weight: 700;

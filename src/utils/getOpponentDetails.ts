@@ -1,4 +1,3 @@
-import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import { type User } from "../types/UserData";
 
