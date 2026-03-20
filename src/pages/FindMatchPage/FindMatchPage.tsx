@@ -1,13 +1,13 @@
 ﻿import styles from './FindMatchPage.module.css';
 import Header from '../../components/Header/Header';
-import { useNavigate, type NavigateFunction } from 'react-router';
-import { getProblemByRatingOrTopic } from '../../services/codeforcesAPI';
+import { useNavigate } from 'react-router';
+// import { getProblemByRatingOrTopic } from '../../services/codeforcesAPI';
 // import radarImg from '../../assets/radar.png';
 
-const findMatch = async (nav: NavigateFunction) => {
-    const problem = await getProblemByRatingOrTopic({rating: 800});
-    await nav('/match', { state: {problem} });
-}
+// const findMatch = async (nav: NavigateFunction) => {
+//     const problem = await getProblemByRatingOrTopic({rating: 800});
+//     await nav('/match', { state: {problem} });
+// }
 
 export function FindMatchPage() {
     const nav = useNavigate();
