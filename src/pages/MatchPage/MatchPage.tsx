@@ -11,7 +11,6 @@ import { useAuth } from '../../hooks/useAuth';
 import { type SubmitEvent } from 'react';
 import { type ChatMessage } from '../../types/ChatMessage';
 import { checkSubmission } from '../../services/codeforcesService';
-import { getUserHandle } from '../../services/userService';
 import { getOpponentDetails } from '../../utils/getOpponentDetails';
 import { startMatch, finishMatch, createSubmissionChannel } from '../../services/matchService';
 import { useMatchTimer } from '../../hooks/useMatchTimer';
@@ -26,12 +25,12 @@ export function MatchPage() {
     const submissionChannelRef = useRef<RealtimeChannel | null>(null);
     const [chatInput, setChatInput] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [handle, setHandle] = useState('');
     const [opponentHandle, setOpponentHandle] = useState<string>('');
     const [isFinished, setIsFinished] = useState<{finished: boolean, win: boolean}>({finished: false, win: false});
     // const [problem, setProblem] = useState<MatchData | null>(null);
     
-    const {userId} = useAuth();
+    const {userId, userData} = useAuth();
+    const handle = userData?.codeforces_handle ?? '';
     const matchDetails = routeState?.matchDetails;
     const {id: matchId} = useParams();
 
@@ -72,21 +71,14 @@ export function MatchPage() {
     }
 
     useEffect(() => {
-        // console.log(matchDetails);
-        const fetchHandle = async () => {
-            const userHandle = await getUserHandle(userId as string);
-            setHandle(userHandle);
-        };
-        if (userId) fetchHandle();
-
         const fetchOpponentHandle = async () => {
             if (!matchDetails) return;
             const opponent = await getOpponentDetails(matchDetails.player2_id);
-            const handle = opponent?.codeforces_handle as string;
-            setOpponentHandle(handle);
+            const opponentUserHandle = opponent?.codeforces_handle as string;
+            setOpponentHandle(opponentUserHandle);
         }
         if (matchDetails?.player2_id) fetchOpponentHandle();
-    }, [userId, matchDetails]);
+    }, [matchDetails]);
 
     useEffect(()=>{
         if (!matchId) return;
