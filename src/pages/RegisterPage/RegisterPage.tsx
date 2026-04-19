@@ -6,6 +6,7 @@ import styles from './RegisterPage.module.css';
 
 export function RegisterPage() {
     const [username, setUsername] = useState('');
+    const [name, setname] = useState('');
     const [handle, setHandle] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -19,7 +20,7 @@ export function RegisterPage() {
     const handleInsertion = async (userId: string) => {
         return insertUserProfile({
             id: userId,
-            name: username,
+            name,
             username,
             email,
             codeforcesHandle: handle,
@@ -118,6 +119,22 @@ export function RegisterPage() {
                     {/* Username */}
                     <div className={styles['sign-up-field']}>
                         <label className={styles['sign-up-label']} htmlFor="username">
+                            Name
+                        </label>
+                        <div className={styles['sign-up-input-wrapper']}>
+                            <input
+                                id="name"
+                                className={styles['sign-up-input']}
+                                type="text"
+                                placeholder="Name"
+                                value={name}
+                                onChange={(e) => setname(e.target.value)}
+                                required
+                                autoComplete="name"
+                            />
+                            <span className={"material-symbols-outlined " + styles['sign-up-input-icon']}>badge</span>
+                        </div>
+                        <label className={styles['sign-up-label']} htmlFor="username">
                             UserName
                         </label>
                         <div className={styles['sign-up-input-wrapper']}>
@@ -125,7 +142,7 @@ export function RegisterPage() {
                                 id="username"
                                 className={styles['sign-up-input']}
                                 type="text"
-                                placeholder="Name"
+                                placeholder="UserName"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 required

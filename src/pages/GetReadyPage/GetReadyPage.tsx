@@ -1,10 +1,12 @@
 import styles from './GetReadyPage.module.css';
 import { useNavigate, useLocation, type NavigateFunction } from 'react-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react'; 
 import { useParams } from 'react-router';
 import lobbySound from '../../assets/sounds/lobby_sound.mp3'
 import { getMatch } from '../../services/matchService';
+import { supabase } from '../../lib/supabase';
 
+//Players Info
 const player = {
     name: 'Ahmed_Warrior',
     rank: 'DIAMOND III',
@@ -24,7 +26,9 @@ const opponent = {
     avatar:
         'https://lh3.googleusercontent.com/aida-public/AB6AXuDmUKiQzzHs9RtgWfCftqWTbVZaFTKCYjYaFFPBP0ctzBSMqZ_muyIZyMA-LBClqJxTMJu_dnMykWaJCY8Lu0HC7Z_l9nnIG0lHqxFY0x4PWhQgKZmhBv9oCx-OQGkRmkAOeA9TOMbOM6OSQNDdMZb_P-0FBo8N_TlejOdn0QzAZYco7GsOi7TWsjnD8HOcXlg-_52vZV1xQmwtQxiqiPnhT36A-FbC_TJKqcnfZjw-k3UpgGetbAdkxEfX6A8en9M4hPDZGjim6Ac',
 };
+
 const audio = new Audio(lobbySound);
+
 export function GetReadyPage() {
     const {id: matchId} = useParams();
     const nav = useNavigate();
@@ -35,19 +39,58 @@ export function GetReadyPage() {
     const [timer , setTimer] = useState(3);
     const ready = isp1ready && isp2ready;
 
+    const channelRef = useRef<any>(null); 
+
     const findMatch = async (nav: NavigateFunction) => {
         const matchDetails = await getMatch(matchId as string);
         await nav(`/match/${matchId}`, { state: {matchDetails, selectedDuration} });
         // nav('/match');
     }
 
+    // SUPABASE BROADCAST (LISTEN & STORE)
+    useEffect(() => {
+        if (!matchId) return;
 
+        const channel = supabase.channel(`match_${matchId}`);
+
+        // 1. Listen for opponent's status
+        channel.on('broadcast', { event: 'ready_status' }, (data) => {
+            console.log("Incoming broadcast:", data);
+            setIsp2ready(data.payload.isReady);
+        }).subscribe();
+
+        // 2. Save the live channel so our button can use it to send
+        channelRef.current = channel; 
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [matchId]);
+
+    // SUPABASE BROADCAST (SEND)
     const handlePlayer1Ready = () => {
-        setIsp1ready(!isp1ready);
+        if (ready) return;         // SECURITY LOCK: If both players are ready (timer started), prevent cancelling!
+
+        const newState = !isp1ready;
+        setIsp1ready(newState);
+
+        // Broadcast to the opponent --> Use the saved channel to send our status to the opponent
+        if (channelRef.current) {
+            channelRef.current.send({
+                type: 'broadcast',
+                event: 'ready_status',
+                payload: { isReady: newState }
+            });
+        }
     }
-    const handlePlayer2Ready = () => {
-        setIsp2ready(!isp2ready);
-    }
+
+    // const handlePlayer1Ready = () => {
+    //     setIsp1ready(!isp1ready);
+    // }
+    // const handlePlayer2Ready = () => {
+    //     setIsp2ready(!isp2ready);
+    // }
+
     useEffect(()=>{
         if(!ready) return;
             const x = setInterval(() => {
@@ -62,7 +105,7 @@ export function GetReadyPage() {
 
     useEffect(() => {
         audio.loop = true;
-        audio.play()
+        audio.play().catch(() => {});
         return () => audio.pause();
     },[])
 
@@ -91,8 +134,19 @@ export function GetReadyPage() {
                                 <span className={styles.dot}>•</span>
                                 {player.rp}
                             </p>
-                            <button onClick={handlePlayer1Ready} className={styles.readyButton}>{isp1ready ? 'READY ✓' : 'READY'}</button>
+                            {/*Cancel Button*/}
+                            <button 
+                                onClick={handlePlayer1Ready} 
+                                disabled={ready}
+                                className={styles.readyButton}
+                                style={isp1ready && !ready ? { color: '#0a0a0a', textShadow: '0 0 10px rgba(254, 249, 249, 0.5)' } : {}}
+                            >
+                                {isp1ready ? (ready ? 'LOCKED IN' : 'CANCEL') : 'READY'}
+                            </button>
+
                         </div>
+
+
                         <div className={styles.connectionRow}>
                             <span>Ping: {player.ping}</span>
                             <span>Connection: {player.connection}</span>
@@ -127,7 +181,14 @@ export function GetReadyPage() {
                                 <span className={styles.dot}>•</span>
                                 {opponent.rp}
                             </p>
-                            <button onClick={handlePlayer2Ready} className={styles.readyButton}>{isp2ready ? 'READY ✓' : 'READY'}</button>
+                            {/* <button onClick={handlePlayer2Ready} className={styles.readyButton}>{isp2ready ? 'READY ✓' : 'READY'}</button> */}
+                            <button 
+                                disabled 
+                                className={styles.readyButton}
+                                style={isp2ready && !isp1ready || ready ? { color: '#278b3b', textShadow: '0 0 10px rgba(254, 249, 249, 0.5)' } : {}}
+                            >
+                                {isp2ready ? 'READY ✓' : 'WAITING...'}
+                            </button>
                         </div>
                         <div className={styles.connectionRow}>
                             <span>Ping: {opponent.ping}</span>
