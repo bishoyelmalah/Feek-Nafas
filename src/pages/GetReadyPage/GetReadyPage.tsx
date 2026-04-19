@@ -1,5 +1,5 @@
 import styles from './GetReadyPage.module.css';
-import { useNavigate, useLocation, type NavigateFunction } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { useEffect, useState, useRef } from 'react'; 
 import { useParams } from 'react-router';
 import lobbySound from '../../assets/sounds/lobby_sound.mp3'
@@ -40,12 +40,6 @@ export function GetReadyPage() {
     const ready = isp1ready && isp2ready;
 
     const channelRef = useRef<any>(null); 
-
-    const findMatch = async (nav: NavigateFunction) => {
-        const matchDetails = await getMatch(matchId as string);
-        await nav(`/match/${matchId}`, { state: {matchDetails, selectedDuration} });
-        // nav('/match');
-    }
 
     // SUPABASE BROADCAST (LISTEN & STORE)
     useEffect(() => {
@@ -100,8 +94,15 @@ export function GetReadyPage() {
         },[ready])
 
     useEffect(() => {
-        if(timer === 0) findMatch(nav);
-    }, [timer]);
+        if (timer !== 0 || !matchId) return;
+
+        const findMatch = async () => {
+            const matchDetails = await getMatch(matchId);
+            await nav(`/match/${matchId}`, { state: { matchDetails, selectedDuration } });
+        };
+
+        findMatch();
+    }, [timer, matchId, nav, selectedDuration]);
 
     useEffect(() => {
         audio.loop = true;
@@ -138,8 +139,7 @@ export function GetReadyPage() {
                             <button 
                                 onClick={handlePlayer1Ready} 
                                 disabled={ready}
-                                className={styles.readyButton}
-                                style={isp1ready && !ready ? { color: '#0a0a0a', textShadow: '0 0 10px rgba(254, 249, 249, 0.5)' } : {}}
+                                className={`${styles.readyButton} ${isp1ready ? styles.playerReadyButton : styles.playerWaitingButton}`}
                             >
                                 {isp1ready ? (ready ? 'LOCKED IN' : 'CANCEL') : 'READY'}
                             </button>
@@ -184,8 +184,7 @@ export function GetReadyPage() {
                             {/* <button onClick={handlePlayer2Ready} className={styles.readyButton}>{isp2ready ? 'READY ✓' : 'READY'}</button> */}
                             <button 
                                 disabled 
-                                className={styles.readyButton}
-                                style={isp2ready && !isp1ready || ready ? { color: '#278b3b', textShadow: '0 0 10px rgba(254, 249, 249, 0.5)' } : {}}
+                                className={`${styles.readyButton} ${isp2ready ? styles.opponentReadyButton : styles.opponentWaitingButton}`}
                             >
                                 {isp2ready ? 'READY ✓' : 'WAITING...'}
                             </button>
