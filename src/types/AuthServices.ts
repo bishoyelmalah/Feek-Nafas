@@ -1,4 +1,5 @@
 import type { Session } from '@supabase/supabase-js';
+import type { User } from './UserData';
 
 export type SignUpPayload = {
     email: string;
@@ -24,5 +25,6 @@ export type ServiceError = {
 export type AuthContextType = {
     session: Session | null;
     userId: string | null;
+    userData: User | null,
     loading: boolean;
 };

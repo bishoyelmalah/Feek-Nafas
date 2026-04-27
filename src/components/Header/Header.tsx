@@ -19,14 +19,14 @@ function Header({
   notifications
 }: HeaderProps) {
   const navigate = useNavigate();
-  const authContext = useAuth();
+  const { session, userData } = useAuth();
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   const displayUsername =
-    (authContext?.session?.user?.user_metadata?.username as string | undefined) ??
-    authContext?.session?.user?.email?.split('@')[0] ??
+    userData?.username ??
+    userData?.email?.split('@')[0] ??
     'Player';
 
   useEffect(() => {
@@ -160,7 +160,7 @@ function Header({
                     <span className="material-symbols-outlined">settings</span>
                     Settings
                   </button>
-                  {authContext?.session && (
+                  {session && (
                     <button
                       className={styles['profile-modal-btn']}
                       onClick={handleLogout}

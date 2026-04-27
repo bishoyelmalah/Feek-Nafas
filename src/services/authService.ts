@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import type { SignUpPayload, SignInPayload, InsertUserPayload, ServiceError } from '../types/AuthServices'
+import type { User } from '../types/UserData';
 
 
 // 3. Add a helper hook to use this context easily
@@ -60,3 +61,8 @@ export const logout = async () => {
   }
   return { error: null };
 };
+
+export const getUserData = async (userId: string) => {
+  const {data} = await supabase.from('users').select().eq('id', userId).single();
+  return data as User;
+}

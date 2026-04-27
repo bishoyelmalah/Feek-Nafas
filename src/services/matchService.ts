@@ -1,5 +1,25 @@
 import { supabase } from "../lib/supabase";
 import type { MatchData } from "../types/MatchData";
+import { type CreateMatchData } from "../types/CreateMatchData";
+
+export const createMatch = async ({player1_id, player2_id, contest_id, problem_index, duration}: CreateMatchData) => {
+    const {data, error} = await supabase
+    .from ("matches")
+    .insert([
+        {
+        player1_id,
+        player2_id,
+        status: "pending",
+        contest_id,
+        problem_index,
+        duration
+        }
+    ])
+    .select()
+    .single()
+    if(error) throw error ;
+    return data;
+}
 
 export const getMatch = async (matchId: string) => {
     const details = await supabase.from('matches').select().eq('id', matchId).single();

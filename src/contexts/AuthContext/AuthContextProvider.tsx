@@ -1,16 +1,19 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 import { AuthContext } from './AuthContext';
+import { type User } from '../../types/UserData';
+import { getUserData } from '../../services/authService';
 
 
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
+    const [userData, setUserData] = useState<User | null>(null);
+    const userId = session?.user?.id ?? null;
 
     useEffect(() => {
-        // Create an async function to handle the initial fetch
         const initializeAuth = async () => {
             const { data } = await supabase.auth.getSession();
             setSession(data.session);
@@ -19,22 +22,34 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
         initializeAuth();
 
-        // The listener is fine as-is because it uses a callback
         const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
-            setLoading(false); // Ensure loading is false when state changes
+            setLoading(false);
         });
 
         return () => {
             listener?.subscription.unsubscribe();
         };
     }, []);
+// 
+    useEffect(() => {
+        const handleUserData = async () => {
+            if (!userId) {
+                setUserData(null);
+                return;
+            }
 
+            const response = await getUserData(userId);
+            setUserData(response as User);
+        };
+
+        handleUserData();
+    }, [userId]);
+    
     // console.log(session);
-    const userId = session?.user?.id ?? null;
 
     return (
-        <AuthContext.Provider value={{ session, userId, loading }}>
+        <AuthContext.Provider value={{ session, userId, userData, loading }}>
             {children}
         </AuthContext.Provider>
     );
