@@ -11,9 +11,10 @@ import { useAuth } from '../../hooks/useAuth';
 import { type SubmitEvent } from 'react';
 import { type ChatMessage } from '../../types/ChatMessage';
 import { checkSubmission } from '../../services/codeforcesService';
-import { getOpponentDetails } from '../../utils/getOpponentDetails';
 import { startMatch, finishMatch, createSubmissionChannel } from '../../services/matchService';
 import { useMatchTimer } from '../../hooks/useMatchTimer';
+import { OpponentContextProvider } from '../../contexts/OpponentContext/OpponentContextProvider';
+import { useOpponent } from '../../hooks/useOpponent';
 
 
 
@@ -25,11 +26,12 @@ export function MatchPage() {
     const submissionChannelRef = useRef<RealtimeChannel | null>(null);
     const [chatInput, setChatInput] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [opponentHandle, setOpponentHandle] = useState<string>('');
+    // const [opponentHandle, setOpponentHandle] = useState<string>('');
     const [isFinished, setIsFinished] = useState<{finished: boolean, win: boolean}>({finished: false, win: false});
     // const [problem, setProblem] = useState<MatchData | null>(null);
     
     const {userId, userData} = useAuth();
+    const {opponentData} = useOpponent();
     const handle = userData?.codeforces_handle ?? '';
     const matchDetails = routeState?.matchDetails;
     const {id: matchId} = useParams();
@@ -70,15 +72,15 @@ export function MatchPage() {
         setChatInput('');
     }
 
-    useEffect(() => {
-        const fetchOpponentHandle = async () => {
-            if (!matchDetails) return;
-            const opponent = await getOpponentDetails(matchDetails.player2_id);
-            const opponentUserHandle = opponent?.codeforces_handle as string;
-            setOpponentHandle(opponentUserHandle);
-        }
-        if (matchDetails?.player2_id) fetchOpponentHandle();
-    }, [matchDetails]);
+    // useEffect(() => {
+    //     const fetchOpponentHandle = async () => {
+    //         if (!matchDetails) return;
+    //         const opponent = await getOpponentDetails(matchDetails.player2_id);
+    //         const opponentUserHandle = opponent?.codeforces_handle as string;
+    //         setOpponentHandle(opponentUserHandle);
+    //     }
+    //     if (matchDetails?.player2_id) fetchOpponentHandle();
+    // }, [matchDetails]);
 
     useEffect(()=>{
         if (!matchId) return;
@@ -122,6 +124,7 @@ export function MatchPage() {
     }
 
     return (
+        <OpponentContextProvider>
         <div className={styles['match-page']}>
             {/* <Header activeLink="arena" /> */}
             
@@ -168,7 +171,7 @@ export function MatchPage() {
                                 <span className={[styles['status-text'], styles['submitting']].join(' ')}>Submitting...</span>
                             </div> */}
                             <div className={[styles['player-details'], styles['right']].join(' ')}>
-                                <span className={[styles['player-name'], styles['orange-text']].join(' ')}>{opponentHandle}</span>
+                                <span className={[styles['player-name'], styles['orange-text']].join(' ')}>{opponentData?.codeforces_handle}</span>
                                 <div className={styles['player-stats']}>
                                     <span className={styles['rating']}>1910</span>
                                     <span className={[styles['rank-badge'], styles['orange-badge']].join(' ')}>Master</span>
@@ -364,5 +367,6 @@ export function MatchPage() {
 
             {/* <Footer/> */}
         </div>
+        </OpponentContextProvider>
     )
 }

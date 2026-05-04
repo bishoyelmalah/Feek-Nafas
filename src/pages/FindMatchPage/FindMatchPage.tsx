@@ -5,60 +5,65 @@ import { useState, useEffect } from 'react';
 import { CreateMatchServices } from '../../services/findMatchService';
 import { supabase } from '../../lib/supabase';
 import { getProblemByRatingOrTopic } from '../../services/codeforcesService';
+// import { OpponentContextProvider } from '../../contexts/OpponentContext/OpponentContextProvider';
+import { useOpponent } from '../../hooks/useOpponent';
+import { getUserDataByHandle } from '../../services/authService';
 // import radarImg from '../../assets/radar.png';
 
 export function FindMatchPage() {
     const nav = useNavigate();
+    const {setOpponentData} = useOpponent();
 
-const [searchUsername, setSearchUsername] = useState ('');
-const [isLoading, setIsLoading] = useState(false);
-const [error, setError] = useState('');
-const [currentUserId, setCurrentUserId] = useState('');
-const ratingOptions = ['Any', '800', '1000', '1200', '1400', '1600', '1800', '2000'];
-const topicOptions = ['Any', 'Implementation', 'Math', 'Greedy', 'DP', 'Graphs'];
-const durationOptions = [15, 30, 45, 60];
-const [selectedRating, setSelectedRating] = useState('Any');
-const [selectedTopic, setSelectedTopic] = useState('Any');
-const [selectedDuration, setSelectedDuration] = useState(30);
-useEffect(() => { 
-    const getCurrentUser = async() =>{
-        try{
-            const { data: {user},error} = await supabase.auth.getUser();
-            if (error){
-                console.error('Error fetching user:',error);
-                window.location.href = '/login';
-                return;
-            }
-            if (user){
-               setCurrentUserId(user.id);
-               const {data: exsistingUser}= await supabase
-               .from("users")
-               .select("id")
-               .eq("id",user.id)
-               .single();
+    const [searchUsername, setSearchUsername] = useState ('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [currentUserId, setCurrentUserId] = useState('');
+    const ratingOptions = ['Any', '800', '1000', '1200', '1400', '1600', '1800', '2000'];
+    const topicOptions = ['Any', 'Implementation', 'Math', 'Greedy', 'DP', 'Graphs'];
+    const durationOptions = [15, 30, 45, 60];
+    const [selectedRating, setSelectedRating] = useState('Any');
+    const [selectedTopic, setSelectedTopic] = useState('Any');
+    const [selectedDuration, setSelectedDuration] = useState(30);
 
-               if(!exsistingUser){
-                await supabase.from("users").insert({
-                    id : user.id,
-                    email: user.email,
-                    username: user.email?.split("@")[0],
-                    name: user.email?.split("@")[0]
+    useEffect(() => { 
+        const getCurrentUser = async() =>{
+            try{
+                const { data: {user},error} = await supabase.auth.getUser();
+                if (error){
+                    console.error('Error fetching user:',error);
+                    window.location.href = '/login';
+                    return;
+                }
+                if (user){
+                setCurrentUserId(user.id);
+                const {data: exsistingUser}= await supabase
+                .from("users")
+                .select("id")
+                .eq("id",user.id)
+                .single();
 
-                });
-                console.log("User added successfully");
-               }else{
-                console.log("User already exsist");
-               }
-            }
-               else{
-                 nav('/login');}
-               }catch(err){
-                console.error('Unexpected error:', err);
-                nav('/login');
-               }
-            };
-            getCurrentUser();
-        }, [nav]);
+                if(!exsistingUser){
+                    await supabase.from("users").insert({
+                        id : user.id,
+                        email: user.email,
+                        username: user.email?.split("@")[0],
+                        name: user.email?.split("@")[0]
+
+                    });
+                    console.log("User added successfully");
+                }else{
+                    console.log("User already exsist");
+                }
+                }
+                else{
+                    nav('/login');}
+                }catch(err){
+                    console.error('Unexpected error:', err);
+                    nav('/login');
+                }
+                };
+                getCurrentUser();
+            }, [nav]);
 
         const handleInvite = async () =>{
             if (!searchUsername.trim()){
@@ -76,7 +81,13 @@ useEffect(() => {
                 });
 
                 const match = await CreateMatchServices(currentUserId, searchUsername, problem?.contestId, problem?.index, selectedDuration);
+
+                const OpponentData = await getUserDataByHandle(searchUsername);
+                // console.log(OpponentData);
+                setOpponentData(OpponentData);
+
                 nav(`/getReady/${(match as any).id}`, { state: { selectedDuration } });
+
             } catch (err: any){
                 setError(err.message || 'Failed to create match');
             } finally {
