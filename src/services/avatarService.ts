@@ -1,15 +1,32 @@
 import { supabase } from '../lib/supabase';
 
 export const getAvatarUrl = async (userId: string): Promise<string> => {
+  // If this is the currently signed-in user, check auth metadata first (falls back to DB)
+  try {
+    const { data: current } = await supabase.auth.getUser();
+    const currentUser = current?.user ?? null;
+    if (currentUser && currentUser.id === userId) {
+      const metaUrl = (currentUser.user_metadata as any)?.avatar_url;
+      if (metaUrl) return metaUrl as string;
+    }
+  } catch (e) {
+    // ignore
+  }
+
   const { data: user } = await supabase
     .from('users')
-    .select('codeforces_handle, username')
+    .select('codeforces_handle, username, avatar_url')
     .eq('id', userId)
     .single();
 
   const nameForAvatar = encodeURIComponent(user?.username || user?.codeforces_handle || 'User');
 
   const fallbackUrl = `https://ui-avatars.com/api/?name=${nameForAvatar}&background=ec5b13&color=fff&bold=true&size=80&length=1`;
+
+  if (user?.avatar_url) {
+    return user.avatar_url;
+  }
+  
 
   if (!user?.codeforces_handle) {
     return fallbackUrl;

@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase';
 
 export type UserProfile = {
   id: string;
+  name?: string | null;
   username: string;
   email: string;
   codeforces_handle: string;
@@ -14,7 +15,7 @@ export type UserProfile = {
 export const getUserProfile = async (userId: string): Promise<UserProfile> => {
   const { data: user, error: userError } = await supabase
     .from('users')
-    .select('id, username, email, codeforces_handle, score')
+    .select('id, name, username, email, codeforces_handle, score')
     .eq('id', userId)
     .single();
 
@@ -47,6 +48,7 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
 
   return {
     id: user.id,
+    name: user.name || null,
     username: user.username,
     email: user.email,
     codeforces_handle: user.codeforces_handle,
@@ -55,4 +57,19 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
     totalMatches,
     wins,
   };
+};
+
+export const updateUserProfile = async (
+  userId: string,
+  updates: Partial<{ name: string | null; username: string | null; email: string | null; codeforces_handle: string | null }>
+) => {
+  const { data, error } = await supabase
+    .from('users')
+    .update(updates)
+    .eq('id', userId)
+    .select('id, name, username, email, codeforces_handle')
+    .single();
+
+  if (error) throw error;
+  return data;
 };
