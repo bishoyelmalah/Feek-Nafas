@@ -11,6 +11,7 @@ import { RegisterPage } from './pages/RegisterPage/RegisterPage'
 import { GetReadyPage } from './pages/GetReadyPage/GetReadyPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { PublicRoute } from './components/PublicRoute'
+import { ProfilePage } from './pages/ProfilePage/ProfilePage'
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
       <Route path='/match/:id' element={<ProtectedRoute><MatchPage /></ProtectedRoute>}></Route>
       <Route path='/victory' element={<ProtectedRoute><VictoryPage /></ProtectedRoute>}></Route>
       <Route path='/lose' element={<ProtectedRoute><LosePage /></ProtectedRoute>}></Route>
+      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
     </Routes>
   )
 }
