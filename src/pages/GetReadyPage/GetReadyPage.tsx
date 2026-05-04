@@ -5,6 +5,8 @@ import { useParams } from 'react-router';
 import lobbySound from '../../assets/sounds/lobby_sound.mp3'
 import { getMatch } from '../../services/matchService';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
+import { useOpponent } from '../../hooks/useOpponent';
 
 //Players Info
 const player = {
@@ -31,6 +33,8 @@ const audio = new Audio(lobbySound);
 
 export function GetReadyPage() {
     const {id: matchId} = useParams();
+    const {userData} = useAuth();
+    const {opponentData} = useOpponent();
     const nav = useNavigate();
     const { state } = useLocation();
     const selectedDuration = (state as { selectedDuration?: number } | null)?.selectedDuration ?? 30;
@@ -128,7 +132,7 @@ export function GetReadyPage() {
                                 </div>
                                 <span className={`${styles.badge} ${styles.youBadge}`}>YOU</span>
                             </div>
-                            <h2 className={styles.playerName}>{player.name}</h2>
+                            <h2 className={styles.playerName}>{userData?.name}</h2>
                             <p className={styles.playerRank}>
                                 <span className="material-symbols-outlined">stars</span>
                                 RANK: {player.rank}
@@ -174,7 +178,7 @@ export function GetReadyPage() {
                                 </div>
                                 <span className={`${styles.badge} ${styles.opponentBadge}`}>OPPONENT</span>
                             </div>
-                            <h2 className={styles.playerName}>{opponent.name}</h2>
+                            <h2 className={styles.playerName}>{opponentData?.name}</h2>
                             <p className={styles.playerRank}>
                                 <span className="material-symbols-outlined">stars</span>
                                 RANK: {opponent.rank}
