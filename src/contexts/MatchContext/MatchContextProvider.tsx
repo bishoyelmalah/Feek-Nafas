@@ -1,24 +1,22 @@
-import { createMatch } from "../../services/matchService";
-import type { CreateMatchData } from "../../types/CreateMatchData";
 import type { MatchData } from "../../types/MatchData";
 import { MatchContext } from "./MatchContext";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
-export const MatchContestProvider = ({creationData, children }: { creationData: CreateMatchData ,children: ReactNode }) => {
+export const MatchContestProvider = ({ children }: { children: ReactNode }) => {
     const [matchData, setMatchData] = useState<MatchData | null>(null);
 
-    useEffect(() => {
-        const handleCreation = async () => {
-            const data = await createMatch(creationData); 
-            setMatchData(data);
-        }
-        handleCreation();
-    })
+    // useEffect(() => {
+    //     const handleCreation = async () => {
+    //         const data = await createMatch(creationData); 
+    //         setMatchData(data);
+    //     }
+    //     handleCreation();
+    // })
 
 
 
     return (
-        <MatchContext.Provider value={matchData}>
+        <MatchContext.Provider value={{matchData, setMatchData}}>
             {children}
         </MatchContext.Provider>
     )
