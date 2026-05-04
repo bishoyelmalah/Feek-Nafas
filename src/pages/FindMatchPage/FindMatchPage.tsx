@@ -5,14 +5,13 @@ import { useState, useEffect } from 'react';
 import { CreateMatchServices } from '../../services/findMatchService';
 import { supabase } from '../../lib/supabase';
 import { getProblemByRatingOrTopic } from '../../services/codeforcesService';
-// import { OpponentContextProvider } from '../../contexts/OpponentContext/OpponentContextProvider';
-import { useOpponent } from '../../hooks/useOpponent';
-import { getUserDataByHandle } from '../../services/authService';
-// import radarImg from '../../assets/radar.png';
+
+import { type MatchData } from '../../types/MatchData';
+import { useMatch } from '../../hooks/useMatch';
+
 
 export function FindMatchPage() {
     const nav = useNavigate();
-    const {setOpponentData} = useOpponent();
 
     const [searchUsername, setSearchUsername] = useState ('');
     const [isLoading, setIsLoading] = useState(false);
@@ -24,6 +23,8 @@ export function FindMatchPage() {
     const [selectedRating, setSelectedRating] = useState('Any');
     const [selectedTopic, setSelectedTopic] = useState('Any');
     const [selectedDuration, setSelectedDuration] = useState(30);
+
+    const {setMatchData} = useMatch();
 
     useEffect(() => { 
         const getCurrentUser = async() =>{
@@ -80,13 +81,10 @@ export function FindMatchPage() {
                     topic: selectedTopic === 'Any' ? undefined : selectedTopic
                 });
 
-                const match = await CreateMatchServices(currentUserId, searchUsername, problem?.contestId, problem?.index, selectedDuration);
+                const match: MatchData = await CreateMatchServices(currentUserId, searchUsername, problem?.contestId, problem?.index, selectedDuration);
+                setMatchData(match);
 
-                const OpponentData = await getUserDataByHandle(searchUsername);
-                // console.log(OpponentData);
-                setOpponentData(OpponentData);
-
-                nav(`/getReady/${(match as any).id}`, { state: { selectedDuration } });
+                nav(`/getReady/${match.id}`);
 
             } catch (err: any){
                 setError(err.message || 'Failed to create match');

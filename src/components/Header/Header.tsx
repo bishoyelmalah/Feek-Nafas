@@ -5,6 +5,9 @@ import styles from './Header.module.css';
 import { useAuth } from '../../hooks/useAuth';
 import { acceptInvitation, declineInvitation } from '../../services/invitationService';
 import { type Notification } from '../../types/Notification';
+import type { MatchData } from '../../types/MatchData';
+import { getMatch } from '../../services/matchService';
+import { useMatch } from '../../hooks/useMatch';
 interface HeaderProps {
   activeLink?: 'arena' | 'leaderboard' | 'challenges' | 'profile';
   notificationCount?: number;
@@ -20,6 +23,7 @@ function Header({
 }: HeaderProps) {
   const navigate = useNavigate();
   const { session, userData } = useAuth();
+  const { setMatchData} = useMatch();
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -42,6 +46,7 @@ function Header({
     };
   }, []);
 
+
   const handleNotificationClick = () => {
     const nextOpenState = !isNotificationModalOpen;
     setIsNotificationModalOpen(nextOpenState);
@@ -51,9 +56,11 @@ function Header({
     }
   };
 
-  const handleAcceptNotification = (matchId: string) => {
+  const handleAcceptNotification = async (matchId: string) => {
     setIsNotificationModalOpen(false);
     acceptInvitation(matchId);
+    const data: MatchData = await getMatch(matchId);
+    setMatchData(data);
     navigate(`/getReady/${matchId}`);
   };
 

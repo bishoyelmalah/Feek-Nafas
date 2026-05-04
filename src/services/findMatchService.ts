@@ -1,5 +1,5 @@
 import { supabase } from "../lib/supabase";
-
+import { type MatchData } from "../types/MatchData";
 export const CreateMatchServices = async (
   currentUserId : string,
   opponentUsername : string,
@@ -33,6 +33,7 @@ export const CreateMatchServices = async (
   .select()
   .single()
   if(error) throw error ;
-return data;
+  
+return data as MatchData;
 }
 

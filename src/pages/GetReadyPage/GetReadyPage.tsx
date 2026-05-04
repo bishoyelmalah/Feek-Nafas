@@ -1,12 +1,12 @@
 import styles from './GetReadyPage.module.css';
-import { useNavigate, useLocation } from 'react-router';
+import { useNavigate } from 'react-router';
 import { useEffect, useState, useRef } from 'react'; 
-import { useParams } from 'react-router';
 import lobbySound from '../../assets/sounds/lobby_sound.mp3'
-import { getMatch } from '../../services/matchService';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useOpponent } from '../../hooks/useOpponent';
+import { useMatch } from '../../hooks/useMatch';
+import { getUserData } from '../../services/authService';
 
 //Players Info
 const player = {
@@ -32,12 +32,11 @@ const opponent = {
 const audio = new Audio(lobbySound);
 
 export function GetReadyPage() {
-    const {id: matchId} = useParams();
+    const {matchData} = useMatch();
     const {userData} = useAuth();
-    const {opponentData} = useOpponent();
+    const {opponentData, setOpponentData} = useOpponent();
     const nav = useNavigate();
-    const { state } = useLocation();
-    const selectedDuration = (state as { selectedDuration?: number } | null)?.selectedDuration ?? 30;
+    const selectedDuration = matchData?.duration ?? 30;
     const [ isp1ready , setIsp1ready ] = useState(false);
     const [ isp2ready , setIsp2ready] = useState(false);
     const [timer , setTimer] = useState(3);
@@ -47,9 +46,9 @@ export function GetReadyPage() {
 
     // SUPABASE BROADCAST (LISTEN & STORE)
     useEffect(() => {
-        if (!matchId) return;
+        if (!matchData?.id) return;
 
-        const channel = supabase.channel(`match_${matchId}`);
+        const channel = supabase.channel(`match_${matchData.id}`);
 
         // 1. Listen for opponent's status
         channel.on('broadcast', { event: 'ready_status' }, (data) => {
@@ -63,7 +62,16 @@ export function GetReadyPage() {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [matchId]);
+    }, [matchData?.id]);
+
+    // Set Opponent Data
+    useEffect(() => {
+        const handleOpponentData = async ()=>{
+            const data = await getUserData(matchData?.player2_id as string);
+            setOpponentData(data);
+        }
+        handleOpponentData();
+    }, [])
 
     // SUPABASE BROADCAST (SEND)
     const handlePlayer1Ready = () => {
@@ -98,15 +106,14 @@ export function GetReadyPage() {
         },[ready])
 
     useEffect(() => {
-        if (timer !== 0 || !matchId) return;
+        if (timer !== 0 || !matchData?.id) return;
 
         const findMatch = async () => {
-            const matchDetails = await getMatch(matchId);
-            await nav(`/match/${matchId}`, { state: { matchDetails, selectedDuration } });
+            await nav(`/match/${matchData.id}`);
         };
 
         findMatch();
-    }, [timer, matchId, nav, selectedDuration]);
+    }, [timer, matchData?.id, nav, selectedDuration]);
 
     useEffect(() => {
         audio.loop = true;
