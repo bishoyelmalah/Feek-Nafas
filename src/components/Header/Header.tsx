@@ -8,6 +8,8 @@ import { type Notification } from '../../types/Notification';
 import type { MatchData } from '../../types/MatchData';
 import { getMatch } from '../../services/matchService';
 import { useMatch } from '../../hooks/useMatch';
+import { getAvatarUrl } from '../../services/avatarService';
+
 interface HeaderProps {
   activeLink?: 'arena' | 'leaderboard' | 'challenges' | 'profile';
   notificationCount?: number;
@@ -26,12 +28,23 @@ function Header({
   const { setMatchData} = useMatch();
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState('');
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   const displayUsername =
     userData?.username ??
     userData?.email?.split('@')[0] ??
     'Player';
+
+  useEffect(() => {
+    const loadAvatar = async () => {
+      if (session?.user?.id) {
+        const url = await getAvatarUrl(session.user.id);
+        setAvatarUrl(url);
+      }
+    };
+    loadAvatar();
+  }, [session]);
 
   useEffect(() => {
     const handleDocumentClick = (event: MouseEvent) => {
@@ -75,8 +88,10 @@ function Header({
   };
 
   const handleSettingsClick = () => {
+    navigate('/settings');
     setIsProfileModalOpen(false);
   };
+
   return (
     <header>
       <div className={styles['header-content']}>
@@ -99,7 +114,14 @@ function Header({
             <a className={activeLink === 'challenges' ? styles['active'] : ''} href="#">
               Challenges
             </a>
-            <a className={activeLink === 'profile' ? styles['active'] : ''} href="#">
+            <a 
+              className={activeLink === 'profile' ? styles['active'] : ''} 
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/profile');
+              }}
+            >
               Profile
             </a>
           </nav>
@@ -121,26 +143,29 @@ function Header({
                 <span className="material-symbols-outlined">notifications</span>
                 {notificationCount > 0 && <span className={styles['notification-badge']}>{notifications?.length}</span>}
               </button>
+              <button className={styles['icon-btn']} onClick={handleSettingsClick} title="Settings">
+                <span className="material-symbols-outlined">settings</span>
+              </button>
               {isNotificationModalOpen && (
                 <div className={styles['notification-modal']}>
                   { notifications?.length === 0 ? 
                   <div className={styles['notification-message']}>
                       <div className={styles['notification-title']}>No Notifications</div>
                   </div>
-                  : notifications?.map((notification) => {
+                  : notifications?.map((notification, index) => {
                     return (
-                      <div className={styles['notification-message']}>
-                      <div className={styles['notification-title']}>New Match Invitation</div>
-                      <div className={styles['notification-body']}>{notification.body}</div>
-                      <div className={styles['notification-actions']}>
-                        <button className={styles['notification-accept-btn']} onClick={()=>handleAcceptNotification(notification.matchId)}>
-                          Accept
-                        </button>
-                        <button className={styles['notification-decline-btn']} onClick={()=>handleDeclineNotification(notification.matchId)}>
-                          Decline
-                        </button>
-                    </div>
-                  </div>
+                      <div key={index} className={styles['notification-message']}>
+                        <div className={styles['notification-title']}>New Match Invitation</div>
+                        <div className={styles['notification-body']}>{notification.body}</div>
+                        <div className={styles['notification-actions']}>
+                          <button className={styles['notification-accept-btn']} onClick={()=>handleAcceptNotification(notification.matchId)}>
+                            Accept
+                          </button>
+                          <button className={styles['notification-decline-btn']} onClick={()=>handleDeclineNotification(notification.matchId)}>
+                            Decline
+                          </button>
+                        </div>
+                      </div>
                     )
                   })}
                 </div>
@@ -152,12 +177,25 @@ function Header({
                 onClick={() => setIsProfileModalOpen((prev) => !prev)}
                 title="Profile menu"
               >
-                <span className={styles['username']}>{displayUsername}</span>
-                <div className={styles['user-avatar']}>
-                  <img
-                    alt="Cyberpunk female player avatar with neon highlights"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCL8aMK3OzFo7PkzF72qgEEZmkBXunrRdqoPfzsPOOWAA2KdUaCswjzTej_BhhTPKVKqTO-GVcwYOVMadRGVogZYiB0p33yvEit163VmW04lOGDJ-wzKqvjb-cTKExcpB0fzy-psRQVnPcxDTk5n8pSBjIhqtGdj_sycNWUnUbDa-M6Dl5euX9kPoECe1IKG47SqwBpOhOGwG11CfYVWDcDi2M-ilReVqB_s0AKD_DZxWSxHEcUuhXoc023jhaOHpCYa2HStNCBwGg"
-                  />
+                <span 
+                  className={styles['username']} 
+                  onClick={() => navigate('/profile')} 
+                  style={{ cursor: 'pointer' }}
+                >
+                  {displayUsername}
+                </span>
+                <div 
+                  className={styles['user-avatar']} 
+                  onClick={() => navigate('/profile')} 
+                  style={{ cursor: 'pointer' }}
+                >
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="avatar" />
+                  ) : (
+                    <div className={styles['avatar-placeholder']}>
+                      {displayUsername?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                 </div>
               </button>
 

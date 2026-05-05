@@ -45,7 +45,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
             listener?.subscription.unsubscribe();
         };
     }, []);
-
+// 
     useEffect(() => {
         if (session) {
             localStorage.setItem('auth_session', JSON.stringify(session));
