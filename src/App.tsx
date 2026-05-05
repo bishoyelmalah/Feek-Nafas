@@ -12,6 +12,7 @@ import { GetReadyPage } from './pages/GetReadyPage/GetReadyPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { PublicRoute } from './components/PublicRoute'
 import { ProfilePage } from './pages/ProfilePage/ProfilePage'
+import { SettingsPage } from './pages/SettingsPage/SettingsPage'
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
       <Route path='/victory' element={<ProtectedRoute><VictoryPage /></ProtectedRoute>}></Route>
       <Route path='/lose' element={<ProtectedRoute><LosePage /></ProtectedRoute>}></Route>
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
     </Routes>
   )
 }

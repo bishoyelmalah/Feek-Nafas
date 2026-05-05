@@ -81,6 +81,7 @@ function Header({
   };
 
   const handleSettingsClick = () => {
+    navigate('/settings');
     setIsProfileModalOpen(false);
   };
 
@@ -134,6 +135,9 @@ function Header({
               <button className={styles['icon-btn']} onClick={handleNotificationClick}>
                 <span className="material-symbols-outlined">notifications</span>
                 {notificationCount > 0 && <span className={styles['notification-badge']}>{notifications?.length}</span>}
+              </button>
+              <button className={styles['icon-btn']} onClick={handleSettingsClick} title="Settings">
+                <span className="material-symbols-outlined">settings</span>
               </button>
               {isNotificationModalOpen && (
                 <div className={styles['notification-modal']}>
