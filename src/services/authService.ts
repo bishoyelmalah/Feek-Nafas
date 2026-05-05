@@ -66,3 +66,9 @@ export const getUserData = async (userId: string) => {
   const {data} = await supabase.from('users').select().eq('id', userId).single();
   return data as User;
 }
+
+export const getUserDataByHandle = async (username: string) => {
+  const {data, error} = await supabase.from('users').select().eq('username', username).single();
+  if (error) throw error;
+  return data as User;
+}
