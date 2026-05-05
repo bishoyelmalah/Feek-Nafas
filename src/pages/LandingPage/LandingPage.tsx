@@ -104,8 +104,7 @@ const LandingPage: React.FC = () => {
               DOMINATE <span className={styles['hero-title-accent']}>THE CODE</span>
             </h1>
             <p className={styles['hero-description']}>
-              The ultimate cyberpunk e-sports competitive programming platform. Outpace, outcode,
-              and outlive the competition in the high-stakes digital arena.
+              Engage in real-time 1v1 duels, tactical battles, and seasonal tournaments. Solve algorithmic challenges, climb the global rankings, and unlock exclusive abilities as you evolve through our dynamic tier system. Where code meets combat in the ultimate digital arena.
             </p>
             <div className={styles['hero-actions']}>
               <Link to="/register" className={styles['btn-hero']}>
@@ -206,7 +205,7 @@ const LandingPage: React.FC = () => {
                   High Stakes
                 </span>
               </div>
-                            {/* Tactical Games */}
+              {/* Tactical Games */}
               <div className={styles['arena-card']}>
                 <div
                   className={styles['arena-icon-box']}
@@ -224,9 +223,14 @@ const LandingPage: React.FC = () => {
                 </div>
                 <h4 className={styles['arena-card-title']}>Tactical X/O</h4>
                 <p className={styles['arena-card-description']}>Use shields and powers to sabotage opponents' logic.</p>
-                <span className={styles['arena-card-badge']} style={{ color: 'rgba(0, 242, 255, 0.7)' }}>
-                  Strategic
-                </span>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <span className={styles['arena-card-badge']} style={{ color: 'rgba(0, 242, 255, 0.7)' }}>
+                    Strategic
+                  </span>
+                  <span className={styles['arena-card-badge']} style={{ backgroundColor: 'rgba(236, 91, 19, 0.2)', color: 'rgba(236, 91, 19, 0.8)', fontSize: '0.625rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Coming Soon
+                  </span>
+                </div>
               </div>
               {/* Champions League */}
               <div className={styles['arena-card']}>
@@ -245,9 +249,14 @@ const LandingPage: React.FC = () => {
                 <p className={styles['arena-card-description']}>
                   Scheduled seasonal tournaments with massive point pools.
                 </p>
-                <span className={styles['arena-card-badge']} style={{ color: 'rgba(236, 91, 19, 0.7)' }}>
-                  Tournament Mode
-                </span>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <span className={styles['arena-card-badge']} style={{ color: 'rgba(236, 91, 19, 0.7)' }}>
+                    Tournament Mode
+                  </span>
+                  <span className={styles['arena-card-badge']} style={{ backgroundColor: 'rgba(236, 91, 19, 0.2)', color: 'rgba(236, 91, 19, 0.8)', fontSize: '0.625rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Coming Soon
+                  </span>
+                </div>
               </div>
 
               {/* Polygon Integration */}
@@ -267,9 +276,14 @@ const LandingPage: React.FC = () => {
                 <p className={styles['arena-card-description']}>
                   Full CD Ladder integration and problem development suite.
                 </p>
-                <span className={styles['arena-card-badge']} style={{ color: 'rgba(168, 85, 247, 0.7)' }}>
-                  Integration
-                </span>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <span className={styles['arena-card-badge']} style={{ color: 'rgba(168, 85, 247, 0.7)' }}>
+                    Integration
+                  </span>
+                  <span className={styles['arena-card-badge']} style={{ backgroundColor: 'rgba(236, 91, 19, 0.2)', color: 'rgba(236, 91, 19, 0.8)', fontSize: '0.625rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Coming Soon
+                  </span>
+                </div>
               </div>
             </div>
           </div>

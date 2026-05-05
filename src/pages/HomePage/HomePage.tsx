@@ -271,7 +271,7 @@ export function HomePage() {
                           <ul className={landingStyles['relatedList']}>
                             <li className={landingStyles['relatedItem']}>
                               <span className={landingStyles['relatedItemNum']}>#812</span>
-                              <span className={landingStyles['relatedItemTitle']}><a href = "https://codeforces.com/problemset/problem/812/C" target="_blank">Fast Fourier Transform</a></span>
+                              <span className={landingStyles['relatedItemTitle']}><a href = "https://codeforces.com/problemset/problem/812/C" target="_blank">Sagheer and Nubian Market</a></span>
                               <span className={`material-symbols-outlined ${landingStyles['relatedItemIcon']}`}>trending_flat</span>
                             </li>
                             <li className={landingStyles['relatedItem']}>

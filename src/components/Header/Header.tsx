@@ -91,9 +91,9 @@ function Header({
 
             {session && (
               <>
-                {/* <a className={activeLink === 'arena' ? styles['active'] : ''} href="#arena">
+                { <a className={activeLink === 'arena' ? styles['active'] : ''} href="#arena">
                   Arena
-                </a>
+                </a>/*
                 <a className={activeLink === 'leaderboard' ? styles['active'] : ''} href="#arena-rankings">
                   Leaderboard
                 </a>
@@ -102,9 +102,9 @@ function Header({
                 </a> */}
               </>
             )}
-            {/* <a className={activeLink === 'profile' ? styles['active'] : ''} href="#">
+            <a className={activeLink === 'profile' ? styles['active'] : ''} href="#">
               Profile
-            </a> */}
+            </a>
           </nav>
         </div>
         <div className={styles['header-right']}>
