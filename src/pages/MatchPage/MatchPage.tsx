@@ -2,7 +2,7 @@
 import { VictoryPage } from '../VictoryPage/VictoryPage';
 import { LosePage } from '../LosePage/LosePage';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useLocation, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { createChatRoom, receiveMessage, sendMessage } from '../../services/chatService';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { useAuth } from '../../hooks/useAuth';
@@ -11,42 +11,71 @@ import { useAuth } from '../../hooks/useAuth';
 import { type SubmitEvent } from 'react';
 import { type ChatMessage } from '../../types/ChatMessage';
 import { checkSubmission } from '../../services/codeforcesService';
-import { startMatch, finishMatch, createSubmissionChannel } from '../../services/matchService';
+import { startMatch, finishMatch, createSubmissionChannel, getMatch } from '../../services/matchService';
 import { useMatchTimer } from '../../hooks/useMatchTimer';
 import { OpponentContextProvider } from '../../contexts/OpponentContext/OpponentContextProvider';
 import { useOpponent } from '../../hooks/useOpponent';
+import { useMatch } from '../../hooks/useMatch';
 
 
 
 export function MatchPage() {
     const navigate = useNavigate();
-    const { state } = useLocation();
-    const routeState = state as { matchDetails?: any } | null;
+    const { id: matchId } = useParams<{ id: string }>();
+    const [localMatchData, setLocalMatchData] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
     const channelRef = useRef<RealtimeChannel | null>(null);
     const submissionChannelRef = useRef<RealtimeChannel | null>(null);
     const [chatInput, setChatInput] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
-    // const [opponentHandle, setOpponentHandle] = useState<string>('');
+
     const [isFinished, setIsFinished] = useState<{finished: boolean, win: boolean}>({finished: false, win: false});
-    // const [problem, setProblem] = useState<MatchData | null>(null);
     
     const {userId, userData} = useAuth();
     const {opponentData} = useOpponent();
+    const {matchData} = useMatch();
     const handle = userData?.codeforces_handle ?? '';
-    const matchDetails = routeState?.matchDetails;
-    const {id: matchId} = useParams();
+
+    // Use context data if available, otherwise fetch from URL
+    const effectiveMatchData = matchData || localMatchData;
 
     useEffect(() => {
-        if (!matchDetails) {
-            navigate('/home');
-        }
-    }, [matchDetails, navigate]);
+        const fetchMatchData = async () => {
+            if (matchData) {
+                // If context has data, use it
+                setIsLoading(false);
+                return;
+            }
+
+            if (!matchId) {
+                navigate('/home');
+                return;
+            }
+
+            try {
+                const data = await getMatch(matchId);
+                if (!data) {
+                    navigate('/home');
+                    return;
+                }
+                setLocalMatchData(data);
+            } catch (error) {
+                console.error('Failed to fetch match data:', error);
+                navigate('/home');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchMatchData();
+    }, [matchId, matchData, navigate]);
     
-    const {timeLeft, durationInMinutes} = useMatchTimer(matchId);
+    const {timeLeft, durationInMinutes} = useMatchTimer(effectiveMatchData?.id);
 
     const handleRefresh = async () => {
-        if (!matchDetails) return;
-        const result = await checkSubmission(handle, matchDetails.contest_id, matchDetails.problem_index, durationInMinutes);
+        if (!effectiveMatchData) return;
+        const result = await checkSubmission(handle, effectiveMatchData.contest_id, effectiveMatchData.problem_index, durationInMinutes);
         // console.log(result);
         if (result) {
             submissionChannelRef.current?.send({
@@ -55,7 +84,7 @@ export function MatchPage() {
                 payload: {winnerId: userId}
             })
             setIsFinished({finished: true, win: true});
-            finishMatch(matchId as string, userId as string);
+            finishMatch(effectiveMatchData.id as string, userId as string);
         } 
             
     };
@@ -83,8 +112,8 @@ export function MatchPage() {
     // }, [matchDetails]);
 
     useEffect(()=>{
-        if (!matchId) return;
-        const channel = createChatRoom(`chat-room-${matchId}`);
+        if (!effectiveMatchData?.id) return;
+        const channel = createChatRoom(`chat-room-${effectiveMatchData.id}`);
         channelRef.current = channel;
 
         receiveMessage(channel, (msg: any)=>{
@@ -95,7 +124,7 @@ export function MatchPage() {
             // console.log(payload);
         })
 
-        const submissionChannel = createSubmissionChannel(`submission-${matchId}`, () => {
+        const submissionChannel = createSubmissionChannel(`submission-${effectiveMatchData.id}`, () => {
                 setIsFinished({finished: true, win: false});
                 // console.log(isFinished);
         })
@@ -104,14 +133,14 @@ export function MatchPage() {
             channel.unsubscribe();
             submissionChannel.unsubscribe();
         }
-    }, [matchId])
+    }, [effectiveMatchData?.id])
 
     useEffect(()=>{
-        if (!matchId) return;
-        startMatch(matchId);
-    }, [matchId]);
+        if (!effectiveMatchData?.id) return;
+        startMatch(effectiveMatchData.id);
+    }, [effectiveMatchData?.id]);
 
-    if (!matchDetails) {
+    if (isLoading || !effectiveMatchData) {
         return null;
     }
 
@@ -221,8 +250,8 @@ export function MatchPage() {
                                         Current Challenge
                                     </h3>
                                     <h1 className={styles['challenge-title']}>
-                                        {matchDetails
-                                            ? `${matchDetails.contest_id}${matchDetails.problem_index}`
+                                        {effectiveMatchData
+                                            ? `${effectiveMatchData.contest_id}${effectiveMatchData.problem_index}`
                                             : 'Loading challenge...'}
                                     </h1>
                                 </div>
@@ -242,11 +271,11 @@ export function MatchPage() {
                             </div>
                             
                             <a
-                                href={matchDetails ? `https://codeforces.com/contest/${matchDetails.contest_id}/problem/${matchDetails.problem_index}` : '#'}
+                                href={effectiveMatchData ? `https://codeforces.com/contest/${effectiveMatchData.contest_id}/problem/${effectiveMatchData.problem_index}` : '#'}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className={styles['solve-button']}
-                                aria-disabled={!matchDetails}
+                                aria-disabled={!effectiveMatchData}
                             >
                                 <span className="material-symbols-outlined">launch</span>
                                 Solve on Codeforces

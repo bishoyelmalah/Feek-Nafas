@@ -67,7 +67,12 @@ export function GetReadyPage() {
     // Set Opponent Data
     useEffect(() => {
         const handleOpponentData = async ()=>{
-            const data = await getUserData(matchData?.player2_id as string);
+            let data;
+            if (userData?.id === matchData?.player1_id) {
+                data = await getUserData(matchData?.player2_id as string);
+            } else {
+                data = await getUserData(matchData?.player1_id as string);
+            }
             setOpponentData(data);
         }
         handleOpponentData();
@@ -109,7 +114,8 @@ export function GetReadyPage() {
         if (timer !== 0 || !matchData?.id) return;
 
         const findMatch = async () => {
-            await nav(`/match/${matchData.id}`);
+            console.log(matchData.id);
+            nav(`/match/${matchData.id}`);
         };
 
         findMatch();
