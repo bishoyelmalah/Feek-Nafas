@@ -1000,7 +1000,7 @@
 
 .tableRow {
   border-bottom: 1px solid #1e293b;
-  transition: background-color 0.15s;
+  transition: background-color 0.15s, box-shadow 0.15s;
 }
 
 .tableRow:last-child {
@@ -1011,8 +1011,59 @@
   background-color: rgba(236, 91, 19, 0.05);
 }
 
+.tableRowFirstPlace {
+  position: relative;
+  background-color: rgba(236, 91, 19, 0.15);
+  border: 2px solid rgba(236, 91, 19, 0.6);
+  box-shadow: inset 0 0 10px rgba(236, 91, 19, 0.2);
+}
+
+.tableRowFirstPlace:hover {
+  background-color: rgba(236, 91, 19, 0.25);
+  box-shadow: inset 0 0 20px rgba(236, 91, 19, 0.3), 0 0 20px rgba(236, 91, 19, 0.2);
+  border: 2px solid rgba(236, 91, 19, 0.8);
+}
+
+.tableRowSecondPlace {
+  position: relative;
+  background-color: rgba(0, 242, 255, 0.08);
+  border: 2px solid rgba(0, 242, 255, 0.3);
+  box-shadow: inset 0 0 8px rgba(0, 242, 255, 0.1);
+}
+
+.tableRowSecondPlace:hover {
+  background-color: rgba(0, 242, 255, 0.15);
+  box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.2), 0 0 15px rgba(0, 242, 255, 0.1);
+  border: 2px solid rgba(0, 242, 255, 0.6);
+}
+
+.tableRowThirdPlace {
+  position: relative;
+  background-color: rgba(236, 91, 19, 0.08);
+  border: 2px solid rgba(236, 91, 19, 0.3);
+  box-shadow: inset 0 0 8px rgba(236, 91, 19, 0.1);
+}
+
+.tableRowThirdPlace:hover {
+  background-color: rgba(236, 91, 19, 0.15);
+  box-shadow: inset 0 0 15px rgba(236, 91, 19, 0.2), 0 0 15px rgba(236, 91, 19, 0.1);
+  border: 2px solid rgba(236, 91, 19, 0.6);
+}
+
 .tableRowHighlight {
   background-color: rgba(236, 91, 19, 0.05);
+}
+
+.tableRowCurrentUser {
+  background-color: rgba(236, 91, 19, 0.15);
+  border-top: 1px solid rgba(236, 91, 19, 0.4);
+  border-bottom: 1px solid rgba(236, 91, 19, 0.4);
+  box-shadow: inset 0 0 15px rgba(236, 91, 19, 0.1);
+  opacity: 1 !important;
+}
+
+.tableRowCurrentUser:hover {
+  background-color: rgba(236, 91, 19, 0.25);
 }
 
 .tableCell {
@@ -1035,6 +1086,20 @@
 .rankDefault {
   font-weight: 900;
   font-style: italic;
+}
+
+.userScore {
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  color: var(--primary);
+}
+
+.codeforcesHandle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  color: var(--accent-blue);
+  font-weight: 600;
 }
 
 .hackerInfo {
@@ -1511,6 +1576,20 @@
   flex: 1;
   font-size: 0.875rem;
   font-weight: 700;
+}
+
+.relatedItemTitle a {
+  color: white;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.relatedItemTitle a:visited {
+  color: white;
+}
+
+.relatedItemTitle a:hover {
+  opacity: 0.8;
 }
 
 .relatedItemIcon {

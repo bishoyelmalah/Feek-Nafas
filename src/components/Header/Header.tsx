@@ -70,6 +70,11 @@ function Header({
   const handleSettingsClick = () => {
     setIsProfileModalOpen(false);
   };
+
+  const handleLoginClick = () => {
+    navigate('/login');
+  };
+
   return (
     <header>
       <div className={styles['header-content']}>
@@ -83,18 +88,23 @@ function Header({
             </h1>
           </div>
           <nav>
-            <a className={activeLink === 'arena' ? styles['active'] : ''} href="#">
-              Arena
-            </a>
-            <a className={activeLink === 'leaderboard' ? styles['active'] : ''} href="#">
-              Leaderboard
-            </a>
-            <a className={activeLink === 'challenges' ? styles['active'] : ''} href="#">
-              Challenges
-            </a>
-            <a className={activeLink === 'profile' ? styles['active'] : ''} href="#">
+
+            {session && (
+              <>
+                {/* <a className={activeLink === 'arena' ? styles['active'] : ''} href="#arena">
+                  Arena
+                </a>
+                <a className={activeLink === 'leaderboard' ? styles['active'] : ''} href="#arena-rankings">
+                  Leaderboard
+                </a>
+                <a className={activeLink === 'challenges' ? styles['active'] : ''} href="#training-grounds">
+                  Challenges
+                </a> */}
+              </>
+            )}
+            {/* <a className={activeLink === 'profile' ? styles['active'] : ''} href="#">
               Profile
-            </a>
+            </a> */}
           </nav>
         </div>
         <div className={styles['header-right']}>
@@ -103,76 +113,84 @@ function Header({
               <span className={styles['status-label']}>SYSTEM_STATUS</span>
               <span className={styles['status-value']}>OPTIMAL // 24MS</span>
             </div>
-            <div className={styles['status-item']}>
+            {/* <div className={styles['status-item']}>
               <span className={styles['status-label']}>PLAYERS_ONLINE</span>
               <span className={styles['status-value']}>14,204</span>
-            </div>
+            </div> */}
           </div>
           <div className={styles['header-actions']}>
-            <div className={styles['notification-wrapper']}>
-              <button className={styles['icon-btn']} onClick={handleNotificationClick}>
-                <span className="material-symbols-outlined">notifications</span>
-                {notificationCount > 0 && <span className={styles['notification-badge']}>{notifications?.length}</span>}
-              </button>
-              {isNotificationModalOpen && (
-                <div className={styles['notification-modal']}>
-                  { notifications?.length === 0 ? 
-                  <div className={styles['notification-message']}>
-                      <div className={styles['notification-title']}>No Notifications</div>
-                  </div>
-                  : notifications?.map((notification) => {
-                    return (
-                      <div className={styles['notification-message']}>
-                      <div className={styles['notification-title']}>New Match Invitation</div>
-                      <div className={styles['notification-body']}>{notification.body}</div>
-                      <div className={styles['notification-actions']}>
-                        <button className={styles['notification-accept-btn']} onClick={()=>handleAcceptNotification(notification.matchId)}>
-                          Accept
-                        </button>
-                        <button className={styles['notification-decline-btn']} onClick={()=>handleDeclineNotification(notification.matchId)}>
-                          Decline
-                        </button>
-                    </div>
-                  </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-            <div className={styles['profile-wrapper']} ref={profileMenuRef}>
-              <button
-                className={styles['profile-trigger']}
-                onClick={() => setIsProfileModalOpen((prev) => !prev)}
-                title="Profile menu"
-              >
-                <span className={styles['username']}>{displayUsername}</span>
-                <div className={styles['user-avatar']}>
-                  <img
-                    alt="Cyberpunk female player avatar with neon highlights"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCL8aMK3OzFo7PkzF72qgEEZmkBXunrRdqoPfzsPOOWAA2KdUaCswjzTej_BhhTPKVKqTO-GVcwYOVMadRGVogZYiB0p33yvEit163VmW04lOGDJ-wzKqvjb-cTKExcpB0fzy-psRQVnPcxDTk5n8pSBjIhqtGdj_sycNWUnUbDa-M6Dl5euX9kPoECe1IKG47SqwBpOhOGwG11CfYVWDcDi2M-ilReVqB_s0AKD_DZxWSxHEcUuhXoc023jhaOHpCYa2HStNCBwGg"
-                  />
-                </div>
-              </button>
-
-              {isProfileModalOpen && (
-                <div className={styles['profile-modal']}>
-                  <button className={styles['profile-modal-btn']} onClick={handleSettingsClick}>
-                    <span className="material-symbols-outlined">settings</span>
-                    Settings
+            {session ? (
+              <>
+                <div className={styles['notification-wrapper']}>
+                  <button className={styles['icon-btn']} onClick={handleNotificationClick}>
+                    <span className="material-symbols-outlined">notifications</span>
+                    {notificationCount > 0 && <span className={styles['notification-badge']}>{notifications?.length}</span>}
                   </button>
-                  {session && (
-                    <button
-                      className={styles['profile-modal-btn']}
-                      onClick={handleLogout}
-                      title="Logout"
-                    >
-                      <span className="material-symbols-outlined">logout</span>
-                      Logout
-                    </button>
+                  {isNotificationModalOpen && (
+                    <div className={styles['notification-modal']}>
+                      { notifications?.length === 0 ? 
+                      <div className={styles['notification-message']}>
+                          <div className={styles['notification-title']}>No Notifications</div>
+                      </div>
+                      : notifications?.map((notification) => {
+                        return (
+                          <div className={styles['notification-message']}>
+                          <div className={styles['notification-title']}>New Match Invitation</div>
+                          <div className={styles['notification-body']}>{notification.body}</div>
+                          <div className={styles['notification-actions']}>
+                            <button className={styles['notification-accept-btn']} onClick={()=>handleAcceptNotification(notification.matchId)}>
+                              Accept
+                            </button>
+                            <button className={styles['notification-decline-btn']} onClick={()=>handleDeclineNotification(notification.matchId)}>
+                              Decline
+                            </button>
+                        </div>
+                      </div>
+                        )
+                      })}
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
+                <div className={styles['profile-wrapper']} ref={profileMenuRef}>
+                  <button
+                    className={styles['profile-trigger']}
+                    onClick={() => setIsProfileModalOpen((prev) => !prev)}
+                    title="Profile menu"
+                  >
+                    <span className={styles['username']}>{displayUsername}</span>
+                    <div className={styles['user-avatar']}>
+                      <img
+                        alt="Cyberpunk female player avatar with neon highlights"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCL8aMK3OzFo7PkzF72qgEEZmkBXunrRdqoPfzsPOOWAA2KdUaCswjzTej_BhhTPKVKqTO-GVcwYOVMadRGVogZYiB0p33yvEit163VmW04lOGDJ-wzKqvjb-cTKExcpB0fzy-psRQVnPcxDTk5n8pSBjIhqtGdj_sycNWUnUbDa-M6Dl5euX9kPoECe1IKG47SqwBpOhOGwG11CfYVWDcDi2M-ilReVqB_s0AKD_DZxWSxHEcUuhXoc023jhaOHpCYa2HStNCBwGg"
+                      />
+                    </div>
+                  </button>
+
+                  {isProfileModalOpen && (
+                    <div className={styles['profile-modal']}>
+                      <button className={styles['profile-modal-btn']} onClick={handleSettingsClick}>
+                        <span className="material-symbols-outlined">settings</span>
+                        Settings
+                      </button>
+                      {session && (
+                        <button
+                          className={styles['profile-modal-btn']}
+                          onClick={handleLogout}
+                          title="Logout"
+                        >
+                          <span className="material-symbols-outlined">logout</span>
+                          Logout
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <button className={styles['btn-login']} onClick={handleLoginClick}>
+                Login
+              </button>
+            )}
           </div>
         </div>
       </div>
