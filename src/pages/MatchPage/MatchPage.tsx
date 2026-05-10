@@ -27,6 +27,7 @@ export function MatchPage() {
 
     const channelRef = useRef<RealtimeChannel | null>(null);
     const submissionChannelRef = useRef<RealtimeChannel | null>(null);
+    const chatEndRef = useRef<HTMLDivElement | null>(null);
     const [chatInput, setChatInput] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
 
@@ -36,6 +37,11 @@ export function MatchPage() {
     const {opponentData} = useOpponent();
     const {matchData} = useMatch();
     const handle = userData?.codeforces_handle ?? '';
+
+    // Scroll to bottom whenever messages change
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
 
     // Use context data if available, otherwise fetch from URL
     const effectiveMatchData = matchData || localMatchData;
@@ -327,7 +333,7 @@ export function MatchPage() {
                                         ? 'SYSTEM'
                                         : isYou
                                             ? 'You'
-                                            : 'Player B';
+                                            : opponentData?.username;
 
                                     return (
                                         <div
@@ -364,7 +370,7 @@ export function MatchPage() {
                                                     >
                                                         {senderLabel}
                                                     </span>
-                                                    <span className={styles['feed-time']}>{`[${message.time}]`}</span>
+                                                    {/* <span className={styles['feed-time']}>{`[${message.time}]`}</span> */}
                                                 </div>
                                                 <p className={styles['chat-text']}>{message.text}</p>
                                             </div>
@@ -374,6 +380,7 @@ export function MatchPage() {
                                 <div className={styles['feed-entry']}>
                                     <span className={styles['feed-cursor']}></span>
                                 </div>
+                                <div ref={chatEndRef} />
                             </div>
 
                             <form className={styles['chat-form']} onSubmit={handleSendMessage}>
