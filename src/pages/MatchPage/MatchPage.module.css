@@ -700,8 +700,31 @@
   background-color: rgba(239, 68, 68, 0.2);
 }
 
+.action-btn.warning {
+  background-color: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.2);
+  color: #eab308;
+}
+
+.action-btn.warning:hover {
+  background-color: rgba(234, 179, 8, 0.2);
+}
+
 .action-btn :global(.material-symbols-outlined) {
   font-size: 1.125rem;
+}
+
+.simulation-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .simulation-group {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Live Feed */

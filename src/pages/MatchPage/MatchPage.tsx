@@ -1,6 +1,7 @@
 ﻿import styles from './MatchPage.module.css';
 import { VictoryPage } from '../VictoryPage/VictoryPage';
 import { LosePage } from '../LosePage/LosePage';
+import { DrawPage } from '../DrawPage/DrawPage';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { RealtimeChannel } from '@supabase/supabase-js';
@@ -10,7 +11,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { type SubmitEvent } from 'react';
 import { type ChatMessage } from '../../types/ChatMessage';
 import { checkSubmission } from '../../services/codeforcesService';
-import { startMatch, finishMatch, createSubmissionChannel, getMatch, sendMessage, getMessages } from '../../services/matchService';
+import { startMatch, finishMatch, getMatch, sendMessage, getMessages } from '../../services/matchService';
 import { supabase } from '../../lib/supabase';
 import { useMatchTimer } from '../../hooks/useMatchTimer';
 import { OpponentContextProvider } from '../../contexts/OpponentContext/OpponentContextProvider';
@@ -22,20 +23,18 @@ import { useMatch } from '../../hooks/useMatch';
 export function MatchPage() {
     const navigate = useNavigate();
     const { id: matchId } = useParams<{ id: string }>();
-    const [localMatchData, setLocalMatchData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const channelRef = useRef<RealtimeChannel | null>(null);
-    const submissionChannelRef = useRef<RealtimeChannel | null>(null);
     const chatEndRef = useRef<HTMLDivElement | null>(null);
     const [chatInput, setChatInput] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
 
-    const [isFinished, setIsFinished] = useState<{finished: boolean, win: boolean}>({finished: false, win: false});
+    const [isFinished, setIsFinished] = useState<{finished: boolean, win: boolean, draw: boolean}>({finished: false, win: false, draw: false});
     
     const {userId, userData} = useAuth();
     const {opponentData} = useOpponent();
-    const {matchData} = useMatch();
+    const {matchData, setMatchData} = useMatch();
     const handle = userData?.codeforces_handle ?? '';
 
     // Scroll to bottom whenever messages change
@@ -43,29 +42,34 @@ export function MatchPage() {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // Use context data if available, otherwise fetch from URL
-    const effectiveMatchData = matchData || localMatchData;
+    // Always use fresh data from the database to ensure we have the latest status and winner information
+    const effectiveMatchData = matchData;
 
     useEffect(() => {
         const fetchMatchData = async () => {
-            if (matchData) {
-                // If context has data, use it
-                setIsLoading(false);
-                return;
-            }
-
             if (!matchId) {
                 navigate('/home');
                 return;
             }
 
             try {
+                // Perform a new query every time the user enters the page to bypass stale local storage/context
                 const data = await getMatch(matchId);
                 if (!data) {
                     navigate('/home');
                     return;
                 }
-                setLocalMatchData(data);
+                setMatchData(data);
+
+                // If the match is already finished, determine the result and display the appropriate page
+                if (data.status === 'finished') {
+                    const isDraw = !data.winner_user_id;
+                    setIsFinished({
+                        finished: true,
+                        win: data.winner_user_id === userId,
+                        draw: isDraw
+                    });
+                }
             } catch (error) {
                 console.error('Failed to fetch match data:', error);
                 navigate('/home');
@@ -75,21 +79,21 @@ export function MatchPage() {
         };
 
         fetchMatchData();
-    }, [matchId, matchData, navigate]);
+    }, [matchId, navigate, userId, setMatchData]);
     
-    const {timeLeft, durationInMinutes} = useMatchTimer(effectiveMatchData?.id);
+    const {timeLeft, durationInMinutes, isTimeUp} = useMatchTimer(effectiveMatchData?.id);
+
+    useEffect(() => {
+        if (isTimeUp && effectiveMatchData && effectiveMatchData.status !== 'finished') {
+            finishMatch(effectiveMatchData.id as string, null);
+        }
+    }, [isTimeUp, effectiveMatchData]);
 
     const handleRefresh = async () => {
         if (!effectiveMatchData) return;
         const result = await checkSubmission(handle, effectiveMatchData.contest_id, effectiveMatchData.problem_index, durationInMinutes);
         // console.log(result);
         if (result) {
-            submissionChannelRef.current?.send({
-                type: 'broadcast',
-                event: 'shout',
-                payload: {winnerId: userId}
-            })
-            setIsFinished({finished: true, win: true});
             finishMatch(effectiveMatchData.id as string, userId as string);
         } 
             
@@ -97,7 +101,7 @@ export function MatchPage() {
 
     const handleSendMessage = async (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!effectiveMatchData || !userId) return;
+        if (!effectiveMatchData || !userId || !chatInput) return;
 
         const newMessage: ChatMessage = {
             match_id: effectiveMatchData.id,
@@ -112,16 +116,6 @@ export function MatchPage() {
             console.error('Failed to send message:', error);
         }
     }
-
-    // useEffect(() => {
-    //     const fetchOpponentHandle = async () => {
-    //         if (!matchDetails) return;
-    //         const opponent = await getOpponentDetails(matchDetails.player2_id);
-    //         const opponentUserHandle = opponent?.codeforces_handle as string;
-    //         setOpponentHandle(opponentUserHandle);
-    //     }
-    //     if (matchDetails?.player2_id) fetchOpponentHandle();
-    // }, [matchDetails]);
 
     useEffect(()=>{
         if (!effectiveMatchData?.id) return;
@@ -156,30 +150,58 @@ export function MatchPage() {
             )
             .subscribe();
 
-        channelRef.current = channel;
+        // Subscribe to match status changes
+        const matchChannel = supabase
+            .channel(`match-status:${effectiveMatchData.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'matches',
+                    filter: `id=eq.${effectiveMatchData.id}`
+                },
+                (payload) => {
+                    const updatedMatch = payload.new as any;
+                    console.log('Match status update received:', updatedMatch);
+                    console.log('Current User ID:', userId);
+                    console.log('Match Winner ID:', updatedMatch.winner_user_id);
+                    
+                    if (updatedMatch.status === 'finished') {
+                        setIsFinished({
+                            finished: true,
+                            win: updatedMatch.winner_user_id === userId,
+                            draw: !updatedMatch.winner_user_id
+                        });
+                        setMatchData(updatedMatch);
+                    }
+                }
+            )
+            .subscribe((status) => {
+                console.log(`Match status subscription: ${status}`);
+            });
 
-        const submissionChannel = createSubmissionChannel(`submission-${effectiveMatchData.id}`, () => {
-                setIsFinished({finished: true, win: false});
-                // console.log(isFinished);
-        })
-        submissionChannelRef.current = submissionChannel;
+        channelRef.current = channel;
         
         return () => {
             channel.unsubscribe();
-            submissionChannel.unsubscribe();
+            matchChannel.unsubscribe();
         }
-    }, [effectiveMatchData?.id])
+    }, [effectiveMatchData?.id, userId, setMatchData])
 
     useEffect(()=>{
-        if (!effectiveMatchData?.id) return;
+        if (!effectiveMatchData?.id || effectiveMatchData.status === 'finished') return;
         startMatch(effectiveMatchData.id);
-    }, [effectiveMatchData?.id]);
+    }, [effectiveMatchData?.id, effectiveMatchData?.status]);
 
     if (isLoading || !effectiveMatchData) {
         return null;
     }
 
     if (isFinished.finished) {
+        if (isFinished.draw) {
+            return <DrawPage />
+        }
         if (isFinished.win) {
             return <VictoryPage />
         } else {
@@ -290,10 +312,9 @@ export function MatchPage() {
                                             : 'Loading challenge...'}
                                     </h1>
                                 </div>
-                                <div className={styles['challenge-meta']}>
-                                    <span className={styles['meta-badge']}>DIFF: 800</span>
-                                    <span className={styles['meta-badge']}>POINTS: 500</span>
-                                </div>
+                                {/* <div className={styles['challenge-meta']}>
+                                    <span className={styles['meta-badge']}>RATING: 800</span>
+                                </div> */}
                             </div>
                             
                             <p className={styles['challenge-description']}>
@@ -329,18 +350,27 @@ export function MatchPage() {
                                 <span className="material-symbols-outlined">logout</span>
                                 Return to Lobby
                             </button>
-                            {/* <button
-                                className={[styles['action-btn'], styles['secondary']].join(' ')}
-                                onClick={() => navigate('/victory')}
-                            >
-                                Victory
-                            </button>
-                            <button
-                                className={[styles['action-btn'], styles['danger']].join(' ')}
-                                onClick={() => navigate('/lose')}
-                            >
-                                Lose
-                            </button> */}
+                            
+                            <div className={styles['simulation-group']}>
+                                <button
+                                    className={[styles['action-btn'], styles['secondary']].join(' ')}
+                                    onClick={() => finishMatch(effectiveMatchData.id as string, userId as string)}
+                                >
+                                    Win
+                                </button>
+                                <button
+                                    className={[styles['action-btn'], styles['warning']].join(' ')}
+                                    onClick={() => finishMatch(effectiveMatchData.id as string, null)}
+                                >
+                                    Draw
+                                </button>
+                                <button
+                                    className={[styles['action-btn'], styles['danger']].join(' ')}
+                                    onClick={() => finishMatch(effectiveMatchData.id as string, opponentData?.id as string)}
+                                >
+                                    Lose
+                                </button>
+                            </div>
                         </div>
                     </div>
 

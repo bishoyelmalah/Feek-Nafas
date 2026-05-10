@@ -36,7 +36,7 @@ export const startMatch = async (matchId: string) => {
         .eq('status', 'accepted');
 }
 
-export const finishMatch = async (matchId: string, winnerId: string) => {
+export const finishMatch = async (matchId: string, winnerId: string | null) => {
     const timeNow = new Date();
     await supabase.from('matches').update({status: 'finished', winner_user_id: winnerId, finished_at: timeNow}).eq('id', matchId);
 }

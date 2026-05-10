@@ -1,19 +1,12 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router';
-import styles from './LosePage.module.css';
-import loseSound from '../../assets/sounds/lose_sound.mp3';
+import styles from './DrawPage.module.css';
 
-const loseSoundEffect = new Audio(loseSound);
-
-const LosePage: React.FC = () => {
+export const DrawPage: React.FC = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loseSoundEffect.play();
-  }, []);
-
   return (
-    <div className={styles.loseContainer}>
+    <div className={styles.drawContainer}>
       {/* Cyberpunk Grid Background */}
       <div className={styles.cyberGrid}></div>
       <div className={styles.gradientOverlay}></div>
@@ -21,9 +14,9 @@ const LosePage: React.FC = () => {
       {/* Main Content */}
       <main className={styles.mainContent}>
         
-        {/* Defeat Title */}
+        {/* Draw Title */}
         <div className={styles.titleContainer}>
-          <h1 className={styles.title}>DEFEAT</h1>
+          <h1 className={styles.title}>DRAW</h1>
           <div className={styles.titleUnderline}></div>
         </div>
 
@@ -39,13 +32,9 @@ const LosePage: React.FC = () => {
         </div>
       </main>
 
-      {/* Decorative Corners and Flares */}
+      {/* Decorative Corners */}
       <div className={styles.cornerTopLeft}></div>
       <div className={styles.cornerBottomRight}></div>
-      <div className={styles.flareLeft}></div>
-      <div className={styles.flareRight}></div>
     </div>
   );
 };
-
-export { LosePage };

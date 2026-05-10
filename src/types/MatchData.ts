@@ -9,5 +9,7 @@ export interface MatchData {
     winner_user_id: string,
     created_at?: string,
     finished_at?: string,
-    updated_at?: string
+    updated_at?: string,
+    player1_ready: boolean,
+    player2_ready: boolean
 }
