@@ -3,7 +3,6 @@ import { VictoryPage } from '../VictoryPage/VictoryPage';
 import { LosePage } from '../LosePage/LosePage';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { createChatRoom, receiveMessage, sendMessage } from '../../services/chatService';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { useAuth } from '../../hooks/useAuth';
 // import { getMatch } from '../../services/matchService';
@@ -11,7 +10,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { type SubmitEvent } from 'react';
 import { type ChatMessage } from '../../types/ChatMessage';
 import { checkSubmission } from '../../services/codeforcesService';
-import { startMatch, finishMatch, createSubmissionChannel, getMatch } from '../../services/matchService';
+import { startMatch, finishMatch, createSubmissionChannel, getMatch, sendMessage, getMessages } from '../../services/matchService';
+import { supabase } from '../../lib/supabase';
 import { useMatchTimer } from '../../hooks/useMatchTimer';
 import { OpponentContextProvider } from '../../contexts/OpponentContext/OpponentContextProvider';
 import { useOpponent } from '../../hooks/useOpponent';
@@ -95,16 +95,22 @@ export function MatchPage() {
             
     };
 
-    const handleSendMessage = (e: SubmitEvent<HTMLFormElement>) => {
+    const handleSendMessage = async (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
-        sendMessage(channelRef.current, chatInput, "bishoy")
-        setMessages(prev => 
-            [...prev, {
-                id: messages.length, sender: 'you', text: chatInput, time: 'time'
-                }
-            ]
-        )
-        setChatInput('');
+        if (!effectiveMatchData || !userId) return;
+
+        const newMessage: ChatMessage = {
+            match_id: effectiveMatchData.id,
+            sender_id: userId,
+            content: chatInput,
+        };
+
+        try {
+            await sendMessage(newMessage);
+            setChatInput('');
+        } catch (error) {
+            console.error('Failed to send message:', error);
+        }
     }
 
     // useEffect(() => {
@@ -119,22 +125,45 @@ export function MatchPage() {
 
     useEffect(()=>{
         if (!effectiveMatchData?.id) return;
-        const channel = createChatRoom(`chat-room-${effectiveMatchData.id}`);
-        channelRef.current = channel;
 
-        receiveMessage(channel, (msg: any)=>{
-            setMessages((prev) => [
-                ...prev,
-                {id: 2, sender: 'opponent', text: msg.payload.message, time: 'time'}
-            ])
-            // console.log(payload);
-        })
+        // Fetch initial messages
+        const fetchInitialMessages = async () => {
+            try {
+                const msgs = await getMessages(effectiveMatchData.id);
+                setMessages(msgs);
+            } catch (error) {
+                console.error('Failed to fetch messages:', error);
+            }
+        };
+        fetchInitialMessages();
+
+        // Subscribe to messages table changes
+        const channel = supabase
+            .channel(`messages:${effectiveMatchData.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `match_id=eq.${effectiveMatchData.id}`
+                },
+                (payload) => {
+                    const newMessage = payload.new as ChatMessage;
+                    console.log(newMessage);
+                    setMessages((prev) => [...prev, newMessage]);
+                }
+            )
+            .subscribe();
+
+        channelRef.current = channel;
 
         const submissionChannel = createSubmissionChannel(`submission-${effectiveMatchData.id}`, () => {
                 setIsFinished({finished: true, win: false});
                 // console.log(isFinished);
         })
         submissionChannelRef.current = submissionChannel;
+        
         return () => {
             channel.unsubscribe();
             submissionChannel.unsubscribe();
@@ -327,11 +356,9 @@ export function MatchPage() {
                             </div>
                             <div className={styles['feed-content']}>
                                 {messages.map((message) => {
-                                    const isYou = message.sender === 'you';
-                                    const isSystem = message.sender === 'system';
-                                    const senderLabel = isSystem
-                                        ? 'SYSTEM'
-                                        : isYou
+                                    const isYou = message.sender_id === userId;
+                                    const senderLabel =
+                                        isYou
                                             ? 'You'
                                             : opponentData?.username;
 
@@ -342,9 +369,7 @@ export function MatchPage() {
                                                 styles['chat-entry'],
                                                 isYou
                                                     ? styles['chat-entry-right']
-                                                    : isSystem
-                                                        ? styles['chat-entry-center']
-                                                        : styles['chat-entry-left'],
+                                                    : styles['chat-entry-left'],
                                             ].join(' ')}
                                         >
                                             <div
@@ -352,9 +377,7 @@ export function MatchPage() {
                                                     styles['chat-bubble'],
                                                     isYou
                                                         ? styles['chat-bubble-you']
-                                                        : isSystem
-                                                            ? styles['chat-bubble-system']
-                                                            : styles['chat-bubble-opponent'],
+                                                        : styles['chat-bubble-opponent'],
                                                 ].join(' ')}
                                             >
                                                 <div className={styles['chat-meta']}>
@@ -363,16 +386,14 @@ export function MatchPage() {
                                                             styles['feed-player'],
                                                             isYou
                                                                 ? styles['blue-text']
-                                                                : isSystem
-                                                                    ? styles['feed-system']
-                                                                    : styles['orange-text'],
+                                                                : styles['orange-text'],
                                                         ].join(' ')}
                                                     >
                                                         {senderLabel}
                                                     </span>
                                                     {/* <span className={styles['feed-time']}>{`[${message.time}]`}</span> */}
                                                 </div>
-                                                <p className={styles['chat-text']}>{message.text}</p>
+                                                <p className={styles['chat-text']}>{message.content}</p>
                                             </div>
                                         </div>
                                     );

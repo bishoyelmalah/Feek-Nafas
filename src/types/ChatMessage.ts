@@ -1,6 +1,7 @@
 export interface ChatMessage {
-    id: number;
-    sender: 'you' | 'opponent' | 'system';
-    text: string;
-    time: string;
+    id?: string,
+    match_id: string,
+    sender_id: string,
+    content: string,
+    created_at?: string
 };
