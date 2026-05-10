@@ -1,6 +1,9 @@
 import { type CodeforcesProblem } from "../types/CodeforcesProblem";
 import { type ProblemData } from "../types/ProblemData";
 
+const ratingOptions = ['800', '1000', '1200', '1400', '1600', '1800', '2000'];
+const topicOptions = ['Implementation', 'Math', 'Greedy', 'DP', 'Graphs'];
+
 
 export async function getAllProblems() {
   try {
@@ -23,18 +26,22 @@ export async function getAllProblems() {
 
 export async function getProblemByRatingOrTopic({rating, topic}: ProblemData) {
   try {
+    let selectedRating = rating;
+    let selectedTopic = topic;
+
+    if (!selectedRating) {
+      const idx = Math.floor(Math.random() * ratingOptions.length);
+      selectedRating = Number(ratingOptions[idx]);
+    }
+
+    if (!selectedTopic) {
+      const idx = Math.floor(Math.random() * topicOptions.length);
+      selectedTopic = topicOptions[idx];
+    }
     const problems = await getAllProblems();
     const filteredProblems = problems.filter(
       (problem: CodeforcesProblem) => {
-        if (rating && topic) {
-          return problem.rating === rating && problem.tags?.includes(topic.toLowerCase());
-        } else if (rating) {
-          return problem.rating === rating;
-        } else if (topic) {
-          return problem.tags?.includes(topic.toLowerCase());
-        } else {
-          throw new Error("You must provide rating or topic at least");
-        }
+          return problem.rating === selectedRating && problem.tags?.includes(selectedTopic.toLowerCase());
       }
     );
     
