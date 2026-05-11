@@ -13,6 +13,8 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { PublicRoute } from './components/PublicRoute'
 import { ProfilePage } from './pages/ProfilePage/ProfilePage'
 import { SettingsPage } from './pages/SettingsPage/SettingsPage'
+import { PracticePage } from './pages/PracticePage/PracticePage'
+import LeaderboardPage from "./pages/leaderboard/leaderboard";
 
 function App() {
   return (
@@ -22,12 +24,14 @@ function App() {
       <Route path='/login' element={<PublicRoute><LoginPage /></PublicRoute>} />
       <Route path='/register' element={<PublicRoute><RegisterPage /></PublicRoute>} />
       <Route path='/findMatch' element={<ProtectedRoute><FindMatchPage /></ProtectedRoute>}></Route>
+      <Route path='/practice' element={<ProtectedRoute><PracticePage /></ProtectedRoute>}></Route>
       <Route path='/getReady/:id' element={<ProtectedRoute><GetReadyPage /></ProtectedRoute>}></Route>
       <Route path='/match/:id' element={<ProtectedRoute><MatchPage /></ProtectedRoute>}></Route>
       <Route path='/victory' element={<ProtectedRoute><VictoryPage /></ProtectedRoute>}></Route>
       <Route path='/lose' element={<ProtectedRoute><LosePage /></ProtectedRoute>}></Route>
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+      <Route path="/leaderboard/:limit" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
     </Routes>
   )
 }

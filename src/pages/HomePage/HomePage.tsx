@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Footer from '../../components/Footer/Footer';
 import Header from '../../components/Header/Header';
 import styles from './HomePage.module.css';
@@ -11,38 +11,59 @@ import { type MatchData } from '../../types/MatchData';
 import { getOpponentDetails } from '../../utils/getOpponentDetails';
 import type { User } from '../../types/UserData';
 import { type Notification } from '../../types/Notification';
-import { getTopUsers, getUserRank } from '../../services/userService';
+import { getActiveMatch } from '../../services/matchService';
+import { Modal } from '../../components/Modal/Modal';
 
 export function HomePage() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { userId } = useAuth();
     const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
     const [notifications, setNotifications ] = useState<Notification[]>([]);
-    const [topUsers, setTopUsers] = useState<any[]>([]);
-    const [currentUserRank, setCurrentUserRank] = useState<any>(null);
+    const [isCheckingActiveMatch, setIsCheckingActiveMatch] = useState(true);
+
+    const [modalConfig, setModalConfig] = useState<{isOpen: boolean, message: string}>({isOpen: false, message: ''});
+
+    useEffect(() => {
+        if (location.state?.notification) {
+            setModalConfig({
+                isOpen: true,
+                message: location.state.notification
+            });
+            // Clear location state to prevent alert on refresh
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state]);
+
+    useEffect(() => {
+        const checkActiveMatch = async () => {
+            if (!userId) {
+                setIsCheckingActiveMatch(false);
+                return;
+            }
+            try {
+                const activeMatch = await getActiveMatch(userId);
+                if (activeMatch) {
+                    if (activeMatch.status === 'accepted') {
+                        navigate(`/getReady/${activeMatch.id}`);
+                        return; // Prevent setting isCheckingActiveMatch to false
+                    } else if (activeMatch.status === 'in_progress') {
+                        navigate(`/match/${activeMatch.id}`);
+                        return; // Prevent setting isCheckingActiveMatch to false
+                    }
+                }
+                setIsCheckingActiveMatch(false);
+            } catch (error) {
+                console.error('Failed to check for active match:', error);
+                setIsCheckingActiveMatch(false);
+            }
+        };
+        checkActiveMatch();
+    }, [userId, navigate]);
 
     const handleFindMatch = () => {
         navigate('/findMatch');
     };
-
-    useEffect(() => {
-        const fetchLeaderboard = async () => {
-            const users = await getTopUsers(5);
-            setTopUsers(users);
-        };
-        fetchLeaderboard();
-    }, []);
-
-    useEffect(() => {
-        const fetchUserRank = async () => {
-            if (!userId) {
-                return;
-            }
-            const rankData = await getUserRank(userId);
-            setCurrentUserRank(rankData);
-        };
-        fetchUserRank();
-    }, [userId]);
 
     useEffect(() => {
         if (!userId) {
@@ -81,6 +102,10 @@ export function HomePage() {
         };
     }, [userId]);
 
+    if (isCheckingActiveMatch) {
+        return null; // Or a splash screen/spinner
+    }
+
     return (
         <>
             <Header
@@ -91,134 +116,47 @@ export function HomePage() {
             />
 
             <main className={styles.contentSpacing}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'start' }}>
-                    <section className={styles.heroSection}>
-                        <div className={styles.heroBg}>
-                            <div className={styles.heroBgGradient}></div>
-                            <img 
-                                src="/image.jpg" 
-                                alt="Competitive coding arena" 
-                                className={styles.heroBgImg} 
-                            />
+                <section className={styles.heroSection}>
+                    <div className={styles.heroBg}>
+                        <div className={styles.heroBgGradient}></div>
+                        <img 
+                            src="/image.jpg" 
+                            alt="Competitive coding arena" 
+                            className={styles.heroBgImg} 
+                        />
+                    </div>
+                    <div className={`${styles.heroContent} ${styles.heroContentSpacing}`}>
+                        <div className={styles.seasonBadge}>
+                            <span className={styles.pulseDot}>
+                                <span className={styles.pulseOuter}></span>
+                                <span className={styles.pulseInner}></span>
+                            </span>
+                            Season 4
                         </div>
-                        <div className={`${styles.heroContent} ${styles.heroContentSpacing}`}>
-                            <div className={styles.seasonBadge}>
-                                <span className={styles.pulseDot}>
-                                    <span className={styles.pulseOuter}></span>
-                                    <span className={styles.pulseInner}></span>
-                                </span>
-                                Season 4
-                            </div>
 
-                            <h2 className={styles.heroTitle}>
-                                PROVE YOUR <br /> <span className={styles.highlight}>LOGIC</span>.
-                            </h2>
+                        <h2 className={styles.heroTitle}>
+                            PROVE YOUR <br /> <span className={styles.highlight}>LOGIC</span>.
+                        </h2>
 
-                            <p className={styles.heroDescription}>
-                                The ultimate competitive terminal for high-velocity coders. Scale the ranks, dominate the arena, and define your legacy in real-time.
-                            </p>
+                        <p className={styles.heroDescription}>
+                            The ultimate competitive terminal for high-velocity coders. Scale the ranks, dominate the arena, and define your legacy in real-time.
+                        </p>
 
-                            <div className={styles.heroButtons}>
-                                <button 
-                                    className={styles.btnPrimary}
-                                    onClick={handleFindMatch}
-                                >
-                                    <span> FIND THE MATCH </span>
-                                </button>
-                            </div>
-
-                            <div className={styles.terminalLog}>
-                                [ROOT@SERVER]: INIT_CONNECTION_ESTABLISHED... <br />
-                                [SYSTEM]: DECRYPTING_MATCH_LOGS...
-                            </div>
+                        <div className={styles.heroButtons}>
+                            <button 
+                                className={styles.btnPrimary}
+                                onClick={handleFindMatch}
+                            >
+                                <span> FIND THE MATCH </span>
+                            </button>
                         </div>
-                    </section>
 
-                    {/* Leaderboard Section */}
-                    <section className={landingStyles['leaderboardSection']} id="arena-rankings" style={{ marginTop: 0 }}>
-                        <div className={landingStyles['leaderboardInner']}>
-                            <div className={landingStyles['leaderboardTopRow']}>
-                                <div>
-                                    <h2 className={landingStyles['leaderboardTitle']}>
-                                        Arena <span className={landingStyles['leaderboardTitleAccent']}>Rankings</span>
-                                    </h2>
-                                </div>
-                            </div>
-
-                            <div className={landingStyles['tableWrapper']}>
-                                <table className={landingStyles['leaderboardTable']}>
-                                    <thead className={landingStyles['tableHead']}>
-                                        <tr>
-                                            <th className={landingStyles['tableHeadCell']}>Rank</th>
-                                            <th className={landingStyles['tableHeadCell']}>Contestants</th>
-                                            <th className={landingStyles['tableHeadCell']}>Codeforces Handle</th>
-                                            <th className={`${landingStyles['tableHeadCell']} ${landingStyles['tableHeadCellRight']}`}>Score</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {topUsers.map((user, index) => {
-                                            let rowClass = landingStyles['tableRow'];
-                                            
-                                            // First place gets priority styling
-                                            if (index === 0) {
-                                                rowClass = `${landingStyles['tableRow']} ${landingStyles['tableRowFirstPlace']}`;
-                                            } else if (user.id === userId) {
-                                                rowClass = `${landingStyles['tableRow']} ${landingStyles['tableRowCurrentUser']}`;
-                                            } else if (index === 1) {
-                                                rowClass = `${landingStyles['tableRow']} ${landingStyles['tableRowSecondPlace']}`;
-                                            } else if (index === 2) {
-                                                rowClass = `${landingStyles['tableRow']} ${landingStyles['tableRowThirdPlace']}`;
-                                            }
-
-                                            return (
-                                                <tr key={user.id} className={rowClass}>
-                                                    <td className={landingStyles['tableCell']}>
-                                                        <span className={index === 0 ? landingStyles['rankPrimary'] : landingStyles['rankDefault']}>
-                                                            {String(index + 1).padStart(2, '0')}
-                                                        </span>
-                                                    </td>
-                                                    <td className={landingStyles['tableCell']}>
-                                                        <div className={landingStyles['hackerInfo']}>
-                                                            <div className={landingStyles['hackerAvatar']} />
-                                                            <span className={landingStyles['hackerName']}>{user.username}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className={landingStyles['tableCell']}>
-                                                        <span className={landingStyles['codeforcesHandle']}>{user.codeforces_handle || '-'}</span>
-                                                    </td>
-                                                    <td className={landingStyles['tableCellRight']}>
-                                                        <span className={landingStyles['userScore']}>{user.score}</span>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                        {currentUserRank && currentUserRank.rank > 5 && (
-                                            <tr className={`${landingStyles['tableRow']} ${landingStyles['tableRowCurrentUser']}`}>
-                                                <td className={landingStyles['tableCell']}>
-                                                    <span className={landingStyles['rankDefault']}>
-                                                        {String(currentUserRank.rank).padStart(2, '0')}
-                                                    </span>
-                                                </td>
-                                                <td className={landingStyles['tableCell']}>
-                                                    <div className={landingStyles['hackerInfo']}>
-                                                        <div className={landingStyles['hackerAvatar']} />
-                                                        <span className={landingStyles['hackerName']}>{currentUserRank.username}</span>
-                                                    </div>
-                                                </td>
-                                                <td className={landingStyles['tableCell']}>
-                                                    <span className={landingStyles['codeforcesHandle']}>{currentUserRank.codeforces_handle || '-'}</span>
-                                                </td>
-                                                <td className={landingStyles['tableCellRight']}>
-                                                    <span className={landingStyles['userScore']}>{currentUserRank.score}</span>
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div className={styles.terminalLog}>
+                            [ROOT@SERVER]: INIT_CONNECTION_ESTABLISHED... <br />
+                            [SYSTEM]: DECRYPTING_MATCH_LOGS...
                         </div>
-                    </section>
-                </div>
+                    </div>
+                </section>
 
                 {/* Training Grounds Section */}
                 <section className={landingStyles['trainingSection']} id="training-grounds">
@@ -302,6 +240,15 @@ export function HomePage() {
             </main>
 
             <Footer />
+            
+            <Modal 
+                isOpen={modalConfig.isOpen}
+                title="Match Update"
+                message={modalConfig.message}
+                onConfirm={() => setModalConfig({isOpen: false, message: ''})}
+                confirmText="OK"
+                type="alert"
+            />
         </>
     );
 }
