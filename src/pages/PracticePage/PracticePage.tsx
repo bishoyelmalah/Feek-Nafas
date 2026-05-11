@@ -179,7 +179,7 @@ export function PracticePage() {
               </div>
               <input
                 type="text"
-                placeholder="between 800 - 3500"
+                placeholder="800 - 3500"
                 value={ratingInput}
                 onChange={handleRatingInputChange}
                 className={styles.ratingInput}
