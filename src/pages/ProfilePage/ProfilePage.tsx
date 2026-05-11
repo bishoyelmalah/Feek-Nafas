@@ -18,6 +18,7 @@ export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ username: '' });
   const [isUploading, setIsUploading] = useState(false);
+  const [resetPasswordMessage, setResetPasswordMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const userId = auth?.userId;
@@ -156,6 +157,21 @@ export function ProfilePage() {
       setError(err.message || 'Failed to update profile');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!profile?.email) {
+      setError('Email not found');
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(profile.email);
+      if (error) throw error;
+      setResetPasswordMessage('Password reset email sent! Check your inbox for instructions.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to send reset email');
     }
   };
 
@@ -304,7 +320,30 @@ export function ProfilePage() {
               >
                 CANCEL
               </button>
-              <a href="#" className={`${styles.version} ${styles.changePasswordLink}`} style={{ marginLeft: 'auto', alignSelf: 'center' }}>Change password</a>
+              <button 
+                type="button"
+                className={`${styles.version} ${styles.changePasswordLink}`}
+                style={{ marginLeft: 'auto', alignSelf: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                onClick={handleResetPassword}
+              >
+                Change password
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {resetPasswordMessage && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h2>Password Reset</h2>
+            <p style={{ marginBottom: '2rem', textAlign: 'center', fontSize: '0.95rem' }}>{resetPasswordMessage}</p>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+              <button 
+                className={styles.logoutButton} 
+                onClick={() => setResetPasswordMessage('')}
+              >
+                OK
+              </button>
             </div>
           </div>
         </div>
