@@ -55,6 +55,17 @@ export const finishMatch = async (matchId: string, winnerId: string | null) => {
     if (error) throw error;
 }
 
+export const cancelMatch = async (matchId: string) => {
+    const { error } = await supabase
+        .from('matches')
+        .update({ status: 'canceled' })
+        .eq('id', matchId)
+        .neq('status', 'finished')
+        .neq('status', 'canceled');
+    
+    if (error) throw error;
+}
+
 export const createSubmissionChannel = (name: string, callback: () => void) => {
     const channel = supabase.channel(name);
     channel.on(

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Footer from '../../components/Footer/Footer';
 import Header from '../../components/Header/Header';
 import styles from './HomePage.module.css';
@@ -13,15 +13,30 @@ import type { User } from '../../types/UserData';
 import { type Notification } from '../../types/Notification';
 import { getTopUsers, getUserRank } from '../../services/userService';
 import { getActiveMatch } from '../../services/matchService';
+import { Modal } from '../../components/Modal/Modal';
 
 export function HomePage() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { userId } = useAuth();
     const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
     const [notifications, setNotifications ] = useState<Notification[]>([]);
     const [topUsers, setTopUsers] = useState<any[]>([]);
     const [currentUserRank, setCurrentUserRank] = useState<any>(null);
     const [isCheckingActiveMatch, setIsCheckingActiveMatch] = useState(true);
+
+    const [modalConfig, setModalConfig] = useState<{isOpen: boolean, message: string}>({isOpen: false, message: ''});
+
+    useEffect(() => {
+        if (location.state?.notification) {
+            setModalConfig({
+                isOpen: true,
+                message: location.state.notification
+            });
+            // Clear location state to prevent alert on refresh
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state]);
 
     useEffect(() => {
         const checkActiveMatch = async () => {
@@ -328,6 +343,15 @@ export function HomePage() {
             </main>
 
             <Footer />
+            
+            <Modal 
+                isOpen={modalConfig.isOpen}
+                title="Match Update"
+                message={modalConfig.message}
+                onConfirm={() => setModalConfig({isOpen: false, message: ''})}
+                confirmText="OK"
+                type="alert"
+            />
         </>
     );
 }

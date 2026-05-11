@@ -11,13 +11,14 @@ import { useAuth } from '../../hooks/useAuth';
 import { type SubmitEvent } from 'react';
 import { type ChatMessage } from '../../types/ChatMessage';
 import { checkSubmission } from '../../services/codeforcesService';
-import { startMatch, finishMatch, getMatch, sendMessage, getMessages } from '../../services/matchService';
+import { startMatch, finishMatch, getMatch, sendMessage, getMessages, cancelMatch } from '../../services/matchService';
 import { supabase } from '../../lib/supabase';
 import { updateUserScore } from '../../services/userService';
 import { useMatchTimer } from '../../hooks/useMatchTimer';
 import { OpponentContextProvider } from '../../contexts/OpponentContext/OpponentContextProvider';
 import { useOpponent } from '../../hooks/useOpponent';
 import { useMatch } from '../../hooks/useMatch';
+import { Modal } from '../../components/Modal/Modal';
 
 
 
@@ -32,6 +33,7 @@ export function MatchPage() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
 
     const [isFinished, setIsFinished] = useState<{finished: boolean, win: boolean, draw: boolean}>({finished: false, win: false, draw: false});
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     
     const {userId, userData} = useAuth();
     const {opponentData} = useOpponent();
@@ -100,6 +102,22 @@ export function MatchPage() {
             
     };
 
+    const handleReturnToLobby = () => {
+        setIsCancelModalOpen(true);
+    };
+
+    const confirmCancelMatch = async () => {
+        if (effectiveMatchData) {
+            try {
+                await cancelMatch(effectiveMatchData.id);
+                navigate('/home');
+            } catch (error) {
+                console.error('Failed to cancel match:', error);
+            }
+        }
+        setIsCancelModalOpen(false);
+    };
+
     const handleSendMessage = async (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!effectiveMatchData || !userId || !chatInput) return;
@@ -165,8 +183,6 @@ export function MatchPage() {
                 (payload) => {
                     const updatedMatch = payload.new as any;
                     console.log('Match status update received:', updatedMatch);
-                    console.log('Current User ID:', userId);
-                    console.log('Match Winner ID:', updatedMatch.winner_user_id);
                     
                     if (updatedMatch.status === 'finished') {
                         const isWin = updatedMatch.winner_user_id === userId;
@@ -186,6 +202,10 @@ export function MatchPage() {
                                 console.error('Failed to update local score:', err);
                             });
                         }
+                    } else if (updatedMatch.status === 'canceled') {
+                        // The user who clicked the button already navigated away, 
+                        // so this will likely only trigger for the other player.
+                        navigate('/home', { state: { notification: "The other player canceled the match" } });
                     }
                 }
             )
@@ -199,7 +219,7 @@ export function MatchPage() {
             channel.unsubscribe();
             matchChannel.unsubscribe();
         }
-    }, [effectiveMatchData?.id, userId, setMatchData])
+    }, [effectiveMatchData?.id, userId, setMatchData, navigate])
 
     useEffect(()=>{
         if (!effectiveMatchData?.id || effectiveMatchData.status === 'finished') return;
@@ -357,7 +377,7 @@ export function MatchPage() {
                             </button>
                             <button 
                                 className={[styles['action-btn'], styles['danger']].join(' ')}
-                                onClick={() => navigate('/home')}
+                                onClick={handleReturnToLobby}
                             >
                                 <span className="material-symbols-outlined">logout</span>
                                 Return to Lobby
@@ -465,6 +485,16 @@ export function MatchPage() {
             </main>
 
             {/* <Footer/> */}
+            
+            <Modal 
+                isOpen={isCancelModalOpen}
+                title="Cancel Match"
+                message="Do you want to cancel this match and return to home page?"
+                onConfirm={confirmCancelMatch}
+                onCancel={() => setIsCancelModalOpen(false)}
+                confirmText="Yes, Cancel"
+                cancelText="No, Stay"
+            />
         </div>
         </OpponentContextProvider>
     )
