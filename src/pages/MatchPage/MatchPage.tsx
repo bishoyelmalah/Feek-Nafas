@@ -350,13 +350,13 @@ export function MatchPage() {
                             </div>
                             
                             <p className={styles['challenge-description']}>
-                                Contestant who earns a score equal to or greater than the k-th place finisher's score will advance to the next round, as long as the contestant earns a positive score...
+                                To complete this challenge, click the button below to open the problem on Codeforces. Once you've submitted your solution and received an "Accepted" verdict, return here and press the <strong>Refresh</strong> button to synchronize your status.
                             </p>
                             
-                            <div className={styles['challenge-tags']}>
+                            {/* <div className={styles['challenge-tags']}>
                                 <span className={styles['tag']}>Implementation</span>
                                 <span className={styles['tag']}>Special Problems</span>
-                            </div>
+                            </div> */}
                             
                             <a
                                 href={effectiveMatchData ? `https://codeforces.com/contest/${effectiveMatchData.contest_id}/problem/${effectiveMatchData.problem_index}` : '#'}
