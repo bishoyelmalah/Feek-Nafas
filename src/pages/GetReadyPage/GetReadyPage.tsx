@@ -1,12 +1,13 @@
 import styles from './GetReadyPage.module.css';
 import { useNavigate } from 'react-router';
-import { useEffect, useState, useRef } from 'react'; 
+import { useEffect, useState} from 'react'; 
 import lobbySound from '../../assets/sounds/lobby_sound.mp3'
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useOpponent } from '../../hooks/useOpponent';
 import { useMatch } from '../../hooks/useMatch';
 import { getUserData } from '../../services/authService';
+import { type MatchData } from '../../types/MatchData';
 
 //Players Info
 const player = {
@@ -37,32 +38,83 @@ export function GetReadyPage() {
     const {opponentData, setOpponentData} = useOpponent();
     const nav = useNavigate();
     const selectedDuration = matchData?.duration ?? 30;
-    const [ isp1ready , setIsp1ready ] = useState(false);
-    const [ isp2ready , setIsp2ready] = useState(false);
+    // const [ isp1ready , setIsp1ready ] = useState(false);
+    // const [ isp2ready , setIsp2ready] = useState(false);
+
+    const isPlayer1 = userData?.id === matchData?.player1_id;
+
+    const [ isp1ready , setIsp1ready ] = useState(
+        isPlayer1 ? (matchData?.player1_ready || false) : (matchData?.player2_ready || false)
+    );
+    const [ isp2ready , setIsp2ready] = useState(
+        isPlayer1 ? (matchData?.player2_ready || false) : (matchData?.player1_ready || false)
+    );
+
     const [timer , setTimer] = useState(3);
     const ready = isp1ready && isp2ready;
 
-    const channelRef = useRef<any>(null); 
+
+    // const channelRef = useRef<any>(null); // can delete if using Postgres Changes only, but keeping it here in case we want to add any broadcast features later without setting up another listener
 
     // SUPABASE BROADCAST (LISTEN & STORE)
+    // useEffect(() => {
+    //     if (!matchData?.id) return;
+
+    //     const channel = supabase.channel(`match_${matchData.id}`);
+
+    //     // 1. Listen for opponent's status
+    //     channel.on('broadcast', { event: 'ready_status' }, (data) => {
+    //         console.log("Incoming broadcast:", data);
+    //         setIsp2ready(data.payload.isReady);
+    //     }).subscribe();
+
+    //     // 2. Save the live channel so our button can use it to send
+    //     channelRef.current = channel; 
+
+    //     return () => {
+    //         supabase.removeChannel(channel);
+    //     };
+    // }, [matchData?.id]);
+
+
+
+    // --- 📡 SUPABASE POSTGRES CHANGES (LISTEN) ---
     useEffect(() => {
         if (!matchData?.id) return;
 
-        const channel = supabase.channel(`match_${matchData.id}`);
-
-        // 1. Listen for opponent's status
-        channel.on('broadcast', { event: 'ready_status' }, (data) => {
-            console.log("Incoming broadcast:", data);
-            setIsp2ready(data.payload.isReady);
-        }).subscribe();
-
-        // 2. Save the live channel so our button can use it to send
-        channelRef.current = channel; 
+        const channel = supabase
+            .channel(`match_updates_${matchData.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'matches',
+                    filter: `id=eq.${matchData.id}`,
+                },
+                (payload) => {
+                    const updatedMatch = payload.new as MatchData;
+                    console.log("Match updated in DB:", updatedMatch);
+                    
+                    // Map the DB columns back to the correct UI sides
+                    if (isPlayer1) {
+                        setIsp1ready(updatedMatch.player1_ready);
+                        setIsp2ready(updatedMatch.player2_ready);
+                    } else {
+                        setIsp1ready(updatedMatch.player2_ready);
+                        setIsp2ready(updatedMatch.player1_ready);
+                    }
+                }
+            )
+            .subscribe();
 
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [matchData?.id]);
+    }, [matchData?.id, isPlayer1]);
+
+
+
 
     // Set Opponent Data
     useEffect(() => {
@@ -79,21 +131,50 @@ export function GetReadyPage() {
     }, [])
 
     // SUPABASE BROADCAST (SEND)
-    const handlePlayer1Ready = () => {
-        if (ready) return;         // SECURITY LOCK: If both players are ready (timer started), prevent cancelling!
+    // const handlePlayer1Ready = () => {
+    //     if (ready) return;         // SECURITY LOCK: If both players are ready (timer started), prevent cancelling!
+
+    //     const newState = !isp1ready;
+    //     setIsp1ready(newState);
+
+    //     // Broadcast to the opponent --> Use the saved channel to send our status to the opponent
+    //     if (channelRef.current) {
+    //         channelRef.current.send({
+    //             type: 'broadcast',
+    //             event: 'ready_status',
+    //             payload: { isReady: newState }
+    //         });
+    //     }
+    // }
+
+
+
+
+    // --- 📤 SUPABASE DATABASE UPDATE (SEND) ---
+    const handlePlayer1Ready = async () => {
+        if (ready || !matchData?.id) return; // SECURITY LOCK
 
         const newState = !isp1ready;
-        setIsp1ready(newState);
+        setIsp1ready(newState); // Optimistic UI update so it feels instant
 
-        // Broadcast to the opponent --> Use the saved channel to send our status to the opponent
-        if (channelRef.current) {
-            channelRef.current.send({
-                type: 'broadcast',
-                event: 'ready_status',
-                payload: { isReady: newState }
-            });
+        // Figure out which column belongs to us
+        const columnToUpdate = isPlayer1 ? 'player1_ready' : 'player2_ready';
+
+        // Update the database
+        const { error } = await supabase
+            .from('matches')
+            .update({ [columnToUpdate]: newState })
+            .eq('id', matchData.id);
+
+        if (error) {
+            console.error("Failed to update ready status:", error);
+            setIsp1ready(!newState); // Revert UI if the database fails
         }
     }
+
+
+
+
 
     // const handlePlayer1Ready = () => {
     //     setIsp1ready(!isp1ready);
