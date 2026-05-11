@@ -4,6 +4,7 @@ import { getTopUsers, getUserRank } from '../../services/userService';
 import landingStyles from './Leaderboard.module.css';
 import Header from '../../components/Header/Header';
 import { type Notification } from '../../types/Notification';
+import { supabase } from '../../lib/supabase';
 
 // Type definition for our Hacker
 interface Hacker {
@@ -12,6 +13,7 @@ interface Hacker {
     codeforces_handle: string;
     score: number;
     avatar?: string;
+    avatar_url?: string;
 }
 
 const LeaderboardPage: React.FC = () => {
@@ -28,16 +30,41 @@ const LeaderboardPage: React.FC = () => {
     const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
     const [notifications, setNotifications ] = useState<Notification[]>([]);
 
+    const getAvatarUrl = async (userId: string): Promise<string | null> => {
+        try {
+            const { data, error } = await supabase
+                .from("users")
+                .select("avatar_url")
+                .eq("id", userId)
+                .single();
+
+            if (error || !data?.avatar_url) {
+                return null;
+            }
+
+            const { data: publicUrlData } = supabase.storage
+                .from("avatars")
+                .getPublicUrl(data.avatar_url);
+
+            return publicUrlData.publicUrl;
+        } catch (error) {
+            console.error("Failed to fetch avatar:", error);
+            return null;
+        }
+    };
+
     useEffect(() => {
         const fetchLeaderboard = async () => {
             setIsLoading(true);
             try {
                 const users = await getTopUsers(userLimit);
-                
 
-                const usersWithAvatars = users.map((user: any) => ({
-                    ...user,
-                    avatar: `https://api.multiavatar.com/${encodeURIComponent(user.username)}.png`
+                const usersWithAvatars = await Promise.all(users.map(async (user: any) => {
+                    const avatarUrl = await getAvatarUrl(user.id);
+                    return {
+                        ...user,
+                        avatar_url: avatarUrl
+                    };
                 }));
 
                 setTopUsers(usersWithAvatars);
@@ -55,7 +82,13 @@ const LeaderboardPage: React.FC = () => {
         const fetchUserRank = async () => {
             if (!userId) return;
             const rankData = await getUserRank(userId);
-            setCurrentUserRank(rankData);
+            if (rankData) {
+                const avatarUrl = await getAvatarUrl(userId);
+                setCurrentUserRank({
+                    ...rankData,
+                    avatar_url: avatarUrl
+                });
+            }
         };
         fetchUserRank();
     }, [userId]);
@@ -126,15 +159,17 @@ const LeaderboardPage: React.FC = () => {
                                         <td className={landingStyles['tableCell']}>
                                             <div className={landingStyles['hackerInfo']}>
                                                 <div className={landingStyles['hackerAvatar']}>
-                                                    {/* <img 
-                                                        src={user.avatar} 
-                                                        alt={user.username} 
-                                                        style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }}
-                                                        onError={(e) => {
-                                                            // Fallback if Multiavatar fails
-                                                            (e.target as HTMLImageElement).src = `https://api.dicebear.com/9.x/identicon/svg?seed=${user.username}`;
-                                                        }}
-                                                    /> */}
+                                                    {user.avatar_url ? (
+                                                        <img 
+                                                            src={user.avatar_url} 
+                                                            alt={user.username} 
+                                                            style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover', borderRadius: '50%' }}
+                                                            onError={(e) => {
+                                                                (e.target as HTMLImageElement).style.display = 'none';
+                                                                (e.currentTarget.parentElement as HTMLElement).style.backgroundColor = '#1a1a2e';
+                                                            }}
+                                                        />
+                                                    ) : null}
                                                 </div>
                                                 <span className={landingStyles['hackerName']}>{user.username}</span>
                                             </div>
@@ -160,11 +195,17 @@ const LeaderboardPage: React.FC = () => {
                                     <td className={landingStyles['tableCell']}>
                                         <div className={landingStyles['hackerInfo']}>
                                             <div className={landingStyles['hackerAvatar']}>
-                                                {/* <img 
-                                                    src={`https://api.multiavatar.com/${encodeURIComponent(currentUserRank.username)}.png`} 
-                                                    alt="Me" 
-                                                    style={{ width: '100%', height: '100%' }}
-                                                /> */}
+                                                {currentUserRank.avatar_url ? (
+                                                    <img 
+                                                        src={currentUserRank.avatar_url} 
+                                                        alt="Me" 
+                                                        style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover', borderRadius: '50%' }}
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).style.display = 'none';
+                                                            (e.currentTarget.parentElement as HTMLElement).style.backgroundColor = '#1a1a2e';
+                                                        }}
+                                                    />
+                                                ) : null}
                                             </div>
                                             <span className={landingStyles['hackerName']}>{currentUserRank.username}</span>
                                         </div>
@@ -179,7 +220,7 @@ const LeaderboardPage: React.FC = () => {
                             )}
                         </tbody>
                     </table>
-                    {isLoading && <div className={landingStyles['loader']}>Hacking Database...</div>}
+                    {/* {isLoading && <div className={landingStyles['loader']}>Hacking Database...</div>} */}
                 </div>
             </div>
         </section>
