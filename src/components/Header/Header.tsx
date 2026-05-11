@@ -95,6 +95,10 @@ function Header({
   const handleLoginClick = () => {
     navigate('/login');
   };
+  
+  const goPresentation = () => {
+    navigate('/Presentation');
+  };
 
   return (
     <header>
@@ -107,6 +111,9 @@ function Header({
             <h1 className={styles['logo-text']}>
               FEEK<span className={styles['highlight']}>NAFAS</span>
             </h1>
+            <button className={styles['btn-login']} onClick={goPresentation}>
+                Presentation
+            </button>
           </div>
           <nav>
             {session && (
@@ -241,6 +248,7 @@ function Header({
               <button className={styles['btn-login']} onClick={handleLoginClick}>
                 Login
               </button>
+
             )}
           </div>
         </div>

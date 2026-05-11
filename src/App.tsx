@@ -28,6 +28,11 @@ function App() {
       <Route path='/lose' element={<ProtectedRoute><LosePage /></ProtectedRoute>}></Route>
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+      <Route path="/presentation" element={
+        <PublicRoute>
+          <iframe src="/Presentation/Presentation.html" style={{ width: '100vw', height: '100vh', border: 'none' }} title="Presentation" />
+        </PublicRoute>
+      } />
     </Routes>
   )
 }
