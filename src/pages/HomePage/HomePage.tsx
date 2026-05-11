@@ -12,6 +12,7 @@ import { getOpponentDetails } from '../../utils/getOpponentDetails';
 import type { User } from '../../types/UserData';
 import { type Notification } from '../../types/Notification';
 import { getTopUsers, getUserRank } from '../../services/userService';
+import { getActiveMatch } from '../../services/matchService';
 
 export function HomePage() {
     const navigate = useNavigate();
@@ -20,6 +21,33 @@ export function HomePage() {
     const [notifications, setNotifications ] = useState<Notification[]>([]);
     const [topUsers, setTopUsers] = useState<any[]>([]);
     const [currentUserRank, setCurrentUserRank] = useState<any>(null);
+    const [isCheckingActiveMatch, setIsCheckingActiveMatch] = useState(true);
+
+    useEffect(() => {
+        const checkActiveMatch = async () => {
+            if (!userId) {
+                setIsCheckingActiveMatch(false);
+                return;
+            }
+            try {
+                const activeMatch = await getActiveMatch(userId);
+                if (activeMatch) {
+                    if (activeMatch.status === 'accepted') {
+                        navigate(`/getReady/${activeMatch.id}`);
+                        return; // Prevent setting isCheckingActiveMatch to false
+                    } else if (activeMatch.status === 'in_progress') {
+                        navigate(`/match/${activeMatch.id}`);
+                        return; // Prevent setting isCheckingActiveMatch to false
+                    }
+                }
+                setIsCheckingActiveMatch(false);
+            } catch (error) {
+                console.error('Failed to check for active match:', error);
+                setIsCheckingActiveMatch(false);
+            }
+        };
+        checkActiveMatch();
+    }, [userId, navigate]);
 
     const handleFindMatch = () => {
         navigate('/findMatch');
@@ -80,6 +108,10 @@ export function HomePage() {
             removeInbox(inboxChannel);
         };
     }, [userId]);
+
+    if (isCheckingActiveMatch) {
+        return null; // Or a splash screen/spinner
+    }
 
     return (
         <>

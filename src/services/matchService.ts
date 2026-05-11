@@ -53,6 +53,20 @@ export const createSubmissionChannel = (name: string, callback: () => void) => {
     return channel;
 }
 
+export const getActiveMatch = async (userId: string) => {
+    const { data, error } = await supabase
+        .from('matches')
+        .select()
+        .in('status', ['accepted', 'in_progress'])
+        .or(`player1_id.eq.${userId},player2_id.eq.${userId}`)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+    
+    if (error) throw error;
+    return data as MatchData | null;
+}
+
 export const getStartTime = async (matchId: string) => {
     const { data } = await supabase
         .from('matches')
