@@ -1,0 +1,348 @@
+.leaderboardSection {
+  padding: 5rem 1.5rem;
+}
+
+.leaderboardInner {
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+.leaderboardTopRow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .leaderboardTopRow {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+.leaderboardTitle {
+  font-size: 2.25rem;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+}
+
+.leaderboardTitleAccent {
+  color: var(--primary);
+}
+
+.liveIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.liveBlip {
+  position: relative;
+  display: flex;
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
+.liveBlipPing {
+  position: absolute;
+  display: inline-flex;
+  height: 100%;
+  width: 100%;
+  border-radius: 9999px;
+  background-color: rgba(248, 113, 113, 0.75);
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.liveBlipDot {
+  position: relative;
+  display: inline-flex;
+  height: 0.75rem;
+  width: 0.75rem;
+  border-radius: 9999px;
+  background-color: #ef4444;
+}
+
+.leaderboardFilters {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filterBtnInactive {
+  padding: 0.5rem 1rem;
+  background-color: #1e293b;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid #334155;
+  color: #f1f5f9;
+  cursor: pointer;
+  font-family: 'Public Sans', sans-serif;
+}
+
+.filterBtnActive {
+  padding: 0.5rem 1rem;
+  background-color: var(--primary);
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: 'Public Sans', sans-serif;
+}
+
+.tableWrapper {
+  overflow: hidden;
+  border: 1px solid #1e293b;
+  border-radius: 0.75rem;
+  background-color: rgba(26, 15, 10, 0.5);
+  backdrop-filter: blur(4px);
+  overflow-x: auto;
+}
+
+.leaderboardTable {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+.tableHead {
+  background-color: #0f172a;
+  border-bottom: 1px solid #1e293b;
+}
+
+.tableHeadCell {
+  padding: 1rem 1.5rem;
+  font-size: 0.625rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.tableHeadCellRight {
+  text-align: right;
+}
+
+.tableRow {
+  border-bottom: 1px solid #1e293b;
+  transition: background-color 0.15s, box-shadow 0.15s;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableRow:hover {
+  background-color: rgba(236, 91, 19, 0.05);
+}
+
+.tableRowFirstPlace {
+  position: relative;
+  background-color: rgba(255, 191, 0, 0.12);
+  border: 2px solid rgba(255, 191, 0, 0.5);
+  box-shadow: inset 0 0 10px rgba(255, 191, 0, 0.15);
+}
+
+.tableRowFirstPlace:hover {
+  background-color: rgba(255, 191, 0, 0.2);
+  box-shadow: inset 0 0 20px rgba(255, 191, 0, 0.25), 0 0 20px rgba(255, 191, 0, 0.15);
+  border: 2px solid rgba(255, 191, 0, 0.7);
+}
+
+.tableRowSecondPlace {
+  position: relative;
+  background-color: rgba(224, 224, 224, 0.08);
+  border: 2px solid rgba(224, 224, 224, 0.4);
+  box-shadow: inset 0 0 8px rgba(224, 224, 224, 0.1);
+}
+
+.tableRowSecondPlace:hover {
+  background-color: rgba(224, 224, 224, 0.15);
+  box-shadow: inset 0 0 15px rgba(224, 224, 224, 0.2), 0 0 15px rgba(224, 224, 224, 0.1);
+  border: 2px solid rgba(224, 224, 224, 0.6);
+}
+
+.tableRowThirdPlace {
+  position: relative;
+  background-color: rgba(250, 128, 114, 0.08);
+  border: 2px solid rgba(250, 128, 114, 0.4);
+  box-shadow: inset 0 0 8px rgba(250, 128, 114, 0.1);
+}
+
+.tableRowThirdPlace:hover {
+  background-color: rgba(250, 128, 114, 0.15);
+  box-shadow: inset 0 0 15px rgba(250, 128, 114, 0.2), 0 0 15px rgba(250, 128, 114, 0.1);
+  border: 2px solid rgba(250, 128, 114, 0.6);
+}
+
+.tableRowHighlight {
+  background-color: rgba(236, 91, 19, 0.05);
+}
+
+.tableRowCurrentUser {
+  background-color: rgba(236, 91, 19, 0.15);
+  border-top: 1px solid rgba(236, 91, 19, 0.4);
+  border-bottom: 1px solid rgba(236, 91, 19, 0.4);
+  box-shadow: inset 0 0 15px rgba(236, 91, 19, 0.1);
+  opacity: 1 !important;
+}
+
+.tableRowCurrentUser:hover {
+  background-color: rgba(236, 91, 19, 0.25);
+}
+
+.tableCell {
+  padding: 1rem 1.5rem;
+  white-space: nowrap;
+}
+
+.tableCellRight {
+  padding: 1rem 1.5rem;
+  text-align: right;
+  font-family: ui-monospace, monospace;
+}
+
+.rankPrimary {
+  font-weight: 900;
+  font-style: italic;
+  color: var(--primary);
+}
+
+.rankDefault {
+  font-weight: 900;
+  font-style: italic;
+}
+
+.userScore {
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  color: var(--primary);
+}
+
+.codeforcesHandle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  color: var(--accent-blue);
+  font-weight: 600;
+}
+
+.hackerInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hackerAvatar {
+  width: 32px !important;  /* Added !important to override any table-cell stretching */
+  height: 32px !important;
+  border-radius: 50%;
+  overflow: hidden;        /* This MUST be here to crop the image */
+  background-color: #1a1d2b;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 242, 255, 0.2);
+  display: flex;           /* Centers the content */
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.hackerAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;       /* 'contain' is better for SVGs like DiceBear */
+  display: block;
+  object-fit: cover;
+}
+
+.hackerName {
+  font-weight: 700;
+}
+
+.statusBlueText {
+  font-weight: 700;
+  color: var(--accent-blue);
+}
+
+.iconGreen {
+  color: #22c55e;
+  font-size: 0.875rem !important;
+}
+
+.iconDim {
+  color: #475569;
+  font-size: 0.875rem !important;
+}
+
+.iconRed {
+  color: #ef4444;
+  font-size: 0.875rem !important;
+}
+.backButton {
+  background: rgba(0, 242, 255, 0.05);
+  color: #00f2ff;
+  border: 1px solid rgba(0, 242, 255, 0.3);
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; /* Or your hacky font */
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  margin-bottom: 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.backButton:hover {
+  background: rgba(0, 242, 255, 0.15);
+  border-color: #00f2ff;
+  box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+  transform: translateX(-5px); /* Subtle "push back" effect */
+}
+
+/* Also ensure these exist for your filter buttons */
+.filterContainer {
+  display: flex;
+  gap: 10px;
+}
+
+.filterBtnInactive {
+  background: #1a1a1a;
+  color: #888;
+  border: 1px solid #333;
+  padding: 5px 15px;
+  cursor: pointer;
+}
+
+.filterBtnActive {
+  background: #00f2ff;
+  color: #000;
+  border: 1px solid #00f2ff;
+  padding: 5px 15px;
+  font-weight: bold;
+}

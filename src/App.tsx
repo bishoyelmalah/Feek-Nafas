@@ -13,6 +13,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { PublicRoute } from './components/PublicRoute'
 import { ProfilePage } from './pages/ProfilePage/ProfilePage'
 import { SettingsPage } from './pages/SettingsPage/SettingsPage'
+import LeaderboardPage from "./pages/leaderboard/leaderboard";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
       <Route path='/lose' element={<ProtectedRoute><LosePage /></ProtectedRoute>}></Route>
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+      <Route path="/leaderboard/:limit" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
     </Routes>
   )
 }

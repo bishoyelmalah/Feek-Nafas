@@ -18,7 +18,7 @@ interface HeaderProps {
 }
 
 function Header({
-  activeLink = 'arena',
+  activeLink = 'arena' ,
   notificationCount = 0,
   onNotificationOpened,
   notifications
@@ -109,35 +109,27 @@ function Header({
             </h1>
           </div>
           <nav>
-            {session && (
-              <button 
-                onClick={() => navigate('/')} 
-                style={{ 
-                  background: 'none', 
-                  border: 'none', 
-                  color: 'inherit', 
-                  cursor: 'pointer', 
-                  fontSize: '0.875rem',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  padding: '0.5rem 1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#ec5b13';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'inherit';
-                }}
-                className={activeLink === 'arena' ? styles['active'] : ''}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>sports_esports</span>
-                Arena
-              </button>
+            {session && (<div style={{display:'flex'}}>
+                  <button 
+                      onClick={() => navigate('/')} 
+                      className={`${styles.cyberBtn} ${activeLink === 'arena' ? styles.active : ''}`}
+                  >
+                      <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>
+                          sports_esports
+                      </span>
+                      Arena
+                  </button>
+
+                  <button 
+                      onClick={() => navigate('/leaderboard/10')} 
+                      className={`${styles.cyberBtn} ${activeLink === 'leaderboard' ? styles.active : ''}`}
+                  >
+                      <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>
+                          leaderboard
+                      </span>
+                      Rankings
+                  </button>
+                </div>
             )}
           </nav>
         </div>
@@ -237,10 +229,14 @@ function Header({
                   )}
                 </div>
               </>
-            ) : (
+            ) : (<div className={styles['register-btns']}>
               <button className={styles['btn-login']} onClick={handleLoginClick}>
                 Login
               </button>
+              <button className={styles['btn-login']} onClick={()=>{navigate('/register')}}>
+                Sign up
+              </button>
+              </div>
             )}
           </div>
         </div>
