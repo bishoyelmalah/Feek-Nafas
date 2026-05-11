@@ -15,7 +15,13 @@ export async function getAllProblems() {
     }
 
     const allProblems = data.result.problems;
-    return allProblems;
+    
+    // Filter for English-only problems (ASCII characters)
+    const englishProblems = allProblems.filter((problem: CodeforcesProblem) => {
+      return /^[a-zA-Z0-9\s\-.,:'()&/+*]+$/.test(problem.name);
+    });
+
+    return englishProblems;
 
   } catch (error) {
     console.error("Error fetching problem:", error);
