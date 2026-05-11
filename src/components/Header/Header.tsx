@@ -9,6 +9,7 @@ import type { MatchData } from '../../types/MatchData';
 import { getMatch } from '../../services/matchService';
 import { useMatch } from '../../hooks/useMatch';
 import { getAvatarUrl } from '../../services/avatarService';
+import { supabase } from '../../lib/supabase';
 
 interface HeaderProps {
   activeLink?: 'arena' | 'leaderboard' | 'challenges' | 'profile';
@@ -36,14 +37,58 @@ function Header({
     userData?.email?.split('@')[0] ??
     'Player';
 
+  const getHeaderUserAvatar = async () => {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error("No user found");
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from("users")
+      .select("avatar_url")
+      .eq("id", user.id)
+      .single();
+
+    if (error || !data?.avatar_url) {
+      console.error("No avatar found");
+      return null;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(data.avatar_url);
+
+    return publicUrlData.publicUrl;
+  };
+
   useEffect(() => {
     const loadAvatar = async () => {
-      if (session?.user?.id) {
-        const url = await getAvatarUrl(session.user.id);
+      const url = await getHeaderUserAvatar();
+      if (url) {
         setAvatarUrl(url);
       }
     };
     loadAvatar();
+  }, [session]);
+
+  useEffect(() => {
+    const handleAvatarUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail?.userId === session?.user?.id) {
+        setTimeout(() => {
+          getHeaderUserAvatar().then(url => {
+            if (url) setAvatarUrl(url);
+          });
+        }, 500);
+      }
+    };
+    window.addEventListener('avatarUpdated', handleAvatarUpdate);
+    return () => window.removeEventListener('avatarUpdated', handleAvatarUpdate);
   }, [session]);
 
   useEffect(() => {
