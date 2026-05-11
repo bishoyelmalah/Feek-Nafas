@@ -29,7 +29,6 @@ function Header({
   const { setMatchData} = useMatch();
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState('');
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   const displayUsername =
@@ -37,59 +36,8 @@ function Header({
     userData?.email?.split('@')[0] ??
     'Player';
 
-  const getHeaderUserAvatar = async () => {
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      console.error("No user found");
-      return null;
-    }
-
-    const { data, error } = await supabase
-      .from("users")
-      .select("avatar_url")
-      .eq("id", user.id)
-      .single();
-
-    if (error || !data?.avatar_url) {
-      console.error("No avatar found");
-      return null;
-    }
-
-    const { data: publicUrlData } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(data.avatar_url);
-
-    return publicUrlData.publicUrl;
-  };
-
-  useEffect(() => {
-    const loadAvatar = async () => {
-      const url = await getHeaderUserAvatar();
-      if (url) {
-        setAvatarUrl(url);
-      }
-    };
-    loadAvatar();
-  }, [session]);
-
-  useEffect(() => {
-    const handleAvatarUpdate = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      if (customEvent.detail?.userId === session?.user?.id) {
-        setTimeout(() => {
-          getHeaderUserAvatar().then(url => {
-            if (url) setAvatarUrl(url);
-          });
-        }, 500);
-      }
-    };
-    window.addEventListener('avatarUpdated', handleAvatarUpdate);
-    return () => window.removeEventListener('avatarUpdated', handleAvatarUpdate);
-  }, [session]);
+  const avatarValue = userData?.avatar_url;
+  const isAvatarUrl = avatarValue?.startsWith('http');
 
   useEffect(() => {
     const handleDocumentClick = (event: MouseEvent) => {
@@ -256,11 +204,11 @@ function Header({
                       onClick={() => navigate('/profile')} 
                       style={{ cursor: 'pointer' }}
                     >
-                      {avatarUrl ? (
-                        <img src={avatarUrl} alt="avatar" />
+                      {isAvatarUrl ? (
+                        <img src={avatarValue} alt="avatar" />
                       ) : (
                         <div className={styles['avatar-placeholder']}>
-                          {displayUsername?.charAt(0).toUpperCase()}
+                          {avatarValue || displayUsername?.charAt(0).toUpperCase()}
                         </div>
                       )}
                     </div>

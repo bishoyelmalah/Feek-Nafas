@@ -15,10 +15,11 @@ import { startMatch, finishMatch, getMatch, sendMessage, getMessages, cancelMatc
 import { supabase } from '../../lib/supabase';
 import { updateUserScore } from '../../services/userService';
 import { useMatchTimer } from '../../hooks/useMatchTimer';
-import { OpponentContextProvider } from '../../contexts/OpponentContext/OpponentContextProvider';
 import { useOpponent } from '../../hooks/useOpponent';
 import { useMatch } from '../../hooks/useMatch';
 import { Modal } from '../../components/Modal/Modal';
+import { getUserData } from '../../services/authService';
+import { getPublicAvatarUrl } from '../../services/avatarService';
 
 
 
@@ -36,9 +37,15 @@ export function MatchPage() {
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     
     const {userId, userData} = useAuth();
-    const {opponentData} = useOpponent();
+    const {opponentData, setOpponentData} = useOpponent();
     const {matchData, setMatchData} = useMatch();
     const handle = userData?.codeforces_handle ?? '';
+
+    const userAvatarValue = userData?.avatar_url;
+    const isUserAvatarUrl = userAvatarValue?.startsWith('http');
+
+    const opponentAvatarValue = opponentData?.avatar_url;
+    const isOpponentAvatarUrl = opponentAvatarValue?.startsWith('http');
 
     // Scroll to bottom whenever messages change
     useEffect(() => {
@@ -64,6 +71,30 @@ export function MatchPage() {
                 }
                 setMatchData(data);
 
+                // Fetch and resolve opponent data
+                let opponentId = "";
+                if (userId === data.player1_id) {
+                    opponentId = data.player2_id;
+                } else {
+                    opponentId = data.player1_id;
+                }
+
+                if (opponentId) {
+                    const opponent = await getUserData(opponentId);
+                    if (opponent) {
+                        if (opponent.avatar_url && !opponent.avatar_url.startsWith('http')) {
+                            opponent.avatar_url = getPublicAvatarUrl(opponent.avatar_url) || "";
+                        } else if (!opponent.avatar_url) {
+                            opponent.avatar_url = opponent.name
+                                ?.split(' ')
+                                .map((n: string) => n[0])
+                                .join('')
+                                .toUpperCase() || opponent.username?.charAt(0).toUpperCase() || '?';
+                        }
+                        setOpponentData(opponent);
+                    }
+                }
+
                 // If the match is already finished, determine the result and display the appropriate page
                 if (data.status === 'finished') {
                     const isDraw = !data.winner_user_id;
@@ -82,7 +113,7 @@ export function MatchPage() {
         };
 
         fetchMatchData();
-    }, [matchId, navigate, userId, setMatchData]);
+    }, [matchId, navigate, userId, setMatchData, setOpponentData]);
     
     const {timeLeft, durationInMinutes, isTimeUp} = useMatchTimer(effectiveMatchData?.id);
 
@@ -222,9 +253,18 @@ export function MatchPage() {
     }, [effectiveMatchData?.id, userId, setMatchData, navigate])
 
     useEffect(()=>{
-        if (!effectiveMatchData?.id || effectiveMatchData.status === 'finished') return;
-        startMatch(effectiveMatchData.id);
-    }, [effectiveMatchData?.id, effectiveMatchData?.status]);
+        if (!effectiveMatchData?.id || effectiveMatchData.status !== 'accepted') return;
+        
+        const triggerStartMatch = async () => {
+            try {
+                await startMatch(effectiveMatchData.id);
+                setMatchData(prev => prev ? { ...prev, status: 'in_progress' } : null);
+            } catch (error) {
+                console.error('Failed to start match:', error);
+            }
+        };
+        triggerStartMatch();
+    }, [effectiveMatchData?.id, effectiveMatchData?.status, setMatchData]);
 
     if (isLoading || !effectiveMatchData) {
         return null;
@@ -242,7 +282,6 @@ export function MatchPage() {
     }
 
     return (
-        <OpponentContextProvider>
         <div className={styles['match-page']}>
             {/* <Header activeLink="arena" /> */}
             
@@ -254,10 +293,13 @@ export function MatchPage() {
                         <div className={styles['player-info']}>
                             <div className={styles['player-avatar-container']}>
                                 <div className={[styles['player-avatar'], styles['blue-border']].join(' ')}>
-                                    <img 
-                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcSM1JyCgADutBmUal13KYePGDj08Do90Z2zgAeUp9R2VqFq3wAhR8GsAdZXGZTSuutZx0brGzt9_pSsScFju4iwXzh4EDGZuAoCqFm4cXngbLtTRbTHE-EJVXv2GquZ6WbgQhhNKrKfVEszX_TOxWgY8wU9DJFxWG1ueTI_ObIaJ0IS4SNEZeJP1ibgFZZ0zOzsHkSeRXUvCEi6yHozWr8t8kDH9RKiZGgSvlruDo53Bc5B0C87nqhIdbIIYJXU7m0TSF-uX35Ds" 
-                                        alt="Player A avatar"
-                                    />
+                                    {isUserAvatarUrl ? (
+                                        <img src={userAvatarValue} alt="Player A avatar" />
+                                    ) : (
+                                        <div className={styles['avatar-placeholder']}>
+                                            {userAvatarValue}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className={styles['online-indicator']}></div>
                             </div>
@@ -297,10 +339,13 @@ export function MatchPage() {
                             </div>
                             <div className={styles['player-avatar-container']}>
                                 <div className={[styles['player-avatar'], styles['orange-border']].join(' ')}>
-                                    <img 
-                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnkP0tPBbWUufigD2mPunXbt4EYjBqJJgv7Uq6uYj01D-AH8FVNHK2Df06ZMf9RTOINJzZwneretI5Z6G09nsHGJ7bdxqbLyPhnZHQfKj4OfN_rUHSoReSnYA9JVVesrBi_gKVpHcZ5Lq6VehWiDvoGxh1OI_66BtggFz9zGVGB3jKzw0B4OcFxWiqSv8QX5NiidXC6FQxBspR2Wwbg52l6NTo5ja3Uf3hLQ1svBSBmC8YcN5HAKC6lQFZW8nCuQN_MZaQ1wfDluw" 
-                                        alt="Player B avatar"
-                                    />
+                                    {isOpponentAvatarUrl ? (
+                                        <img src={opponentAvatarValue} alt="Player B avatar" />
+                                    ) : (
+                                        <div className={styles['avatar-placeholder']}>
+                                            {opponentAvatarValue}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className={styles['online-indicator']}></div>
                             </div>
@@ -496,6 +541,5 @@ export function MatchPage() {
                 cancelText="No, Stay"
             />
         </div>
-        </OpponentContextProvider>
     )
 }

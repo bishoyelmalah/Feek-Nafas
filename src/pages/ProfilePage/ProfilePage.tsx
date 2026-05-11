@@ -14,7 +14,6 @@ export function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ username: '' });
   const [isUploading, setIsUploading] = useState(false);
@@ -22,35 +21,10 @@ export function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const userId = auth?.userId;
+  const userData = auth?.userData;
 
-  const getUserAvatar = async () => {
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      console.error("No user found");
-      return null;
-    }
-
-    const { data, error } = await supabase
-      .from("users")
-      .select("avatar_url")
-      .eq("id", user.id)
-      .single();
-
-    if (error || !data?.avatar_url) {
-      console.error("No avatar found");
-      return null;
-    }
-
-    const { data: publicUrlData } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(data.avatar_url);
-
-    return publicUrlData.publicUrl;
-  };
+  const avatarValue = userData?.avatar_url;
+  const isAvatarUrl = avatarValue?.startsWith('http');
 
   useEffect(() => {
     if (!userId) {
@@ -76,16 +50,6 @@ export function ProfilePage() {
 
     loadProfile();
   }, [userId, nav]);
-
-  useEffect(() => {
-    const loadAvatar = async () => {
-      const url = await getUserAvatar();
-      if (url) {
-        setAvatarUrl(url);
-      }
-    };
-    loadAvatar();
-  }, [userId]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -123,16 +87,12 @@ export function ProfilePage() {
 
       if (updateError) throw updateError;
 
-      const url = await getUserAvatar();
-      if (url) {
-        setAvatarUrl(url);
-      }
     } catch (err: any) {
       setError(err.message || 'Failed to upload avatar');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
-      // Notify Header to refresh avatar
+      // Notify AuthContext and other components to refresh avatar
       window.dispatchEvent(new CustomEvent('avatarUpdated', { detail: { userId: uploadedUserId } }));
     }
   };
@@ -148,10 +108,6 @@ export function ProfilePage() {
 
       const refreshed = await getUserProfile(userId);
       setProfile(refreshed);
-      const url = await getUserAvatar();
-      if (url) {
-        setAvatarUrl(url);
-      }
       setIsEditing(false);
     } catch (err: any) {
       setError(err.message || 'Failed to update profile');
@@ -218,11 +174,11 @@ export function ProfilePage() {
 
           <div className={styles.avatarSection}>
             <div className={styles.avatar}>
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="avatar" className={styles.avatarImage} />
+              {isAvatarUrl ? (
+                <img src={avatarValue} alt="avatar" className={styles.avatarImage} />
               ) : (
                 <div className={styles.avatarInitial}>
-                  {profile.username?.charAt(0).toUpperCase() || '?'}
+                  {avatarValue || profile.username?.charAt(0).toUpperCase() || '?'}
                 </div>
               )}
             </div>

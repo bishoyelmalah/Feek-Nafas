@@ -61,11 +61,40 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
             }
 
             const response = await getUserData(userId);
-            setUserData(response as User);
-            localStorage.setItem('user_data', JSON.stringify(response));
+            if (response) {
+                let finalAvatarUrl = "";
+                if (response.avatar_url) {
+                    const { data: publicUrlData } = supabase.storage
+                        .from('avatars')
+                        .getPublicUrl(response.avatar_url);
+                    finalAvatarUrl = publicUrlData.publicUrl;
+                } else {
+                    const initials = response.name
+                        ?.split(' ')
+                        .map((n: string) => n[0])
+                        .join('')
+                        .toUpperCase() || response.username?.charAt(0).toUpperCase() || '?';
+                    finalAvatarUrl = initials;
+                }
+
+                const updatedUser = { ...response, avatar_url: finalAvatarUrl };
+                setUserData(updatedUser);
+                localStorage.setItem('user_data', JSON.stringify(updatedUser));
+            }
         };
 
         handleUserData();
+
+        const onAvatarUpdated = (event: any) => {
+            if (event.detail?.userId === userId) {
+                handleUserData();
+            }
+        };
+
+        window.addEventListener('avatarUpdated', onAvatarUpdated);
+        return () => {
+            window.removeEventListener('avatarUpdated', onAvatarUpdated);
+        };
     }, [userId]);
     
     // console.log(session);

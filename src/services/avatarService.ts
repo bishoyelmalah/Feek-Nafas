@@ -1,4 +1,28 @@
 import { supabase } from '../lib/supabase';
+import { type User } from '../types/UserData';
+
+export const resolveUserAvatar = (user: User | null): string => {
+  if (!user) return '?';
+
+  if (user.avatar_url && user.avatar_url.startsWith('http')) {
+    return user.avatar_url;
+  }
+
+  // If it's a file path (doesn't start with http and isn't empty), get public URL
+  // Note: This sync version only works if we've already resolved it or if we don't need async storage call.
+  // Actually, we should probably have an async version too.
+  return user.avatar_url || (user.name
+    ?.split(' ')
+    .map((n: string) => n[0])
+    .join('')
+    .toUpperCase() || user.username?.charAt(0).toUpperCase() || '?');
+};
+
+export const getPublicAvatarUrl = (path: string | null): string | null => {
+    if (!path || path.startsWith('http')) return path;
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+    return data.publicUrl;
+}
 
 export const getAvatarUrl = async (userId: string): Promise<string> => {
   // If this is the currently signed-in user, check auth metadata first (falls back to DB)

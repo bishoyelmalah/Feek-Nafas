@@ -10,7 +10,7 @@ const ITEMS_PER_PAGE = 30;
 const DIFFICULTY_RATINGS = Array.from({ length: (3500 - 800) / 100 + 1 }, (_, i) => 800 + i * 100);
 
 export function PracticePage() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [problems, setProblems] = useState<CodeforcesProblem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
