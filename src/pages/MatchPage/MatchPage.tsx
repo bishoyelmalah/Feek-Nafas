@@ -13,6 +13,7 @@ import { type ChatMessage } from '../../types/ChatMessage';
 import { checkSubmission } from '../../services/codeforcesService';
 import { startMatch, finishMatch, getMatch, sendMessage, getMessages } from '../../services/matchService';
 import { supabase } from '../../lib/supabase';
+import { updateUserScore } from '../../services/userService';
 import { useMatchTimer } from '../../hooks/useMatchTimer';
 import { OpponentContextProvider } from '../../contexts/OpponentContext/OpponentContextProvider';
 import { useOpponent } from '../../hooks/useOpponent';
@@ -168,12 +169,23 @@ export function MatchPage() {
                     console.log('Match Winner ID:', updatedMatch.winner_user_id);
                     
                     if (updatedMatch.status === 'finished') {
+                        const isWin = updatedMatch.winner_user_id === userId;
+                        const isDraw = !updatedMatch.winner_user_id;
+
                         setIsFinished({
                             finished: true,
-                            win: updatedMatch.winner_user_id === userId,
-                            draw: !updatedMatch.winner_user_id
+                            win: isWin,
+                            draw: isDraw
                         });
                         setMatchData(updatedMatch);
+
+                        // LOCAL SCORE UPDATE: Each user updates their OWN score to respect RLS
+                        if (!isDraw && userId) {
+                            const scoreChange = isWin ? 20 : -20;
+                            updateUserScore(userId, scoreChange).catch(err => {
+                                console.error('Failed to update local score:', err);
+                            });
+                        }
                     }
                 }
             )

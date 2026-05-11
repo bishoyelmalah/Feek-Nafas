@@ -1,7 +1,8 @@
 import { supabase } from "../lib/supabase";
 import type { MatchData } from "../types/MatchData";
 import { type CreateMatchData } from "../types/CreateMatchData";
-import type { ChatMessage } from "../types/ChatMessage";
+import { type ChatMessage } from "../types/ChatMessage";
+// import { updateUserScore } from "./userService";
 
 export const createMatch = async ({player1_id, player2_id, contest_id, problem_index, duration}: CreateMatchData) => {
     const {data, error} = await supabase
@@ -38,7 +39,20 @@ export const startMatch = async (matchId: string) => {
 
 export const finishMatch = async (matchId: string, winnerId: string | null) => {
     const timeNow = new Date();
-    await supabase.from('matches').update({status: 'finished', winner_user_id: winnerId, finished_at: timeNow}).eq('id', matchId);
+    
+    // Update the match status in the database. 
+    // We remove score updates from here because RLS prevents one user from updating another user's score.
+    const { error } = await supabase
+        .from('matches')
+        .update({
+            status: 'finished', 
+            winner_user_id: winnerId, 
+            finished_at: timeNow
+        })
+        .eq('id', matchId)
+        .neq('status', 'finished'); // Basic idempotency
+    
+    if (error) throw error;
 }
 
 export const createSubmissionChannel = (name: string, callback: () => void) => {
