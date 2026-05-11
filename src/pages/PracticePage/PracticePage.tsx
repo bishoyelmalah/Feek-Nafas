@@ -7,6 +7,7 @@ import { getAllProblems } from '../../services/codeforcesService';
 import { type CodeforcesProblem } from '../../types/CodeforcesProblem';
 
 const ITEMS_PER_PAGE = 30;
+const DIFFICULTY_RATINGS = Array.from({ length: (3500 - 800) / 100 + 1 }, (_, i) => 800 + i * 100);
 
 export function PracticePage() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ export function PracticePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isTagsDropdownOpen, setIsTagsDropdownOpen] = useState(false);
-  const [ratingInput, setRatingInput] = useState('');
+  const [isRatingsDropdownOpen, setIsRatingsDropdownOpen] = useState(false);
 
   // Fetch all problems on component mount
   useEffect(() => {
@@ -32,12 +33,7 @@ export function PracticePage() {
     fetchProblems();
   }, []);
 
-  // Get unique ratings and tags from problems
-  const ratings = useMemo(() => {
-    return Array.from(new Set(problems.map(p => p.rating).filter(Boolean)))
-      .sort((a, b) => (a || 0) - (b || 0));
-  }, [problems]);
-
+  // Get unique tags from problems
   const tags = useMemo(() => {
     const allTags = new Set<string>();
     problems.forEach(p => {
@@ -66,20 +62,10 @@ export function PracticePage() {
     setCurrentPage(1);
   }, [selectedRatings, selectedTags, searchQuery]);
 
-  const handleRatingInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setRatingInput(value);
-
-    // Parse comma-separated ratings
-    if (value.trim() === '') {
-      setSelectedRatings([]);
-    } else {
-      const ratings = value
-        .split(',')
-        .map(r => parseInt(r.trim()))
-        .filter(r => !isNaN(r));
-      setSelectedRatings(ratings);
-    }
+  const handleRatingToggle = (rating: number) => {
+    setSelectedRatings(prev =>
+      prev.includes(rating) ? prev.filter(r => r !== rating) : [...prev, rating]
+    );
   };
 
   const handleTagToggle = (tag: string) => {
@@ -170,21 +156,52 @@ export function PracticePage() {
                     className={styles.clearBtn}
                     onClick={() => {
                       setSelectedRatings([]);
-                      setRatingInput('');
                     }}
                   >
                     Clear
                   </button>
                 )}
               </div>
-              <input
-                type="text"
-                placeholder="800 - 3500"
-                value={ratingInput}
-                onChange={handleRatingInputChange}
-                className={styles.ratingInput}
-              />
-              <p className={styles.helpText}>Enter ratings separated by commas</p>
+              <div className={styles.dropdownContainer}>
+                <button
+                  className={styles.dropdownToggle}
+                  onClick={() => setIsRatingsDropdownOpen(!isRatingsDropdownOpen)}
+                >
+                  <span>{selectedRatings.length > 0 ? `${selectedRatings.length} selected` : 'Select difficulty'}</span>
+                  <span className={`material-symbols-outlined ${isRatingsDropdownOpen ? styles.open : ''}`}>
+                    expand_more
+                  </span>
+                </button>
+                {isRatingsDropdownOpen && (
+                  <div className={styles.dropdownMenu}>
+                    {DIFFICULTY_RATINGS.map(rating => (
+                      <label key={rating} className={styles.dropdownItem}>
+                        <input
+                          type="checkbox"
+                          checked={selectedRatings.includes(rating)}
+                          onChange={() => handleRatingToggle(rating)}
+                        />
+                        <span>{rating}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {selectedRatings.length > 0 && (
+                <div className={styles.selectedTagsContainer}>
+                  {selectedRatings.sort((a, b) => a - b).map(rating => (
+                    <div key={rating} className={styles.selectedTag}>
+                      <span>{rating}</span>
+                      <button
+                        onClick={() => handleRatingToggle(rating)}
+                        title="Remove rating"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className={styles.filterSection}>
@@ -258,7 +275,6 @@ export function PracticePage() {
                     setSelectedRatings([]);
                     setSelectedTags([]);
                     setSearchQuery('');
-                    setRatingInput('');
                     setCurrentPage(1);
                   }}
                 >

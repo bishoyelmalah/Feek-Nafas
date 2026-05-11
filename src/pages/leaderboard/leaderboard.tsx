@@ -5,6 +5,7 @@ import landingStyles from './Leaderboard.module.css';
 import Header from '../../components/Header/Header';
 import { type Notification } from '../../types/Notification';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
 
 // Type definition for our Hacker
 interface Hacker {
@@ -22,7 +23,7 @@ const LeaderboardPage: React.FC = () => {
     
     // Default to 10 if no limit is provided in URL
     const userLimit = limit ? parseInt(limit) : 10;
-    const userId = "current-user-id"; // Replace with your actual auth logic
+    const {userId} = useAuth(); // Replace with your actual auth logic
 
     const [topUsers, setTopUsers] = useState<Hacker[]>([]);
     const [currentUserRank, setCurrentUserRank] = useState<any>(null);
