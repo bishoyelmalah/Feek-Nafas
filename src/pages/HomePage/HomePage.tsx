@@ -93,8 +93,14 @@ export function HomePage() {
             <main className={styles.contentSpacing}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'start' }}>
                     <section className={styles.heroSection}>
-
-
+                        <div className={styles.heroBg}>
+                            <div className={styles.heroBgGradient}></div>
+                            <img 
+                                src="/image.jpg" 
+                                alt="Competitive coding arena" 
+                                className={styles.heroBgImg} 
+                            />
+                        </div>
                         <div className={`${styles.heroContent} ${styles.heroContentSpacing}`}>
                             <div className={styles.seasonBadge}>
                                 <span className={styles.pulseDot}>
