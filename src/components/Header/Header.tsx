@@ -181,9 +181,9 @@ function Header({
                 </div>
 
                 {/* Settings Button */}
-                <button className={styles['icon-btn']} onClick={handleSettingsClick} title="Settings">
+                {/* <button className={styles['icon-btn']} onClick={handleSettingsClick} title="Settings">
                   <span className="material-symbols-outlined">settings</span>
-                </button>
+                </button> */}
 
                 {/* Profile Menu */}
                 <div className={styles['profile-wrapper']} ref={profileMenuRef}>
@@ -216,10 +216,10 @@ function Header({
 
                   {isProfileModalOpen && (
                     <div className={styles['profile-modal']}>
-                      <button className={styles['profile-modal-btn']} onClick={handleSettingsClick}>
+                      {/* <button className={styles['profile-modal-btn']} onClick={handleSettingsClick}>
                         <span className="material-symbols-outlined">settings</span>
                         Settings
-                      </button>
+                      </button> */}
                       <button
                         className={styles['profile-modal-btn']}
                         onClick={handleLogout}
