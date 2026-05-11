@@ -129,6 +129,16 @@ function Header({
                       </span>
                       Rankings
                   </button>
+
+                  <button 
+                      onClick={() => navigate('/practice')} 
+                      className={`${styles.cyberBtn} ${activeLink === 'challenges' ? styles.active : ''}`}
+                  >
+                      <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>
+                          code
+                      </span>
+                      Practice
+                  </button>
                 </div>
             )}
           </nav>

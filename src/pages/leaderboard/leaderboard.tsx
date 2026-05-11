@@ -70,12 +70,12 @@ const LeaderboardPage: React.FC = () => {
         <section className={landingStyles['leaderboardSection']} id="arena-rankings">
             <div className={landingStyles['leaderboardInner']}>
                 {/* Back Button */}
-                <button 
+                {/* <button 
                     onClick={() => navigate('/home')} 
                     className={landingStyles['backButton']}
                 >
                     ← Back to Home
-                </button>
+                </button> */}
                 <div className={landingStyles['leaderboardTopRow']}>
                     <div>
                         <h2 className={landingStyles['leaderboardTitle']}>
