@@ -263,10 +263,10 @@ export function MatchPage() {
                             </div>
                             <div className={styles['player-details']}>
                                 <span className={[styles['player-name'], styles['blue-text']].join(' ')}>{handle} (You)</span>
-                                <div className={styles['player-stats']}>
+                                {/* <div className={styles['player-stats']}>
                                     <span className={[styles['rank-badge'], styles['blue-badge']].join(' ')}>Candidate Master</span>
                                     <span className={styles['rating']}>1840</span>
-                                </div>
+                                </div> */}
                             </div>
                             {/* <div className={styles['player-status']}>
                                 <span className={[styles['status-text'], styles['thinking']].join(' ')}>Thinking</span>
@@ -290,10 +290,10 @@ export function MatchPage() {
                             </div> */}
                             <div className={[styles['player-details'], styles['right']].join(' ')}>
                                 <span className={[styles['player-name'], styles['orange-text']].join(' ')}>{opponentData?.codeforces_handle}</span>
-                                <div className={styles['player-stats']}>
+                                {/* <div className={styles['player-stats']}>
                                     <span className={styles['rating']}>1910</span>
                                     <span className={[styles['rank-badge'], styles['orange-badge']].join(' ')}>Master</span>
-                                </div>
+                                </div> */}
                             </div>
                             <div className={styles['player-avatar-container']}>
                                 <div className={[styles['player-avatar'], styles['orange-border']].join(' ')}>
