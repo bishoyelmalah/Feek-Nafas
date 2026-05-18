@@ -89,9 +89,9 @@ function Header({
     navigate('/login');
   };
   
-  const goPresentation = () => {
-    navigate('/Presentation');
-  };
+  // const goPresentation = () => {
+  //   navigate('/Presentation');
+  // };
 
   return (
     <header>
@@ -104,9 +104,9 @@ function Header({
             <h1 className={styles['logo-text']}>
               FEEK<span className={styles['highlight']}>NAFAS</span>
             </h1>
-            <button className={styles['btn-login']} onClick={goPresentation}>
+            {/* <button className={styles['btn-login']} onClick={goPresentation}>
                 Presentation
-            </button>
+            </button> */}
           </div>
           <nav>
             {session && (<div style={{display:'flex'}}>
