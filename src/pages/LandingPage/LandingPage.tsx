@@ -8,40 +8,59 @@ import bavlyAvatar from '../../assets/Developers_avatars/Bavly_avatar.jpg';
 import paulaAvatar from '../../assets/Developers_avatars/Paula_avatar.jpg';
 import farahAvatar from '../../assets/Developers_avatars/Farah_avatar.jpg';
 import shahdAvatar from '../../assets/Developers_avatars/Shahd_avatar.jpg';
+// npm install @multiavatar/multiavatar
+import multiavatar from '@multiavatar/multiavatar';
+  const mockTopUsers = [
+    {
+      id: '1',
+      username: 'CYBER_NEXUS',
+      codeforces_handle: 'nexus_pro',
+      score: 4850,
+    },
+    {
+      id: '2',
+      username: 'CODE_PHANTOM',
+      codeforces_handle: 'phantom_coder',
+      score: 4720,
+    },
+    {
+      id: '3',
+      username: 'LOGIC_MASTER',
+      codeforces_handle: 'master_logic',
+      score: 4610,
+    },
+    {
+      id: '4',
+      username: 'ALGO_KING',
+      codeforces_handle: 'algo_genius',
+      score: 4520,
+    },
+    {
+      id: '5',
+      username: 'SYNTAX_WARRIOR',
+      codeforces_handle: 'syntax_lord',
+      score: 4380,
+    },
+  ].map(user => {
+  // Generate the SVG string locally
+  const svgCode = multiavatar(user.username);
 
-const mockTopUsers = [
-  {
-    id: '1',
-    username: 'CYBER_NEXUS',
-    codeforces_handle: 'nexus_pro',
-    score: 4850,
-  },
-  {
-    id: '2',
-    username: 'CODE_PHANTOM',
-    codeforces_handle: 'phantom_coder',
-    score: 4720,
-  },
-  {
-    id: '3',
-    username: 'LOGIC_MASTER',
-    codeforces_handle: 'master_logic',
-    score: 4610,
-  },
-  {
-    id: '4',
-    username: 'ALGO_KING',
-    codeforces_handle: 'algo_genius',
-    score: 4520,
-  },
-  {
-    id: '5',
-    username: 'SYNTAX_WARRIOR',
-    codeforces_handle: 'syntax_lord',
-    score: 4380,
-  },
-];
+  // Convert that string into a Data URI so the <img> tag can read it
+  const base64Avatar = `data:image/svg+xml;utf8,${encodeURIComponent(svgCode)}`;
 
+  return {
+    ...user,
+    avatar: base64Avatar
+  };
+});
+/*another avatars
+or
+.map(user => ({
+  ...user,
+  // Using the 'adventurer' style - it's vibrant and very reliable
+  avatar: `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(user.username)}`
+}));
+*/
 const contributors = [
   {
     name: 'Bishoy El Malah',
@@ -207,33 +226,47 @@ const LandingPage: React.FC = () => {
               </div>
               {/* Tactical Games */}
               <div className={styles['arena-card']}>
-                <div
-                  className={styles['arena-icon-box']}
-                  style={{
-                    backgroundColor: 'rgba(0, 242, 255, 0.1)',
-                    border: '1px solid rgba(0, 242, 255, 0.3)',
-                  }}
-                >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ color: 'var(--accent-blue)' }}
-                  >
-                    shield_with_heart
-                  </span>
-                </div>
-                <h4 className={styles['arena-card-title']}>Tactical X/O</h4>
-                <p className={styles['arena-card-description']}>Use shields and powers to sabotage opponents' logic.</p>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <span className={styles['arena-card-badge']} style={{ color: 'rgba(0, 242, 255, 0.7)' }}>
-                    Strategic
-                  </span>
-                  <span className={styles['arena-card-badge']} style={{ backgroundColor: 'rgba(236, 91, 19, 0.2)', color: 'rgba(236, 91, 19, 0.8)', fontSize: '0.625rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    Coming Soon
-                  </span>
-                </div>
-              </div>
+                    {/* Absolute Positioned Badge */}
+                    <span 
+                      className={styles['arena-card-badge-top']}
+                    >
+                      Coming Soon
+                    </span>
+
+                    <div
+                      className={styles['arena-icon-box']}
+                      style={{
+                        backgroundColor: 'rgba(0, 242, 255, 0.1)',
+                        border: '1px solid rgba(0, 242, 255, 0.3)',
+                      }}
+                    >
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ color: 'var(--accent-blue)' }}
+                      >
+                        shield_with_heart
+                      </span>
+                    </div>
+
+                    <h4 className={styles['arena-card-title']}>Tactical X/O</h4>
+
+                    <p className={styles['arena-card-description']}>
+                      Use shields and powers to sabotage opponents' logic.
+                    </p>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <span className={styles['arena-card-badge']} style={{ color: 'rgba(0, 242, 255, 0.7)' }}>
+                        Strategic
+                      </span>
+                    </div>
+                  </div>
               {/* Champions League */}
               <div className={styles['arena-card']}>
+                      <span 
+                      className={styles['arena-card-badge-top']}
+                    >
+                      Coming Soon
+                    </span>
                 <div
                   className={styles['arena-icon-box']}
                   style={{
@@ -253,14 +286,17 @@ const LandingPage: React.FC = () => {
                   <span className={styles['arena-card-badge']} style={{ color: 'rgba(236, 91, 19, 0.7)' }}>
                     Tournament Mode
                   </span>
-                  <span className={styles['arena-card-badge']} style={{ backgroundColor: 'rgba(236, 91, 19, 0.2)', color: 'rgba(236, 91, 19, 0.8)', fontSize: '0.625rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    Coming Soon
-                  </span>
+
                 </div>
               </div>
 
               {/* Polygon Integration */}
               <div className={styles['arena-card']}>
+                    <span 
+                      className={styles['arena-card-badge-top']}
+                    >
+                      Coming Soon
+                    </span>
                 <div
                   className={styles['arena-icon-box']}
                   style={{
@@ -280,9 +316,7 @@ const LandingPage: React.FC = () => {
                   <span className={styles['arena-card-badge']} style={{ color: 'rgba(168, 85, 247, 0.7)' }}>
                     Integration
                   </span>
-                  <span className={styles['arena-card-badge']} style={{ backgroundColor: 'rgba(236, 91, 19, 0.2)', color: 'rgba(236, 91, 19, 0.8)', fontSize: '0.625rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    Coming Soon
-                  </span>
+
                 </div>
               </div>
             </div>
@@ -417,12 +451,19 @@ const LandingPage: React.FC = () => {
                             {String(index + 1).padStart(2, '0')}
                           </span>
                         </td>
-                        <td className={styles['tableCell']}>
-                          <div className={styles['hackerInfo']}>
-                            <div className={styles['hackerAvatar']} />
-                            <span className={styles['hackerName']}>{user.username}</span>
-                          </div>
-                        </td>
+                          <td className={styles['tableCell']}>
+                            <div className={styles['hackerInfo']}>
+                              {/* Remove the " />" and use an opening and closing tag instead */}
+                              <div className={styles['hackerAvatar']}>
+                                <img 
+                                  src={user.avatar} 
+                                  alt={user.username} 
+                                  style={{ width: '100%', height: '100%', display: 'block' }}
+                                />
+                              </div>
+                              <span className={styles['hackerName']}>{user.username}</span>
+                            </div>
+                          </td>
                         <td className={styles['tableCell']}>
                           <span className={styles['codeforcesHandle']}>{user.codeforces_handle || '-'}</span>
                         </td>

@@ -6,5 +6,6 @@ export interface User {
     codeforces_handle: string,
     score: number,
     created_at?: string,
-    updated_at?: string
+    updated_at?: string,
+    avatar_url?: string
 }

@@ -9,26 +9,7 @@ import { useMatch } from '../../hooks/useMatch';
 import { getUserData } from '../../services/authService';
 import { type MatchData } from '../../types/MatchData';
 
-//Players Info
-const player = {
-    name: 'Ahmed_Warrior',
-    rank: 'DIAMOND III',
-    rp: '2,450 RP',
-    ping: '24ms',
-    connection: 'Stable',
-    avatar:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuDJQQb5REYkskZvP0fno-34F4MIlFTmuLqLHdwpCLWil7Q89LQlscGkaWrP_p99FjSzObdRpoB75vgwplDx5NeSmFJCI5C4jkEqoZ0KIy4uztMEq_PBzjVdDvQ2vx_NbX3ZVqapod1iPM7gitI9VsM8I9hAnVDCNh_G5JAxDxSj7llqS59KLT0oLpa11Z9r2ZYjpvQxg8nfdOskbZX75SJBinpxF1h9kn2VuEshf57myvCWZcRr_kyLczkNeXkYrmAV20sQNm83I0w',
-};
-
-const opponent = {
-    name: 'Night_Stalker',
-    rank: 'DIAMOND II',
-    rp: '2,510 RP',
-    ping: '42ms',
-    connection: 'Encrypted',
-    avatar:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuDmUKiQzzHs9RtgWfCftqWTbVZaFTKCYjYaFFPBP0ctzBSMqZ_muyIZyMA-LBClqJxTMJu_dnMykWaJCY8Lu0HC7Z_l9nnIG0lHqxFY0x4PWhQgKZmhBv9oCx-OQGkRmkAOeA9TOMbOM6OSQNDdMZb_P-0FBo8N_TlejOdn0QzAZYco7GsOi7TWsjnD8HOcXlg-_52vZV1xQmwtQxiqiPnhT36A-FbC_TJKqcnfZjw-k3UpgGetbAdkxEfX6A8en9M4hPDZGjim6Ac',
-};
+import { getPublicAvatarUrl } from '../../services/avatarService';
 
 const audio = new Audio(lobbySound);
 
@@ -55,6 +36,12 @@ export function GetReadyPage() {
 
 
     // const channelRef = useRef<any>(null); // can delete if using Postgres Changes only, but keeping it here in case we want to add any broadcast features later without setting up another listener
+
+    const userAvatarValue = userData?.avatar_url;
+    const isUserAvatarUrl = userAvatarValue?.startsWith('http');
+
+    const opponentAvatarValue = opponentData?.avatar_url;
+    const isOpponentAvatarUrl = opponentAvatarValue?.startsWith('http');
 
     // SUPABASE BROADCAST (LISTEN & STORE)
     // useEffect(() => {
@@ -119,16 +106,29 @@ export function GetReadyPage() {
     // Set Opponent Data
     useEffect(() => {
         const handleOpponentData = async ()=>{
+            if (!matchData || !userData) return;
             let data;
             if (userData?.id === matchData?.player1_id) {
                 data = await getUserData(matchData?.player2_id as string);
             } else {
                 data = await getUserData(matchData?.player1_id as string);
             }
+            
+            if (data) {
+                if (data.avatar_url && !data.avatar_url.startsWith('http')) {
+                    data.avatar_url = getPublicAvatarUrl(data.avatar_url) || "";
+                } else if (!data.avatar_url) {
+                    data.avatar_url = data.name
+                        ?.split(' ')
+                        .map((n: string) => n[0])
+                        .join('')
+                        .toUpperCase() || data.username?.charAt(0).toUpperCase() || '?';
+                }
+            }
             setOpponentData(data);
         }
         handleOpponentData();
-    }, [])
+    }, [matchData, userData, setOpponentData])
 
     // SUPABASE BROADCAST (SEND)
     // const handlePlayer1Ready = () => {
@@ -222,16 +222,22 @@ export function GetReadyPage() {
                         <div className={`${styles.playerCard} ${styles.playerCardPrimary}`}>
                             <div className={styles.avatarWrap}>
                                 <div className={`${styles.avatarRing} ${styles.primary}`}> 
-                                    <img src={player.avatar} alt="Player avatar" className={styles.avatar} />
+                                    {isUserAvatarUrl ? (
+                                        <img src={userAvatarValue} alt="Player avatar" className={styles.avatar} />
+                                    ) : (
+                                        <div className={styles.avatarInitial}>
+                                            {userAvatarValue}
+                                        </div>
+                                    )}
                                 </div>
                                 <span className={`${styles.badge} ${styles.youBadge}`}>YOU</span>
                             </div>
                             <h2 className={styles.playerName}>{userData?.name}</h2>
                             <p className={styles.playerRank}>
                                 <span className="material-symbols-outlined">stars</span>
-                                RANK: {player.rank}
+                                RANK: DIAMOND III
                                 <span className={styles.dot}>•</span>
-                                {player.rp}
+                                2,450 RP
                             </p>
                             {/*Cancel Button*/}
                             <button 
@@ -246,8 +252,8 @@ export function GetReadyPage() {
 
 
                         <div className={styles.connectionRow}>
-                            <span>Ping: {player.ping}</span>
-                            <span>Connection: {player.connection}</span>
+                            <span>Ping: 24ms</span>
+                            <span>Connection: Stable</span>
                         </div>
                     </article>
 
@@ -268,16 +274,22 @@ export function GetReadyPage() {
                         <div className={`${styles.playerCard} ${styles.playerCardSecondary}`}>
                             <div className={styles.avatarWrap}>
                                 <div className={`${styles.avatarRing} ${styles.secondary}`}>
-                                    <img src={opponent.avatar} alt="Opponent avatar" className={styles.avatar} />
+                                    {isOpponentAvatarUrl ? (
+                                        <img src={opponentAvatarValue} alt="Opponent avatar" className={styles.avatar} />
+                                    ) : (
+                                        <div className={styles.avatarInitial}>
+                                            {opponentAvatarValue}
+                                        </div>
+                                    )}
                                 </div>
                                 <span className={`${styles.badge} ${styles.opponentBadge}`}>OPPONENT</span>
                             </div>
                             <h2 className={styles.playerName}>{opponentData?.name}</h2>
                             <p className={styles.playerRank}>
                                 <span className="material-symbols-outlined">stars</span>
-                                RANK: {opponent.rank}
+                                RANK: DIAMOND II
                                 <span className={styles.dot}>•</span>
-                                {opponent.rp}
+                                2,510 RP
                             </p>
                             {/* <button onClick={handlePlayer2Ready} className={styles.readyButton}>{isp2ready ? 'READY ✓' : 'READY'}</button> */}
                             <button 
@@ -288,8 +300,8 @@ export function GetReadyPage() {
                             </button>
                         </div>
                         <div className={styles.connectionRow}>
-                            <span>Ping: {opponent.ping}</span>
-                            <span>Connection: {opponent.connection}</span>
+                            <span>Ping: 42ms</span>
+                            <span>Connection: Encrypted</span>
                         </div>
                     </article>
                 </section>

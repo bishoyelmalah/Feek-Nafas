@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { AuthContext } from '../../contexts/AuthContext/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -14,11 +14,17 @@ export function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', username: '', email: '', codeforces_handle: '' });
+  const [editForm, setEditForm] = useState({ username: '' });
+  const [isUploading, setIsUploading] = useState(false);
+  const [resetPasswordMessage, setResetPasswordMessage] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const userId = auth?.userId;
+  const userData = auth?.userData;
+
+  const avatarValue = userData?.avatar_url;
+  const isAvatarUrl = avatarValue?.startsWith('http');
 
   useEffect(() => {
     if (!userId) {
@@ -33,10 +39,7 @@ export function ProfilePage() {
         const userProfile = await getUserProfile(userId);
         setProfile(userProfile);
         setEditForm({
-          name: (userProfile as any).name || '',
           username: userProfile.username || '',
-          email: userProfile.email || '',
-          codeforces_handle: userProfile.codeforces_handle || '',
         });
       } catch (err: any) {
         setError(err.message || 'Failed to load profile');
@@ -48,19 +51,50 @@ export function ProfilePage() {
     loadProfile();
   }, [userId, nav]);
 
-  useEffect(() => {
-    const loadAvatar = async () => {
-      if (userId) {
-        const url = await getAvatarUrl(userId);
-        setAvatarUrl(url);
-      }
-    };
-    loadAvatar();
-  }, [userId]);
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     nav('/login');
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !userId) return;
+
+    setIsUploading(true);
+    setError('');
+    let uploadedUserId = userId;
+    try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) throw new Error('User not authenticated');
+      uploadedUserId = user.id;
+
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          avatar_url: filePath,
+          updated_at: new Date(),
+        })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+    } catch (err: any) {
+      setError(err.message || 'Failed to upload avatar');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      // Notify AuthContext and other components to refresh avatar
+      window.dispatchEvent(new CustomEvent('avatarUpdated', { detail: { userId: uploadedUserId } }));
+    }
   };
 
   const handleSave = async () => {
@@ -69,21 +103,31 @@ export function ProfilePage() {
     setError('');
     try {
       await updateUserProfile(userId, {
-        name: editForm.name || null,
         username: editForm.username || null,
-        email: editForm.email || null,
-        codeforces_handle: editForm.codeforces_handle || null,
       });
 
       const refreshed = await getUserProfile(userId);
       setProfile(refreshed);
-      const url = await getAvatarUrl(userId);
-      setAvatarUrl(url);
       setIsEditing(false);
     } catch (err: any) {
       setError(err.message || 'Failed to update profile');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!profile?.email) {
+      setError('Email not found');
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(profile.email);
+      if (error) throw error;
+      setResetPasswordMessage('Password reset email sent! Check your inbox for instructions.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to send reset email');
     }
   };
 
@@ -130,11 +174,11 @@ export function ProfilePage() {
 
           <div className={styles.avatarSection}>
             <div className={styles.avatar}>
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="avatar" className={styles.avatarImage} />
+              {isAvatarUrl ? (
+                <img src={avatarValue} alt="avatar" className={styles.avatarImage} />
               ) : (
                 <div className={styles.avatarInitial}>
-                  {profile.username?.charAt(0).toUpperCase() || '?'}
+                  {avatarValue || profile.username?.charAt(0).toUpperCase() || '?'}
                 </div>
               )}
             </div>
@@ -188,39 +232,74 @@ export function ProfilePage() {
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
             <h2>Edit Profile</h2>
-            <div className={styles.inputRow}>
-              <label>Name</label>
-              <input value={editForm.name} onChange={e => setEditForm(prev => ({ ...prev, name: e.target.value }))} />
-            </div>
+            {error && <div style={{ color: '#ff6b6b', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
             <div className={styles.inputRow}>
               <label>Handle</label>
               <input value={editForm.username} onChange={e => setEditForm(prev => ({ ...prev, username: e.target.value }))} />
             </div>
             <div className={styles.inputRow}>
-              <label>Email</label>
-              <input value={editForm.email} onChange={e => setEditForm(prev => ({ ...prev, email: e.target.value }))} />
-            </div>
-            <div className={styles.inputRow}>
-              <label>Codeforces Handle</label>
-              <input value={editForm.codeforces_handle} onChange={e => setEditForm(prev => ({ ...prev, codeforces_handle: e.target.value }))} />
-            </div>
-            <div className={styles.inputRow}>
               <label>Add Photo</label>
               <div className={styles.fileRow}>
-                <button type="button" className={styles.uploadIconButton} title="Upload photo" onClick={() => {}}>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  id="avatarUpload"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleAvatarUpload}
+                  disabled={isUploading}
+                />
+                <button
+                  type="button"
+                  className={styles.uploadIconButton}
+                  title="Upload photo"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
                     <path d="M12 16V4" stroke="#ec5b13" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M6 10l6-6 6 6" stroke="#ec5b13" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M20 20H4a2 2 0 0 1-2-2v-4" stroke="#00f2ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </button>
-                <span className={styles.fileHint}>Upload photo</span>
+                <span className={styles.fileHint}>{isUploading ? 'Uploading...' : 'Upload photo'}</span>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
               <button className={styles.logoutButton} onClick={handleSave} disabled={isLoading}>SAVE</button>
-              <button className={styles.logoutButton} onClick={() => setIsEditing(false)}>CANCEL</button>
-              <a href="#" className={`${styles.version} ${styles.changePasswordLink}`} style={{ marginLeft: 'auto', alignSelf: 'center' }}>Change password</a>
+              <button 
+                className={styles.logoutButton} 
+                onClick={() => {
+                  setIsEditing(false);
+                  setError('');
+                }}
+              >
+                CANCEL
+              </button>
+              <button 
+                type="button"
+                className={`${styles.version} ${styles.changePasswordLink}`}
+                style={{ marginLeft: 'auto', alignSelf: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                onClick={handleResetPassword}
+              >
+                Change password
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {resetPasswordMessage && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h2>Password Reset</h2>
+            <p style={{ marginBottom: '2rem', textAlign: 'center', fontSize: '0.95rem' }}>{resetPasswordMessage}</p>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+              <button 
+                className={styles.logoutButton} 
+                onClick={() => setResetPasswordMessage('')}
+              >
+                OK
+              </button>
             </div>
           </div>
         </div>

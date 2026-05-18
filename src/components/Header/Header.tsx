@@ -9,6 +9,7 @@ import type { MatchData } from '../../types/MatchData';
 import { getMatch } from '../../services/matchService';
 import { useMatch } from '../../hooks/useMatch';
 import { getAvatarUrl } from '../../services/avatarService';
+import { supabase } from '../../lib/supabase';
 
 interface HeaderProps {
   activeLink?: 'arena' | 'leaderboard' | 'challenges' | 'profile';
@@ -18,7 +19,7 @@ interface HeaderProps {
 }
 
 function Header({
-  activeLink = 'arena',
+  activeLink = 'arena' ,
   notificationCount = 0,
   onNotificationOpened,
   notifications
@@ -28,7 +29,6 @@ function Header({
   const { setMatchData} = useMatch();
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState('');
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   const displayUsername =
@@ -36,15 +36,8 @@ function Header({
     userData?.email?.split('@')[0] ??
     'Player';
 
-  useEffect(() => {
-    const loadAvatar = async () => {
-      if (session?.user?.id) {
-        const url = await getAvatarUrl(session.user.id);
-        setAvatarUrl(url);
-      }
-    };
-    loadAvatar();
-  }, [session]);
+  const avatarValue = userData?.avatar_url;
+  const isAvatarUrl = avatarValue?.startsWith('http');
 
   useEffect(() => {
     const handleDocumentClick = (event: MouseEvent) => {
@@ -116,35 +109,37 @@ function Header({
             </button>
           </div>
           <nav>
-            {session && (
-              <button 
-                onClick={() => navigate('/')} 
-                style={{ 
-                  background: 'none', 
-                  border: 'none', 
-                  color: 'inherit', 
-                  cursor: 'pointer', 
-                  fontSize: '0.875rem',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  padding: '0.5rem 1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#ec5b13';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'inherit';
-                }}
-                className={activeLink === 'arena' ? styles['active'] : ''}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>sports_esports</span>
-                Arena
-              </button>
+            {session && (<div style={{display:'flex'}}>
+                  <button 
+                      onClick={() => navigate('/')} 
+                      className={`${styles.cyberBtn} ${activeLink === 'arena' ? styles.active : ''}`}
+                  >
+                      <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>
+                          sports_esports
+                      </span>
+                      Arena
+                  </button>
+
+                  <button 
+                      onClick={() => navigate('/leaderboard/10')} 
+                      className={`${styles.cyberBtn} ${activeLink === 'leaderboard' ? styles.active : ''}`}
+                  >
+                      <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>
+                          leaderboard
+                      </span>
+                      Rankings
+                  </button>
+
+                  <button 
+                      onClick={() => navigate('/practice')} 
+                      className={`${styles.cyberBtn} ${activeLink === 'challenges' ? styles.active : ''}`}
+                  >
+                      <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>
+                          code
+                      </span>
+                      Practice
+                  </button>
+                </div>
             )}
           </nav>
         </div>
@@ -193,9 +188,9 @@ function Header({
                 </div>
 
                 {/* Settings Button */}
-                <button className={styles['icon-btn']} onClick={handleSettingsClick} title="Settings">
+                {/* <button className={styles['icon-btn']} onClick={handleSettingsClick} title="Settings">
                   <span className="material-symbols-outlined">settings</span>
-                </button>
+                </button> */}
 
                 {/* Profile Menu */}
                 <div className={styles['profile-wrapper']} ref={profileMenuRef}>
@@ -216,11 +211,11 @@ function Header({
                       onClick={() => navigate('/profile')} 
                       style={{ cursor: 'pointer' }}
                     >
-                      {avatarUrl ? (
-                        <img src={avatarUrl} alt="avatar" />
+                      {isAvatarUrl ? (
+                        <img src={avatarValue} alt="avatar" />
                       ) : (
                         <div className={styles['avatar-placeholder']}>
-                          {displayUsername?.charAt(0).toUpperCase()}
+                          {avatarValue || displayUsername?.charAt(0).toUpperCase()}
                         </div>
                       )}
                     </div>
@@ -228,10 +223,10 @@ function Header({
 
                   {isProfileModalOpen && (
                     <div className={styles['profile-modal']}>
-                      <button className={styles['profile-modal-btn']} onClick={handleSettingsClick}>
+                      {/* <button className={styles['profile-modal-btn']} onClick={handleSettingsClick}>
                         <span className="material-symbols-outlined">settings</span>
                         Settings
-                      </button>
+                      </button> */}
                       <button
                         className={styles['profile-modal-btn']}
                         onClick={handleLogout}
@@ -244,11 +239,14 @@ function Header({
                   )}
                 </div>
               </>
-            ) : (
+            ) : (<div className={styles['register-btns']}>
               <button className={styles['btn-login']} onClick={handleLoginClick}>
                 Login
               </button>
-
+              <button className={styles['btn-login']} onClick={()=>{navigate('/register')}}>
+                Sign up
+              </button>
+              </div>
             )}
           </div>
         </div>

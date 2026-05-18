@@ -330,7 +330,11 @@ nav a:not(.active):hover {
 .btn-login:active {
   transform: translateY(0);
 }
-
+.register-btns {
+  display: flex;      
+  gap: 16px;           
+  align-items: center; 
+}
 /* Avatar Placeholder */
 .avatar-placeholder {
   width: 100%;
@@ -344,7 +348,43 @@ nav a:not(.active):hover {
   font-size: 1rem;
   border-radius: 0.375rem;
 }
+.cyberBtn {
+  background: none;
+  border: none;
+  color: inherit; /* Takes color from parent or default */
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
 
+/* Replaces your onMouseEnter logic */
+.cyberBtn:hover {
+  color: #ec5b13; /* Your orange accent */
+}
+
+/* If you have an active state */
+.active {
+  color: #ec5b13 !important;
+  position: relative;
+}
+
+.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 1rem;
+  right: 1rem;
+  height: 2px;
+  background-color: #ec5b13;
+}
 /* Responsive Design */
 @media (min-width: 768px) {
   nav {
