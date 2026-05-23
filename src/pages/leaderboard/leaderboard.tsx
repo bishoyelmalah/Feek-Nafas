@@ -30,6 +30,7 @@ const LeaderboardPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
     const [notifications, setNotifications ] = useState<Notification[]>([]);
+    const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
     const getAvatarUrl = async (userId: string): Promise<string | null> => {
         try {
@@ -160,17 +161,18 @@ const LeaderboardPage: React.FC = () => {
                                         <td className={landingStyles['tableCell']}>
                                             <div className={landingStyles['hackerInfo']}>
                                                 <div className={landingStyles['hackerAvatar']}>
-                                                    {user.avatar_url ? (
+                                                    {user.avatar_url && !imageErrors[user.id] ? (
                                                         <img 
                                                             src={user.avatar_url} 
                                                             alt={user.username} 
                                                             style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover', borderRadius: '50%' }}
-                                                            onError={(e) => {
-                                                                (e.target as HTMLImageElement).style.display = 'none';
-                                                                (e.currentTarget.parentElement as HTMLElement).style.backgroundColor = '#1a1a2e';
-                                                            }}
+                                                            onError={() => setImageErrors(prev => ({ ...prev, [user.id]: true }))}
                                                         />
-                                                    ) : null}
+                                                    ) : (
+                                                        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem' }}>
+                                                            {user.username?.charAt(0).toUpperCase() || '?'}
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <span className={landingStyles['hackerName']}>{user.username}</span>
                                             </div>
@@ -196,17 +198,18 @@ const LeaderboardPage: React.FC = () => {
                                     <td className={landingStyles['tableCell']}>
                                         <div className={landingStyles['hackerInfo']}>
                                             <div className={landingStyles['hackerAvatar']}>
-                                                {currentUserRank.avatar_url ? (
+                                                {currentUserRank.avatar_url && userId && !imageErrors[userId] ? (
                                                     <img 
                                                         src={currentUserRank.avatar_url} 
                                                         alt="Me" 
                                                         style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover', borderRadius: '50%' }}
-                                                        onError={(e) => {
-                                                            (e.target as HTMLImageElement).style.display = 'none';
-                                                            (e.currentTarget.parentElement as HTMLElement).style.backgroundColor = '#1a1a2e';
-                                                        }}
+                                                        onError={() => setImageErrors(prev => ({ ...prev, [userId]: true }))}
                                                     />
-                                                ) : null}
+                                                ) : (
+                                                    <span style={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem' }}>
+                                                        {currentUserRank.username?.charAt(0).toUpperCase() || '?'}
+                                                    </span>
+                                                )}
                                             </div>
                                             <span className={landingStyles['hackerName']}>{currentUserRank.username}</span>
                                         </div>
