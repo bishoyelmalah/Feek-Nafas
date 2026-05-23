@@ -508,6 +508,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: auto;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
   background: linear-gradient(90deg, rgba(236, 91, 19, 0.8), rgba(236, 91, 19, 0.6));

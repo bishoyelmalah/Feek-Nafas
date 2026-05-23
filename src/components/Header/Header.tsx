@@ -40,6 +40,7 @@ function Header({
   const isAvatarUrl = avatarValue?.startsWith('http');
 
   useEffect(() => {
+    // console.log(displayUsername);
     const handleDocumentClick = (event: MouseEvent) => {
       if (!profileMenuRef.current?.contains(event.target as Node)) {
         setIsProfileModalOpen(false);

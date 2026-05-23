@@ -6,11 +6,13 @@ import { CreateMatchServices } from '../../services/findMatchService';
 import { getProblemByRatingOrTopic } from '../../services/codeforcesService';
 import { useAuth } from '../../hooks/useAuth';
 import { useMatch } from '../../hooks/useMatch';
+import { useProblems } from '../../hooks/useProblems';
 
 export function FindMatchPage() {
     const nav = useNavigate();
     const { userId, loading: authLoading } = useAuth();
     const { setMatchData } = useMatch();
+    const { problems } = useProblems();
 
     const [searchUsername, setSearchUsername] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +49,7 @@ export function FindMatchPage() {
             const problem = await getProblemByRatingOrTopic({
                 rating: selectedRating === 'Any' ? undefined : parseInt(selectedRating),
                 topic: selectedTopic === 'Any' ? undefined : selectedTopic
-            });
+            }, problems);
 
             if (!problem) {
                 throw new Error('Failed to fetch a problem. Please try again.');

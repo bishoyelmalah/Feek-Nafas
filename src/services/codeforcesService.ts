@@ -30,7 +30,7 @@ export async function getAllProblems() {
 }
 
 
-export async function getProblemByRatingOrTopic({rating, topic}: ProblemData) {
+export async function getProblemByRatingOrTopic({rating, topic}: ProblemData, existingProblems?: CodeforcesProblem[]) {
   try {
     let selectedRating = rating;
     let selectedTopic = topic;
@@ -44,10 +44,12 @@ export async function getProblemByRatingOrTopic({rating, topic}: ProblemData) {
       const idx = Math.floor(Math.random() * topicOptions.length);
       selectedTopic = topicOptions[idx];
     }
-    const problems = await getAllProblems();
+    const problems = existingProblems || await getAllProblems();
+    if (!problems) throw new Error("Could not load problems");
+
     const filteredProblems = problems.filter(
       (problem: CodeforcesProblem) => {
-          return problem.rating === selectedRating && problem.tags?.includes(selectedTopic.toLowerCase());
+          return problem.rating === selectedRating && problem.tags?.includes(selectedTopic!.toLowerCase());
       }
     );
     

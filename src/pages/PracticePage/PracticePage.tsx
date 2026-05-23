@@ -3,35 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import styles from './PracticePage.module.css';
-import { getAllProblems } from '../../services/codeforcesService';
 import { type CodeforcesProblem } from '../../types/CodeforcesProblem';
+import { useProblems } from '../../hooks/useProblems';
 
 const ITEMS_PER_PAGE = 30;
 const DIFFICULTY_RATINGS = Array.from({ length: (3500 - 800) / 100 + 1 }, (_, i) => 800 + i * 100);
 
 export function PracticePage() {
   // const navigate = useNavigate();
-  const [problems, setProblems] = useState<CodeforcesProblem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { problems, loading } = useProblems();
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isTagsDropdownOpen, setIsTagsDropdownOpen] = useState(false);
   const [isRatingsDropdownOpen, setIsRatingsDropdownOpen] = useState(false);
-
-  // Fetch all problems on component mount
-  useEffect(() => {
-    const fetchProblems = async () => {
-      setLoading(true);
-      const data = await getAllProblems();
-      if (data) {
-        setProblems(data);
-      }
-      setLoading(false);
-    };
-    fetchProblems();
-  }, []);
 
   // Get unique tags from problems
   const tags = useMemo(() => {

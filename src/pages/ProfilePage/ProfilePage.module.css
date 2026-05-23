@@ -63,6 +63,20 @@
   margin-bottom: 2rem;
 }
 
+.avatarInfo {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.userName {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  letter-spacing: 0.05em;
+  font-family: 'JetBrains Mono', monospace;
+}
+
 .avatar {
   width: 90px;
   height: 90px;
@@ -301,6 +315,14 @@
 
   .statValue {
     font-size: 1.2rem;
+  }
+
+  .avatarInfo {
+    gap: 1rem;
+  }
+
+  .userName {
+    font-size: 1.1rem;
   }
 
   .actions {

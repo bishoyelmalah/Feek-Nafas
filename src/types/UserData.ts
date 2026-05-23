@@ -7,5 +7,8 @@ export interface User {
     score: number,
     created_at?: string,
     updated_at?: string,
-    avatar_url?: string
+    avatar_url?: string,
+    rank?: number,
+    totalMatches?: number,
+    wins?: number
 }

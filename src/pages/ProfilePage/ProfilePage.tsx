@@ -1,55 +1,35 @@
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { AuthContext } from '../../contexts/AuthContext/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { getUserProfile, updateUserProfile, type UserProfile } from '../../services/ProfileService';
-import { getAvatarUrl } from '../../services/avatarService';
+import { updateUserProfile } from '../../services/authService';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import styles from './ProfilePage.module.css';
+import { useAuth } from '../../hooks/useAuth';
 
 export function ProfilePage() {
   const nav = useNavigate();
-  const auth = useContext(AuthContext);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { session, userId, userData, loading: authLoading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ username: '' });
   const [isUploading, setIsUploading] = useState(false);
   const [resetPasswordMessage, setResetPasswordMessage] = useState('');
+  const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const userId = auth?.userId;
-  const userData = auth?.userData;
 
   const avatarValue = userData?.avatar_url;
   const isAvatarUrl = avatarValue?.startsWith('http');
 
   useEffect(() => {
-    if (!userId) {
+    if (!authLoading && !userId) {
       nav('/login');
-      return;
     }
-
-    const loadProfile = async () => {
-      setIsLoading(true);
-      setError('');
-      try {
-        const userProfile = await getUserProfile(userId);
-        setProfile(userProfile);
-        setEditForm({
-          username: userProfile.username || '',
-        });
-      } catch (err: any) {
-        setError(err.message || 'Failed to load profile');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadProfile();
-  }, [userId, nav]);
+    if (userData) {
+      setEditForm({
+        username: userData.username || '',
+      });
+    }
+  }, [userId, authLoading, nav, userData]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -99,31 +79,28 @@ export function ProfilePage() {
 
   const handleSave = async () => {
     if (!userId) return;
-    setIsLoading(true);
     setError('');
     try {
       await updateUserProfile(userId, {
         username: editForm.username || null,
       });
 
-      const refreshed = await getUserProfile(userId);
-      setProfile(refreshed);
       setIsEditing(false);
+      // Notify AuthContext to refresh user data
+      window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { userId } }));
     } catch (err: any) {
       setError(err.message || 'Failed to update profile');
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleResetPassword = async () => {
-    if (!profile?.email) {
+    if (!userData?.email) {
       setError('Email not found');
       return;
     }
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(profile.email);
+      const { error } = await supabase.auth.resetPasswordForEmail(userData.email);
       if (error) throw error;
       setResetPasswordMessage('Password reset email sent! Check your inbox for instructions.');
     } catch (err: any) {
@@ -132,7 +109,7 @@ export function ProfilePage() {
   };
 
 
-  if (isLoading) {
+  if (authLoading) {
     return (
       <>
         <Header activeLink="profile" />
@@ -145,7 +122,7 @@ export function ProfilePage() {
     );
   }
 
-  if (error || !profile) {
+  if (!userData) {
     return (
       <>
         <Header activeLink="profile" />
@@ -158,8 +135,8 @@ export function ProfilePage() {
     );
   }
 
-  const winRate = profile.totalMatches > 0
-    ? Math.round((profile.wins / profile.totalMatches) * 100)
+  const winRate = (userData.totalMatches || 0) > 0
+    ? Math.round(((userData.wins || 0) / (userData.totalMatches || 1)) * 100)
     : 0;
 
   return (
@@ -173,43 +150,48 @@ export function ProfilePage() {
           </div>
 
           <div className={styles.avatarSection}>
-            <div className={styles.avatar}>
-              {isAvatarUrl ? (
-                <img src={avatarValue} alt="avatar" className={styles.avatarImage} />
-              ) : (
-                <div className={styles.avatarInitial}>
-                  {avatarValue || profile.username?.charAt(0).toUpperCase() || '?'}
-                </div>
-              )}
+            <div className={styles.avatarInfo}>
+              <div className={styles.avatar}>
+                {isAvatarUrl ? (
+                  <img src={avatarValue} alt="avatar" className={styles.avatarImage} />
+                ) : (
+                  <div className={styles.avatarInitial}>
+                    {avatarValue || userData.username?.charAt(0).toUpperCase() || '?'}
+                  </div>
+                )}
+              </div>
+              <div className={styles.userName}>
+                {userData.name || 'N/A'}
+              </div>
             </div>
             <div className={styles.rankBadge}>
               <span className={styles.rankLabel}>RANK</span>
-              <span className={styles.rankValue}>#{profile.rank}</span>
+              <span className={styles.rankValue}>#{userData.rank}</span>
             </div>
           </div>
 
           <div className={styles.infoSection}>
             <div className={styles.infoRow}>
-              <span className={styles.label}>HANDLE</span>
-              <span className={styles.value}>{profile.username || 'N/A'}</span>
+              <span className={styles.label}>EMAIL</span>
+              <span className={styles.value}>{userData.email || 'N/A'}</span>
             </div>
             <div className={styles.infoRow}>
-              <span className={styles.label}>EMAIL</span>
-              <span className={styles.value}>{profile.email || 'N/A'}</span>
+              <span className={styles.label}>USERNAME</span>
+              <span className={styles.value}>{userData.username || 'N/A'}</span>
             </div>
             <div className={styles.infoRow}>
               <span className={styles.label}>CODEFORCES HANDLE</span>
-              <span className={styles.value}>{profile.codeforces_handle || 'NOT SET'}</span>
+              <span className={styles.value}>{userData.codeforces_handle || 'NOT SET'}</span>
             </div>
           </div>
 
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
-              <span className={styles.statValue}>{profile.score}</span>
+              <span className={styles.statValue}>{userData.score}</span>
               <span className={styles.statLabel}>SCORE (TOTAL)</span>
             </div>
             <div className={styles.statCard}>
-              <span className={styles.statValue}>{profile.totalMatches}</span>
+              <span className={styles.statValue}>{userData.totalMatches}</span>
               <span className={styles.statLabel}>MATCHES</span>
             </div>
             <div className={styles.statCard}>
@@ -266,7 +248,7 @@ export function ProfilePage() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-              <button className={styles.logoutButton} onClick={handleSave} disabled={isLoading}>SAVE</button>
+              <button className={styles.logoutButton} onClick={handleSave} disabled={authLoading}>SAVE</button>
               <button 
                 className={styles.logoutButton} 
                 onClick={() => {

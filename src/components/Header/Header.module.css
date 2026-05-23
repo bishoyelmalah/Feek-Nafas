@@ -147,7 +147,6 @@ nav a:not(.active):hover {
   color: #cbd5e1;
   font-size: 0.875rem;
   font-weight: 700;
-  text-transform: lowercase;
 }
 
 .profile-modal {

@@ -63,8 +63,47 @@ export const logout = async () => {
 };
 
 export const getUserData = async (userId: string) => {
-  const {data} = await supabase.from('users').select().eq('id', userId).single();
-  return data as User;
+  const { data: user, error: userError } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (userError || !user) {
+    return null;
+  }
+
+  // Calculate matches and wins
+  const { data: matchesAsPlayer1 } = await supabase
+    .from('matches')
+    .select('status, winner_user_id')
+    .eq('player1_id', userId);
+
+  const { data: matchesAsPlayer2 } = await supabase
+    .from('matches')
+    .select('status, winner_user_id')
+    .eq('player2_id', userId);
+
+  const allMatches = [...(matchesAsPlayer1 || []), ...(matchesAsPlayer2 || [])];
+  const finishedMatches = allMatches.filter(m => m.status === 'finished');
+  const totalMatches = finishedMatches.length;
+  const wins = finishedMatches.filter(m => m.winner_user_id === userId).length;
+
+  // Calculate rank
+  const { data: allUsers } = await supabase
+    .from('users')
+    .select('id, score')
+    .order('score', { ascending: false });
+
+  const rankIndex = allUsers?.findIndex(u => u.id === userId) ?? -1;
+  const rank = rankIndex !== -1 ? rankIndex + 1 : 0;
+
+  return {
+    ...user,
+    rank,
+    totalMatches,
+    wins,
+  } as User;
 }
 
 export const getUserDataByHandle = async (username: string) => {
@@ -72,3 +111,18 @@ export const getUserDataByHandle = async (username: string) => {
   if (error) throw error;
   return data as User;
 }
+
+export const updateUserProfile = async (
+  userId: string,
+  updates: Partial<{ name: string | null; username: string | null; email: string | null; codeforces_handle: string | null }>
+) => {
+  const { data, error } = await supabase
+    .from('users')
+    .update(updates)
+    .eq('id', userId)
+    .select('id, name, username, email, codeforces_handle')
+    .single();
+
+  if (error) throw error;
+  return data;
+};

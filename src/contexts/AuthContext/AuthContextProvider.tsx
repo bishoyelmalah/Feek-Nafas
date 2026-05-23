@@ -91,9 +91,17 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
             }
         };
 
+        const onProfileUpdated = (event: any) => {
+            if (event.detail?.userId === userId) {
+                handleUserData();
+            }
+        };
+
         window.addEventListener('avatarUpdated', onAvatarUpdated);
+        window.addEventListener('profileUpdated', onProfileUpdated);
         return () => {
             window.removeEventListener('avatarUpdated', onAvatarUpdated);
+            window.removeEventListener('profileUpdated', onProfileUpdated);
         };
     }, [userId]);
     

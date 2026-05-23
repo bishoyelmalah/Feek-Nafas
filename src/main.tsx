@@ -6,16 +6,19 @@ import App from './App.tsx'
 import { AuthContextProvider } from './contexts/AuthContext/AuthContextProvider.tsx'
 import { OpponentContextProvider } from './contexts/OpponentContext/OpponentContextProvider.tsx'
 import { MatchContestProvider } from './contexts/MatchContext/MatchContextProvider.tsx'
+import { ProblemsContextProvider } from './contexts/ProblemsContext/ProblemsContextProvider.tsx'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthContextProvider>
-      <MatchContestProvider>
-        <OpponentContextProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </OpponentContextProvider>
-      </MatchContestProvider>
+      <ProblemsContextProvider>
+        <MatchContestProvider>
+          <OpponentContextProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </OpponentContextProvider>
+        </MatchContestProvider>
+      </ProblemsContextProvider>
     </AuthContextProvider>
   </StrictMode>,
 )
