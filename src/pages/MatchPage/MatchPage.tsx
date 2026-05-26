@@ -11,7 +11,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { type SubmitEvent } from 'react';
 import { type ChatMessage } from '../../types/ChatMessage';
 import { checkSubmission } from '../../services/codeforcesService';
-import { startMatch, finishMatch, getMatch, sendMessage, getMessages, cancelMatch } from '../../services/matchService';
+import { startMatch, finishMatch, getMatch, cancelMatch } from '../../services/matchService';
 import { supabase } from '../../lib/supabase';
 import { updateUserScore } from '../../services/userService';
 import { useMatchTimer } from '../../hooks/useMatchTimer';
@@ -51,6 +51,24 @@ export function MatchPage() {
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    // Load messages from localStorage and cleanup old matches
+    useEffect(() => {
+        if (!matchId) return;
+
+        // Cleanup: remove any localStorage items for other matches
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('match_chat_') && key !== `match_chat_${matchId}`) {
+                localStorage.removeItem(key);
+            }
+        });
+
+        // Load messages for current match
+        const savedMessages = localStorage.getItem(`match_chat_${matchId}`);
+        if (savedMessages) {
+            setMessages(JSON.parse(savedMessages));
+        }
+    }, [matchId]);
 
     // Always use fresh data from the database to ensure we have the latest status and winner information
     const effectiveMatchData = matchData;
@@ -97,13 +115,20 @@ export function MatchPage() {
 
                 // If the match is already finished, determine the result and display the appropriate page
                 if (data.status === 'finished') {
+                    setMatchData(null);
+                    setOpponentData(null);
+                    localStorage.removeItem(`match_chat_${matchId}`);
                     const isDraw = !data.winner_user_id;
                     setIsFinished({
                         finished: true,
                         win: data.winner_user_id === userId,
                         draw: isDraw
                     });
+                    setIsLoading(false);
+                    return; // Skip setting context data
                 }
+
+                setMatchData(data);
             } catch (error) {
                 console.error('Failed to fetch match data:', error);
                 navigate('/home');
@@ -114,7 +139,7 @@ export function MatchPage() {
 
         fetchMatchData();
     }, [matchId, navigate, userId, setMatchData, setOpponentData]);
-    
+
     const {timeLeft, durationInMinutes, isTimeUp} = useMatchTimer(effectiveMatchData?.id);
 
     useEffect(() => {
@@ -151,7 +176,7 @@ export function MatchPage() {
 
     const handleSendMessage = async (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!effectiveMatchData || !userId || !chatInput) return;
+        if (!effectiveMatchData || !userId || !chatInput || !channelRef.current) return;
 
         const newMessage: ChatMessage = {
             match_id: effectiveMatchData.id,
@@ -160,7 +185,20 @@ export function MatchPage() {
         };
 
         try {
-            await sendMessage(newMessage);
+            // Broadcast the message to other devices
+            channelRef.current.send({
+                type: 'broadcast',
+                event: 'chat-message',
+                payload: newMessage
+            });
+
+            // Save to localStorage and update state
+            setMessages((prev) => {
+                const updated = [...prev, newMessage];
+                localStorage.setItem(`match_chat_${effectiveMatchData.id}`, JSON.stringify(updated));
+                return updated;
+            });
+
             setChatInput('');
         } catch (error) {
             console.error('Failed to send message:', error);
@@ -170,32 +208,19 @@ export function MatchPage() {
     useEffect(()=>{
         if (!effectiveMatchData?.id) return;
 
-        // Fetch initial messages
-        const fetchInitialMessages = async () => {
-            try {
-                const msgs = await getMessages(effectiveMatchData.id);
-                setMessages(msgs);
-            } catch (error) {
-                console.error('Failed to fetch messages:', error);
-            }
-        };
-        fetchInitialMessages();
-
-        // Subscribe to messages table changes
+        // Subscribe to broadcast messages and match status changes
         const channel = supabase
-            .channel(`messages:${effectiveMatchData.id}`)
+            .channel(`match_chat:${effectiveMatchData.id}`)
             .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'messages',
-                    filter: `match_id=eq.${effectiveMatchData.id}`
-                },
+                'broadcast',
+                { event: 'chat-message' },
                 (payload) => {
-                    const newMessage = payload.new as ChatMessage;
-                    console.log(newMessage);
-                    setMessages((prev) => [...prev, newMessage]);
+                    const newMessage = payload.payload as ChatMessage;
+                    setMessages((prev) => {
+                        const updated = [...prev, newMessage];
+                        localStorage.setItem(`match_chat_${effectiveMatchData.id}`, JSON.stringify(updated));
+                        return updated;
+                    });
                 }
             )
             .subscribe();
@@ -216,6 +241,9 @@ export function MatchPage() {
                     console.log('Match status update received:', updatedMatch);
                     
                     if (updatedMatch.status === 'finished') {
+                        localStorage.removeItem(`match_chat_${effectiveMatchData.id}`);
+                        setMatchData(null);
+                        setOpponentData(null);
                         const isWin = updatedMatch.winner_user_id === userId;
                         const isDraw = !updatedMatch.winner_user_id;
 
@@ -224,7 +252,6 @@ export function MatchPage() {
                             win: isWin,
                             draw: isDraw
                         });
-                        setMatchData(updatedMatch);
 
                         // LOCAL SCORE UPDATE: Each user updates their OWN score to respect RLS
                         if (!isDraw && userId) {
@@ -234,9 +261,10 @@ export function MatchPage() {
                             });
                         }
                     } else if (updatedMatch.status === 'canceled') {
-                        // The user who clicked the button already navigated away, 
-                        // so this will likely only trigger for the other player.
-                        navigate('/home', { state: { notification: "The other player canceled the match" } });
+                        localStorage.removeItem(`match_chat_${effectiveMatchData.id}`);
+                        setMatchData(null);
+                        setOpponentData(null);
+                        navigate('/home', { state: { notification: "The match was canceled" } });
                     }
                 }
             )
@@ -250,7 +278,7 @@ export function MatchPage() {
             channel.unsubscribe();
             matchChannel.unsubscribe();
         }
-    }, [effectiveMatchData?.id, userId, setMatchData, navigate])
+    }, [effectiveMatchData?.id, userId, setMatchData, setOpponentData, navigate])
 
     useEffect(()=>{
         if (!effectiveMatchData?.id || effectiveMatchData.status !== 'accepted') return;
@@ -258,15 +286,17 @@ export function MatchPage() {
         const triggerStartMatch = async () => {
             try {
                 await startMatch(effectiveMatchData.id);
-                setMatchData(prev => prev ? { ...prev, status: 'in_progress' } : null);
+                if (effectiveMatchData) {
+                    setMatchData({ ...effectiveMatchData, status: 'in_progress' });
+                }
             } catch (error) {
                 console.error('Failed to start match:', error);
             }
         };
         triggerStartMatch();
-    }, [effectiveMatchData?.id, effectiveMatchData?.status, setMatchData]);
+    }, [effectiveMatchData, setMatchData]);
 
-    if (isLoading || !effectiveMatchData) {
+    if (isLoading) {
         return null;
     }
 
@@ -279,6 +309,10 @@ export function MatchPage() {
         } else {
             return <LosePage />
         }
+    }
+
+    if (!effectiveMatchData) {
+        return null;
     }
 
     return (

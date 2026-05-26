@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import type { SignUpPayload, SignInPayload, InsertUserPayload, ServiceError } from '../types/AuthServices'
+import type { SignInPayload, ServiceError } from '../types/AuthServices'
 import type { User } from '../types/UserData';
 
 
@@ -7,29 +7,66 @@ import type { User } from '../types/UserData';
 
 
 
-export const insertUserProfile = async ({
-  id,
-  name,
-  username,
-  email,
-  codeforcesHandle,
-}: InsertUserPayload) => {
-  return supabase.from('users').insert({
-    id,
-    name,
-    username,
-    email,
-    codeforces_handle: codeforcesHandle,
-  });
-};
+// export const insertUserProfile = async ({
+//   id,
+//   name,
+//   username,
+//   email,
+//   codeforcesHandle,
+// }: InsertUserPayload) => {
+//   return supabase.from('users').insert({
+//     id,
+//     name,
+//     username,
+//     email,
+//     codeforces_handle: codeforcesHandle,
+//   });
+// };
 
-export const signUp = async ({ email, password }: SignUpPayload) => {
+export const signUp = async ({ email, password, name, username, codeforces_handle}: User & {password: string}) => {
+  // Check for existing username
+  const { data: existingUsername } = await supabase
+    .from('users')
+    .select('username')
+    .eq('username', username)
+    .maybeSingle();
+
+  if (existingUsername) {
+    return { error: { message: 'Username is already taken' } as ServiceError, userId: null };
+  }
+
+  // Check for existing codeforces handle
+  const { data: existingHandle } = await supabase
+    .from('users')
+    .select('codeforces_handle')
+    .eq('codeforces_handle', codeforces_handle)
+    .maybeSingle();
+
+  if (existingHandle) {
+    return { error: { message: 'Codeforces handle is already taken' } as ServiceError, userId: null };
+  }
+
+  // Check for existing email
+  const { data: existingEmail } = await supabase
+    .from('users')
+    .select('email')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (existingEmail) {
+    return { error: { message: 'Email is already taken' } as ServiceError, userId: null };
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       emailRedirectTo: 'https://feek-nafas.vercel.app/home',
-
+      data: {
+        name,
+        username,
+        codeforces_handle
+      }
     },
   });
 

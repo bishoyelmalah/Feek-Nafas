@@ -1,7 +1,7 @@
 import { supabase } from "../lib/supabase";
 import type { MatchData } from "../types/MatchData";
 import { type CreateMatchData } from "../types/CreateMatchData";
-import { type ChatMessage } from "../types/ChatMessage";
+// import { type ChatMessage } from "../types/ChatMessage";
 // import { updateUserScore } from "./userService";
 
 export const createMatch = async ({player1_id, player2_id, contest_id, problem_index, duration}: CreateMatchData) => {
@@ -110,16 +110,4 @@ export const getMatchDuration = async (matchId: string) => {
         .single();
 
     return data?.duration ?? 30;
-}
-
-export const sendMessage = async (message: ChatMessage) => {
-    const {data, error} = await supabase.from("messages").insert(message).select().single();
-    if (error) throw error;
-    return data;
-}
-
-export const getMessages = async (match_id: string) => {
-    const {data, error} = await supabase.from("messages").select().eq("match_id", match_id);
-    if (error) throw error;
-    return data as ChatMessage[];
 }

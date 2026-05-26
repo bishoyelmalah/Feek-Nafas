@@ -84,7 +84,7 @@ function Footer(){
       </div>
 
       <div className={styles['footer-bottom']}>
-        <p>© 2024 FEEK_NAFAS // ALL_RIGHTS_RESERVED // SYSTEM_VERSION_4.0.2</p>
+        <p>© 2026 FEEK_NAFAS // ALL_RIGHTS_RESERVED // SYSTEM_VERSION_1.0.0</p>
         <p>CONNECTED_FROM: 192.168.1.1 // LOCATION: ENCRYPTED</p>
       </div>
     </footer>

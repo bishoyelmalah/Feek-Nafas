@@ -1,10 +1,10 @@
 export interface User {
-    id: string,
+    id?: string,
     name: string,
     username: string,
     email: string,
     codeforces_handle: string,
-    score: number,
+    score?: number,
     created_at?: string,
     updated_at?: string,
     avatar_url?: string,

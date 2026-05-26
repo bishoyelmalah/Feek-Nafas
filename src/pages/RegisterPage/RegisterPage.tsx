@@ -1,7 +1,7 @@
 ﻿import { useState, type SubmitEvent } from 'react';
 import { Link } from 'react-router';
 import { signUp } from '../../services/authService';
-import { insertUserProfile } from '../../services/authService';
+// import { insertUserProfile } from '../../services/authService';
 import styles from './RegisterPage.module.css';
 
 export function RegisterPage() {
@@ -17,15 +17,15 @@ export function RegisterPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
 
-    const handleInsertion = async (userId: string) => {
-        return insertUserProfile({
-            id: userId,
-            name,
-            username,
-            email,
-            codeforcesHandle: handle,
-        });
-    };
+    // const handleInsertion = async (userId: string) => {
+    //     return insertUserProfile({
+    //         id: userId,
+    //         name,
+    //         username,
+    //         email,
+    //         codeforcesHandle: handle,
+    //     });
+    // };
 
     const handleSignUp = async (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -39,6 +39,9 @@ export function RegisterPage() {
         const { error: authError, userId } = await signUp({
             email,
             password,
+            name,
+            username,
+            codeforces_handle: handle,
         });
 
         if (authError) {
@@ -53,12 +56,12 @@ export function RegisterPage() {
             return;
         }
 
-        const { error: insertError } = await handleInsertion(userId);
-        if (insertError) {
-            setError(insertError.message.toUpperCase());
-            setLoading(false);
-            return;
-        }
+        // const { error: insertError } = await handleInsertion(userId);
+        // if (insertError) {
+        //     setError(insertError.message.toUpperCase());
+        //     setLoading(false);
+        //     return;
+        // }
 
         setSuccess(true);
         setLoading(false);

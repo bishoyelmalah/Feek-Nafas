@@ -8,8 +8,8 @@ import { type Notification } from '../../types/Notification';
 import type { MatchData } from '../../types/MatchData';
 import { getMatch } from '../../services/matchService';
 import { useMatch } from '../../hooks/useMatch';
-import { getAvatarUrl } from '../../services/avatarService';
-import { supabase } from '../../lib/supabase';
+// import { getAvatarUrl } from '../../services/avatarService';
+// import { supabase } from '../../lib/supabase';
 
 interface HeaderProps {
   activeLink?: 'arena' | 'leaderboard' | 'challenges' | 'profile';
@@ -81,10 +81,10 @@ function Header({
     navigate('/login');
   };
 
-  const handleSettingsClick = () => {
-    navigate('/settings');
-    setIsProfileModalOpen(false);
-  };
+  // const handleSettingsClick = () => {
+  //   navigate('/settings');
+  //   setIsProfileModalOpen(false);
+  // };
 
   const handleLoginClick = () => {
     navigate('/login');
@@ -102,7 +102,7 @@ function Header({
             <div className={styles['logo-icon']}>
               <span className="material-symbols-outlined">terminal</span>
             </div>
-            <h1 className={styles['logo-text']}>
+            <h1 className={styles['logo-text']} onClick={()=>navigate('/home')}>
               FEEK<span className={styles['highlight']}>NAFAS</span>
             </h1>
             {/* <button className={styles['btn-login']} onClick={goPresentation}>
