@@ -82,18 +82,18 @@ export function MatchPage() {
     // Always use fresh data from the database to ensure we have the latest status and winner information
     const effectiveMatchData = matchData;
 
-    useEffect(() => {
-        // Prevent back button
-        window.history.pushState(null, '', window.location.href);
-        const handlePopState = () => {
-            window.history.pushState(null, '', window.location.href);
-        };
+    // useEffect(() => {
+    //     // Prevent back button
+    //     window.history.pushState(null, '', window.location.href);
+    //     const handlePopState = () => {
+    //         window.history.pushState(null, '', window.location.href);
+    //     };
 
-        window.addEventListener('popstate', handlePopState);
-        return () => {
-            window.removeEventListener('popstate', handlePopState);
-        };
-    }, []);
+    //     window.addEventListener('popstate', handlePopState);
+    //     return () => {
+    //         window.removeEventListener('popstate', handlePopState);
+    //     };
+    // }, []);
 
     useEffect(() => {
         const fetchMatchData = async () => {
