@@ -21,7 +21,9 @@ import { Modal } from '../../components/Modal/Modal';
 import { getUserData } from '../../services/authService';
 import { getPublicAvatarUrl } from '../../services/avatarService';
 import { Notification as Toast } from '../../components/Notification/Notification';
+import messageSound from '../../assets/sounds/message_sound.mp3';
 
+const messageAudio = new Audio(messageSound);
 
 
 export function MatchPage() {
@@ -257,6 +259,7 @@ export function MatchPage() {
                 { event: 'chat-message' },
                 (payload) => {
                     const newMessage = payload.payload as ChatMessage;
+                    messageAudio.play().catch(err => console.error('Error playing sound:', err));
                     setMessages((prev) => {
                         const updated = [...prev, newMessage];
                         localStorage.setItem(`match_chat_${effectiveMatchData.id}`, JSON.stringify(updated));
