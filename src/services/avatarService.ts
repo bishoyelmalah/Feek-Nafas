@@ -34,7 +34,7 @@ export const getAvatarUrl = async (userId: string): Promise<string> => {
       if (metaUrl) return metaUrl as string;
     }
   } catch (e) {
-    // ignore
+    console.error(e);
   }
 
   const { data: user } = await supabase

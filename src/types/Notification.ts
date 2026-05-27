@@ -1,4 +1,5 @@
 export interface Notification {
     body: string,
-    matchId: string
+    matchId: string,
+    createdAt: string
 }

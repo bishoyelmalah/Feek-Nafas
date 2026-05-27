@@ -247,6 +247,13 @@ nav a:not(.active):hover {
   color: #cbd5e1;
 }
 
+.notification-time {
+  font-size: 0.625rem;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+  text-align: right;
+}
+
 .notification-actions {
   margin-top: 0.65rem;
   display: flex;

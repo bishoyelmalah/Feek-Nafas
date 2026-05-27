@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getTopUsers, getUserRank } from '../../services/userService';
 import landingStyles from './leaderboard.module.css';
 import Header from '../../components/Header/Header';
-import { type Notification } from '../../types/Notification';
+// import { type Notification } from '../../types/Notification';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -27,8 +27,6 @@ const LeaderboardPage: React.FC = () => {
 
     const [topUsers, setTopUsers] = useState<Hacker[]>([]);
     const [currentUserRank, setCurrentUserRank] = useState<any>(null);
-    const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
-    const [notifications ] = useState<Notification[]>([]);
     const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
     const getAvatarUrl = async (userId: string): Promise<string | null> => {
@@ -92,12 +90,7 @@ const LeaderboardPage: React.FC = () => {
     }, [userId]);
 
     return (<div>
-                <Header
-                activeLink="leaderboard"
-                notificationCount={hasUnreadNotification ? 1 : 0}
-                onNotificationOpened={() => setHasUnreadNotification(false)}
-                notifications={notifications}
-            />
+                <Header activeLink="leaderboard" />
         <section className={landingStyles['leaderboardSection']} id="arena-rankings">
             <div className={landingStyles['leaderboardInner']}>
                 {/* Back Button */}

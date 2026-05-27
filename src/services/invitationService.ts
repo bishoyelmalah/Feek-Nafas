@@ -15,8 +15,6 @@ export const createInbox = (userId: string, onNewNotification?: (text: MatchData
         (payload) => {
             const matchDetails: MatchData = payload.new as MatchData;
             onNewNotification?.(matchDetails);
-            // alert("you have a new match!");
-            // console.log(matchDetails);
         }
     ).subscribe();
 
@@ -28,7 +26,14 @@ export const removeInbox = (channel: RealtimeChannel) => {
 }
 
 export const acceptInvitation = async (matchId: string) => {
-    await supabase.from('matches').update({status: 'accepted'}).eq('id', matchId);
+    const { data: currentMatch } = await supabase.from('matches').select('status').eq('id', matchId).single();
+    
+    if (currentMatch && currentMatch.status !== 'pending') {
+        return { success: false, status: currentMatch.status };
+    }
+
+    const { error } = await supabase.from('matches').update({status: 'accepted'}).eq('id', matchId);
+    return { success: !error, status: 'accepted' };
 }
 
 export const declineInvitation = async (matchId: string) => {
@@ -37,6 +42,6 @@ export const declineInvitation = async (matchId: string) => {
 
 export const checkMatchInvitations = async (userId: string, payload: (matches: any) => void) => {
     const response = await supabase.from('matches').select().eq('player2_id', userId).eq('status', 'pending');
-    console.log(response.data);
+    // console.log(response.data);
     payload(response.data);
 }
