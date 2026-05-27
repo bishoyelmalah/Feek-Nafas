@@ -19,8 +19,6 @@ export function GetReadyPage() {
     const {opponentData, setOpponentData} = useOpponent();
     const nav = useNavigate();
     const selectedDuration = matchData?.duration ?? 30;
-    // const [ isp1ready , setIsp1ready ] = useState(false);
-    // const [ isp2ready , setIsp2ready] = useState(false);
 
     const isPlayer1 = userData?.id === matchData?.player1_id;
 
@@ -32,38 +30,31 @@ export function GetReadyPage() {
     );
 
     const [timer , setTimer] = useState(3);
+    const [isCancelling, setIsCancelling] = useState(false);
     const ready = isp1ready && isp2ready;
 
-
-    // const channelRef = useRef<any>(null); // can delete if using Postgres Changes only, but keeping it here in case we want to add any broadcast features later without setting up another listener
+    useEffect(() => {
+        const checkInitialStatus = async () => {
+            if (!matchData?.id) return;
+            const { data } = await supabase.from('matches').select('status').eq('id', matchData.id).single();
+            if (data) {
+                if (data.status === 'canceled') {
+                    nav('/home', { state: { notification: 'The match is canceled', notificationColor: '#ef4444' } });
+                } else if (data.status === 'declined') {
+                    nav('/home', { state: { notification: 'The invitation was declined', notificationColor: '#ef4444' } });
+                } else if (data.status === 'finished') {
+                    nav('/home', { state: { notification: 'The match is already finished', notificationColor: '#ec5b13' } });
+                }
+            }
+        };
+        checkInitialStatus();
+    }, [matchData?.id, nav]);
 
     const userAvatarValue = userData?.avatar_url;
     const isUserAvatarUrl = userAvatarValue?.startsWith('http');
 
     const opponentAvatarValue = opponentData?.avatar_url;
     const isOpponentAvatarUrl = opponentAvatarValue?.startsWith('http');
-
-    // SUPABASE BROADCAST (LISTEN & STORE)
-    // useEffect(() => {
-    //     if (!matchData?.id) return;
-
-    //     const channel = supabase.channel(`match_${matchData.id}`);
-
-    //     // 1. Listen for opponent's status
-    //     channel.on('broadcast', { event: 'ready_status' }, (data) => {
-    //         console.log("Incoming broadcast:", data);
-    //         setIsp2ready(data.payload.isReady);
-    //     }).subscribe();
-
-    //     // 2. Save the live channel so our button can use it to send
-    //     channelRef.current = channel; 
-
-    //     return () => {
-    //         supabase.removeChannel(channel);
-    //     };
-    // }, [matchData?.id]);
-
-
 
     // --- 📡 SUPABASE POSTGRES CHANGES (LISTEN) ---
     useEffect(() => {
@@ -83,6 +74,16 @@ export function GetReadyPage() {
                     const updatedMatch = payload.new as MatchData;
                     console.log("Match updated in DB:", updatedMatch);
                     
+                    if (updatedMatch.status === 'canceled') {
+                        nav('/home', { state: { notification: 'The other player canceled the match', notificationColor: '#ef4444' } });
+                        return;
+                    }
+
+                    if (updatedMatch.status === 'declined') {
+                        nav('/home', { state: { notification: 'The other player declined the invitation', notificationColor: '#ef4444' } });
+                        return;
+                    }
+
                     // Map the DB columns back to the correct UI sides
                     if (isPlayer1) {
                         setIsp1ready(updatedMatch.player1_ready);
@@ -98,7 +99,7 @@ export function GetReadyPage() {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [matchData?.id, isPlayer1]);
+    }, [matchData?.id, isPlayer1, nav]);
 
 
 
@@ -130,26 +131,6 @@ export function GetReadyPage() {
         handleOpponentData();
     }, [matchData, userData, setOpponentData])
 
-    // SUPABASE BROADCAST (SEND)
-    // const handlePlayer1Ready = () => {
-    //     if (ready) return;         // SECURITY LOCK: If both players are ready (timer started), prevent cancelling!
-
-    //     const newState = !isp1ready;
-    //     setIsp1ready(newState);
-
-    //     // Broadcast to the opponent --> Use the saved channel to send our status to the opponent
-    //     if (channelRef.current) {
-    //         channelRef.current.send({
-    //             type: 'broadcast',
-    //             event: 'ready_status',
-    //             payload: { isReady: newState }
-    //         });
-    //     }
-    // }
-
-
-
-
     // --- 📤 SUPABASE DATABASE UPDATE (SEND) ---
     const handlePlayer1Ready = async () => {
         if (ready || !matchData?.id) return; // SECURITY LOCK
@@ -172,16 +153,22 @@ export function GetReadyPage() {
         }
     }
 
+    const handleCancelMatch = async () => {
+        if (!matchData?.id || isCancelling) return;
+        setIsCancelling(true);
 
+        const { error } = await supabase
+            .from('matches')
+            .update({ status: 'canceled' })
+            .eq('id', matchData.id);
 
-
-
-    // const handlePlayer1Ready = () => {
-    //     setIsp1ready(!isp1ready);
-    // }
-    // const handlePlayer2Ready = () => {
-    //     setIsp2ready(!isp2ready);
-    // }
+        if (!error) {
+            nav('/home');
+        } else {
+            console.error("Failed to cancel match:", error);
+            setIsCancelling(false);
+        }
+    };
 
     useEffect(()=>{
         if(!ready) return;
@@ -239,13 +226,21 @@ export function GetReadyPage() {
                                 <span className={styles.dot}>•</span>
                                 2,450 RP
                             </p>
-                            {/*Cancel Button*/}
+                            
                             <button 
                                 onClick={handlePlayer1Ready} 
                                 disabled={ready}
                                 className={`${styles.readyButton} ${isp1ready ? styles.playerReadyButton : styles.playerWaitingButton}`}
                             >
                                 {isp1ready ? (ready ? 'LOCKED IN' : 'CANCEL') : 'READY'}
+                            </button>
+
+                            <button 
+                                onClick={handleCancelMatch}
+                                disabled={ready || isCancelling}
+                                className={styles.cancelMatchButton}
+                            >
+                                {isCancelling ? 'CANCELLING...' : 'CANCEL MATCH'}
                             </button>
 
                         </div>

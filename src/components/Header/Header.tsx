@@ -1,35 +1,54 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../services/authService';
 import styles from './Header.module.css';
 import { useAuth } from '../../hooks/useAuth';
-import { acceptInvitation, declineInvitation } from '../../services/invitationService';
+import { acceptInvitation, declineInvitation, createInbox, removeInbox, checkMatchInvitations } from '../../services/invitationService';
 import { type Notification } from '../../types/Notification';
 import type { MatchData } from '../../types/MatchData';
 import { getMatch } from '../../services/matchService';
 import { useMatch } from '../../hooks/useMatch';
-// import { getAvatarUrl } from '../../services/avatarService';
-// import { supabase } from '../../lib/supabase';
+import { getOpponentDetails } from '../../utils/getOpponentDetails';
+import type { User } from '../../types/UserData';
+import { useLocation } from 'react-router-dom';
+
+import { Notification as Toast } from '../Notification/Notification';
 
 interface HeaderProps {
   activeLink?: 'arena' | 'leaderboard' | 'challenges' | 'profile';
-  notificationCount?: number;
-  onNotificationOpened?: () => void;
-  notifications?: Notification[]
 }
 
 function Header({
-  activeLink = 'arena' ,
-  notificationCount = 0,
-  onNotificationOpened,
-  notifications
+  activeLink = 'arena'
 }: HeaderProps) {
   const navigate = useNavigate();
-  const { session, userData } = useAuth();
-  const { setMatchData} = useMatch();
+  const location = useLocation();
+  const { session, userData, userId } = useAuth();
+  const { setMatchData } = useMatch();
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
+  const [toast, setToast] = useState<{isOpen: boolean, message: string, color: string}>({
+    isOpen: false, 
+    message: '', 
+    color: '#ec5b13'
+  });
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (location.state?.notification) {
+      startTransition(()=>{
+        setToast({
+          isOpen: true,
+          message: location.state.notification,
+          color: location.state.notificationColor || '#ec5b13'
+        });
+      })
+      // Clear state to prevent showing again on refresh
+      window.history.replaceState({ ...location.state, notification: undefined }, document.title);
+    }
+  }, [location.state]);
 
   const displayUsername =
     userData?.username ??
@@ -53,19 +72,83 @@ function Header({
     };
   }, []);
 
+  useEffect(() => {
+    if (!userId) {
+      return;
+    }
+    
+    const inboxChannel = createInbox(userId, async (invitation: MatchData) => {
+      setHasUnreadNotification(true);
+      const opponent: User | undefined = await getOpponentDetails(invitation.player1_id);
+      const username = opponent?.username || 'someone';
+      
+      setNotifications((prev) => {
+        // Avoid duplicates
+        if (prev.some(n => n.matchId === invitation.id)) return prev;
+        
+        return [
+          {
+            body: `You have a new match invitation from ${username}`,
+            matchId: invitation.id,
+            createdAt: invitation.created_at || new Date().toISOString(),
+          },
+          ...prev,
+        ];
+      });
+    });
+
+    checkMatchInvitations(userId, async (matches: MatchData[] | null) => {
+      if (!matches || matches.length === 0) {
+        return;
+      }
+
+      const invitations = await Promise.all(
+        matches.map(async (match: MatchData) => {
+          const opponent = await getOpponentDetails(match.player1_id);
+          return {
+            body: `You have a new match invitation from ${opponent?.username || 'someone'}`,
+            matchId: match.id,
+            createdAt: match.created_at || new Date().toISOString(),
+          };
+        })
+      );
+
+      setHasUnreadNotification(true);
+      setNotifications((prev) => {
+        const newOnes = invitations.filter(inv => !prev.some(p => p.matchId === inv.matchId));
+        return [...prev, ...newOnes];
+      });
+    });
+
+    return () => {
+      removeInbox(inboxChannel);
+    };
+  }, [userId]);
 
   const handleNotificationClick = () => {
     const nextOpenState = !isNotificationModalOpen;
     setIsNotificationModalOpen(nextOpenState);
 
-    if (nextOpenState && notificationCount > 0) {
-      onNotificationOpened?.();
+    if (nextOpenState) {
+      setHasUnreadNotification(false);
     }
   };
 
   const handleAcceptNotification = async (matchId: string) => {
     setIsNotificationModalOpen(false);
-    acceptInvitation(matchId);
+    const result = await acceptInvitation(matchId);
+    
+    if (!result.success) {
+      let message = "This match is no longer available.";
+      if (result.status === 'canceled') message = "The match is canceled";
+      if (result.status === 'declined') message = "The invitation was declined";
+      if (result.status === 'finished') message = "The match is already finished";
+      
+      setToast({ isOpen: true, message, color: '#ef4444' });
+      setNotifications((prev) => prev.filter((n) => n.matchId !== matchId));
+      return;
+    }
+
     const data: MatchData = await getMatch(matchId);
     setMatchData(data);
     navigate(`/getReady/${matchId}`);
@@ -74,6 +157,7 @@ function Header({
   const handleDeclineNotification = (matchId: string) => {
     setIsNotificationModalOpen(false);
     declineInvitation(matchId);
+    setNotifications((prev) => prev.filter((n) => n.matchId !== matchId));
   };
 
   const handleLogout = async () => {
@@ -81,18 +165,13 @@ function Header({
     navigate('/login');
   };
 
-  // const handleSettingsClick = () => {
-  //   navigate('/settings');
-  //   setIsProfileModalOpen(false);
-  // };
-
   const handleLoginClick = () => {
     navigate('/login');
   };
-  
-  // const goPresentation = () => {
-  //   navigate('/Presentation');
-  // };
+
+  const sortedNotifications = [...notifications].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 
   return (
     <header>
@@ -105,9 +184,6 @@ function Header({
             <h1 className={styles['logo-text']} onClick={()=>navigate('/home')}>
               FEEK<span className={styles['highlight']}>NAFAS</span>
             </h1>
-            {/* <button className={styles['btn-login']} onClick={goPresentation}>
-                Presentation
-            </button> */}
           </div>
           <nav>
             {session && (<div style={{display:'flex'}}>
@@ -160,19 +236,22 @@ function Header({
                 <div className={styles['notification-wrapper']}>
                   <button className={styles['icon-btn']} onClick={handleNotificationClick}>
                     <span className="material-symbols-outlined">notifications</span>
-                    {notificationCount > 0 && <span className={styles['notification-badge']}>{notifications?.length}</span>}
+                    {hasUnreadNotification && <span className={styles['notification-badge']}>{notifications.length}</span>}
                   </button>
                   {isNotificationModalOpen && (
                     <div className={styles['notification-modal']}>
-                      { notifications?.length === 0 ? 
+                      { notifications.length === 0 ? 
                       <div className={styles['notification-message']}>
                           <div className={styles['notification-title']}>No Notifications</div>
                       </div>
-                      : notifications?.map((notification, index) => {
+                      : sortedNotifications.map((notification, index) => {
                         return (
                           <div key={index} className={styles['notification-message']}>
                             <div className={styles['notification-title']}>New Match Invitation</div>
                             <div className={styles['notification-body']}>{notification.body}</div>
+                            <div className={styles['notification-time']}>
+                              {new Date(notification.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </div>
                             <div className={styles['notification-actions']}>
                               <button className={styles['notification-accept-btn']} onClick={()=>handleAcceptNotification(notification.matchId)}>
                                 Accept
@@ -187,11 +266,6 @@ function Header({
                     </div>
                   )}
                 </div>
-
-                {/* Settings Button */}
-                {/* <button className={styles['icon-btn']} onClick={handleSettingsClick} title="Settings">
-                  <span className="material-symbols-outlined">settings</span>
-                </button> */}
 
                 {/* Profile Menu */}
                 <div className={styles['profile-wrapper']} ref={profileMenuRef}>
@@ -224,10 +298,6 @@ function Header({
 
                   {isProfileModalOpen && (
                     <div className={styles['profile-modal']}>
-                      {/* <button className={styles['profile-modal-btn']} onClick={handleSettingsClick}>
-                        <span className="material-symbols-outlined">settings</span>
-                        Settings
-                      </button> */}
                       <button
                         className={styles['profile-modal-btn']}
                         onClick={handleLogout}
@@ -252,6 +322,13 @@ function Header({
           </div>
         </div>
       </div>
+      {toast.isOpen && (
+        <Toast 
+          message={toast.message} 
+          color={toast.color} 
+          onClose={() => setToast({ ...toast, isOpen: false })} 
+        />
+      )}
     </header>
   );
 }

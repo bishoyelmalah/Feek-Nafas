@@ -1,4 +1,4 @@
-﻿import styles from './MatchPage.module.css';
+import styles from './MatchPage.module.css';
 import { VictoryPage } from '../VictoryPage/VictoryPage';
 import { LosePage } from '../LosePage/LosePage';
 import { DrawPage } from '../DrawPage/DrawPage';
@@ -126,6 +126,20 @@ export function MatchPage() {
                     });
                     setIsLoading(false);
                     return; // Skip setting context data
+                }
+
+                if (data.status === 'canceled' || data.status === 'declined') {
+                    setMatchData(null);
+                    setOpponentData(null);
+                    localStorage.removeItem(`match_chat_${matchId}`);
+                    navigate('/home', { 
+                        state: { 
+                            notification: data.status === 'canceled' ? "The match is canceled" : "The invitation was declined",
+                            notificationColor: '#ef4444'
+                        } 
+                    });
+                    setIsLoading(false);
+                    return;
                 }
 
                 setMatchData(data);
@@ -264,13 +278,16 @@ export function MatchPage() {
                         localStorage.removeItem(`match_chat_${effectiveMatchData.id}`);
                         setMatchData(null);
                         setOpponentData(null);
-                        navigate('/home', { state: { notification: "The match was canceled" } });
+                        navigate('/home', { 
+                            state: { 
+                                notification: "The match was canceled",
+                                notificationColor: '#ef4444'
+                            } 
+                        });
                     }
                 }
             )
-            .subscribe((status) => {
-                console.log(`Match status subscription: ${status}`);
-            });
+            .subscribe();
 
         channelRef.current = channel;
         
@@ -339,14 +356,7 @@ export function MatchPage() {
                             </div>
                             <div className={styles['player-details']}>
                                 <span className={[styles['player-name'], styles['blue-text']].join(' ')}>{handle} (You)</span>
-                                {/* <div className={styles['player-stats']}>
-                                    <span className={[styles['rank-badge'], styles['blue-badge']].join(' ')}>Candidate Master</span>
-                                    <span className={styles['rating']}>1840</span>
-                                </div> */}
                             </div>
-                            {/* <div className={styles['player-status']}>
-                                <span className={[styles['status-text'], styles['thinking']].join(' ')}>Thinking</span>
-                            </div> */}
                         </div>
                     </div>
 
@@ -361,15 +371,8 @@ export function MatchPage() {
                     {/* Player B (Opponent) */}
                     <div className={[styles['player-card'], styles['player-b']].join(' ')}>
                         <div className={styles['player-info']}>
-                            {/* <div className={styles['player-status']}>
-                                <span className={[styles['status-text'], styles['submitting']].join(' ')}>Submitting...</span>
-                            </div> */}
                             <div className={[styles['player-details'], styles['right']].join(' ')}>
                                 <span className={[styles['player-name'], styles['orange-text']].join(' ')}>{opponentData?.codeforces_handle}</span>
-                                {/* <div className={styles['player-stats']}>
-                                    <span className={styles['rating']}>1910</span>
-                                    <span className={[styles['rank-badge'], styles['orange-badge']].join(' ')}>Master</span>
-                                </div> */}
                             </div>
                             <div className={styles['player-avatar-container']}>
                                 <div className={[styles['player-avatar'], styles['orange-border']].join(' ')}>
@@ -386,25 +389,6 @@ export function MatchPage() {
                         </div>
                     </div>
                 </div>
-
-                {/* Tug of War Bar */}
-                {/* <div className={styles['momentum-section']}>
-                    <div className={styles['momentum-labels']}>
-                        <div className={styles['momentum-player']}>
-                            <span className={[styles['momentum-title'], styles['blue-text']].join(' ')}>Momentum</span>
-                            <span className={styles['momentum-value']}>50%</span>
-                        </div>
-                        <div className={[styles['momentum-player'], styles['right']].join(' ')}>
-                            <span className={[styles['momentum-title'], styles['orange-text']].join(' ')}>Momentum</span>
-                            <span className={styles['momentum-value']}>50%</span>
-                        </div>
-                    </div>
-                    <div className={styles['momentum-bar']}>
-                        <div className={[styles['momentum-fill'], styles['blue-momentum']].join(' ')} style={{ width: '50%' }}></div>
-                        <div className={[styles['momentum-fill'], styles['orange-momentum']].join(' ')} style={{ width: '50%' }}></div>
-                        <div className={styles['momentum-marker']}></div>
-                    </div>
-                </div> */}
 
                 {/* Main Content Area */}
                 <div className={styles['match-content']}>
@@ -423,19 +407,11 @@ export function MatchPage() {
                                             : 'Loading challenge...'}
                                     </h1>
                                 </div>
-                                {/* <div className={styles['challenge-meta']}>
-                                    <span className={styles['meta-badge']}>RATING: 800</span>
-                                </div> */}
                             </div>
                             
                             <p className={styles['challenge-description']}>
                                 To complete this challenge, click the button below to open the problem on Codeforces. Once you've submitted your solution and received an "Accepted" verdict, return here and press the <strong>Refresh</strong> button to synchronize your status.
                             </p>
-                            
-                            {/* <div className={styles['challenge-tags']}>
-                                <span className={styles['tag']}>Implementation</span>
-                                <span className={styles['tag']}>Special Problems</span>
-                            </div> */}
                             
                             <a
                                 href={effectiveMatchData ? `https://codeforces.com/contest/${effectiveMatchData.contest_id}/problem/${effectiveMatchData.problem_index}` : '#'}
@@ -532,7 +508,6 @@ export function MatchPage() {
                                                     >
                                                         {senderLabel}
                                                     </span>
-                                                    {/* <span className={styles['feed-time']}>{`[${message.time}]`}</span> */}
                                                 </div>
                                                 <p className={styles['chat-text']}>{message.content}</p>
                                             </div>
@@ -563,8 +538,6 @@ export function MatchPage() {
                 </div>
             </main>
 
-            {/* <Footer/> */}
-            
             <Modal 
                 isOpen={isCancelModalOpen}
                 title="Cancel Match"

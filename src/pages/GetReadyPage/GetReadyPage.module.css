@@ -247,6 +247,32 @@
     box-shadow: 0 0 10px rgba(0, 242, 255, 0.8);
 }
 
+.cancelMatchButton {
+    width: 100%;
+    margin-top: 1rem;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancelMatchButton:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+}
+
+.cancelMatchButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .connectionRow {
     display: flex;
     justify-content: space-between;
