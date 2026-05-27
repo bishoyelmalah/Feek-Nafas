@@ -39,7 +39,7 @@ export function HomePage() {
             try {
                 const activeMatch = await getActiveMatch(userId);
                 if (activeMatch) {
-                    if (activeMatch.status === 'accepted') {
+                    if (activeMatch.status === 'accepted' || activeMatch.status === 'pending') {
                         navigate(`/getReady/${activeMatch.id}`);
                         return; // Prevent setting isCheckingActiveMatch to false
                     } else if (activeMatch.status === 'in_progress') {

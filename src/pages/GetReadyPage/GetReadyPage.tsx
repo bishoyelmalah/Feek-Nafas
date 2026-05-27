@@ -30,8 +30,13 @@ export function GetReadyPage() {
     );
 
     const [timer , setTimer] = useState(3);
+    const [isMuted, setIsMuted] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
     const ready = isp1ready && isp2ready;
+
+    useEffect(() => {
+        audio.muted = isMuted;
+    }, [isMuted]);
 
     useEffect(() => {
         const checkInitialStatus = async () => {
@@ -190,6 +195,19 @@ export function GetReadyPage() {
     }, [timer, matchData?.id, nav, selectedDuration]);
 
     useEffect(() => {
+        // Prevent back button
+        window.history.pushState(null, '', window.location.href);
+        const handlePopState = () => {
+            window.history.pushState(null, '', window.location.href);
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, []);
+
+    useEffect(() => {
         audio.loop = true;
         audio.play().catch(() => {});
         return () => audio.pause();
@@ -331,6 +349,16 @@ export function GetReadyPage() {
                     </article>
                 </section>
             </main>
+
+            <button 
+                className={styles.muteButton} 
+                onClick={() => setIsMuted(!isMuted)}
+                title={isMuted ? "Unmute" : "Mute"}
+            >
+                <span className="material-symbols-outlined">
+                    {isMuted ? 'volume_off' : 'volume_up'}
+                </span>
+            </button>
 
             <div className={styles.decorTopLeft} />
             <div className={styles.decorBottomRight} />

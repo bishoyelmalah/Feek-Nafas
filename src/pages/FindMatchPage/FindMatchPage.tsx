@@ -65,7 +65,7 @@ export function FindMatchPage() {
 
             setMatchData(match);
 
-            nav(`/getReady/${match.id}`, { state: { selectedDuration } });
+            nav(`/getReady/${match.id}`, { state: { selectedDuration }, replace: true });
         } catch (err: any) {
             setError(err.message || 'Failed to create match');
         } finally {

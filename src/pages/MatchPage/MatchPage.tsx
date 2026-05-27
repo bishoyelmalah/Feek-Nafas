@@ -74,6 +74,19 @@ export function MatchPage() {
     const effectiveMatchData = matchData;
 
     useEffect(() => {
+        // Prevent back button
+        window.history.pushState(null, '', window.location.href);
+        const handlePopState = () => {
+            window.history.pushState(null, '', window.location.href);
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, []);
+
+    useEffect(() => {
         const fetchMatchData = async () => {
             if (!matchId) {
                 navigate('/home');
