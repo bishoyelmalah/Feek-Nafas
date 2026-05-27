@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState, startTransition } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './LandingPage.module.css';
 import Header from '../../components/Header/Header';
@@ -8,7 +8,59 @@ import bavlyAvatar from '../../assets/Developers_avatars/Bavly_avatar.jpg';
 import paulaAvatar from '../../assets/Developers_avatars/Paula_avatar.jpg';
 import farahAvatar from '../../assets/Developers_avatars/Farah_avatar.jpg';
 import shahdAvatar from '../../assets/Developers_avatars/Shahd_avatar.jpg';
+// npm install @multiavatar/multiavatar
+import multiavatar from '@multiavatar/multiavatar';
+  const mockTopUsers = [
+    {
+      id: '1',
+      username: 'CYBER_NEXUS',
+      codeforces_handle: 'nexus_pro',
+      score: 4850,
+    },
+    {
+      id: '2',
+      username: 'CODE_PHANTOM',
+      codeforces_handle: 'phantom_coder',
+      score: 4720,
+    },
+    {
+      id: '3',
+      username: 'LOGIC_MASTER',
+      codeforces_handle: 'master_logic',
+      score: 4610,
+    },
+    {
+      id: '4',
+      username: 'ALGO_KING',
+      codeforces_handle: 'algo_genius',
+      score: 4520,
+    },
+    {
+      id: '5',
+      username: 'SYNTAX_WARRIOR',
+      codeforces_handle: 'syntax_lord',
+      score: 4380,
+    },
+  ].map(user => {
+  // Generate the SVG string locally
+  const svgCode = multiavatar(user.username);
 
+  // Convert that string into a Data URI so the <img> tag can read it
+  const base64Avatar = `data:image/svg+xml;utf8,${encodeURIComponent(svgCode)}`;
+
+  return {
+    ...user,
+    avatar: base64Avatar
+  };
+});
+/*another avatars
+or
+.map(user => ({
+  ...user,
+  // Using the 'adventurer' style - it's vibrant and very reliable
+  avatar: `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(user.username)}`
+}));
+*/
 const contributors = [
   {
     name: 'Bishoy El Malah',
@@ -43,6 +95,14 @@ const contributors = [
 ];
 
 const LandingPage: React.FC = () => {
+  const [topUsers, setTopUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Use mock data for non-authenticated users
+    startTransition(() => {
+      setTopUsers(mockTopUsers);
+    });
+  }, []);
   return (
     <div className={`${styles['landing-page']} ${styles['grid-overlay']}`}>
       <Header />
@@ -65,20 +125,19 @@ const LandingPage: React.FC = () => {
               DOMINATE <span className={styles['hero-title-accent']}>THE CODE</span>
             </h1>
             <p className={styles['hero-description']}>
-              The ultimate cyberpunk e-sports competitive programming platform. Outpace, outcode,
-              and outlive the competition in the high-stakes digital arena.
+              Engage in real-time 1v1 duels, tactical battles, and seasonal tournaments. Solve algorithmic challenges, climb the global rankings, and unlock exclusive abilities as you evolve through our dynamic tier system. Where code meets combat in the ultimate digital arena.
             </p>
             <div className={styles['hero-actions']}>
               <Link to="/register" className={styles['btn-hero']}>
                 <span>Initialize Combat</span>
                 <span className={`material-symbols-outlined ${styles['icon']}`}>bolt</span>
               </Link>
-              <button className={styles['btn-secondary']}>View Rankings</button>
+              {/* <button className={styles['btn-secondary']}>View Rankings</button> */}
             </div>
           </div>
         </section>
 
-        {/* AI Instructor */} 
+        {/* AI Instructor 
         <section className={`${styles['section']} ${styles['section-dark']}`}>
           <div className={styles['max-w-7xl']}>
             <div className={styles['section-header']}>
@@ -132,14 +191,14 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* The Arena */}
         <section className={styles['section']} id="arena">
           <div className={styles['max-w-7xl']}>
             <div style={{ marginBottom: '3rem' }}>
               <h2 className={styles['section-title']}>
-                The Arena <span style={{ color: 'var(--slate-600)' }}>Modes</span>
+                The Arena <span style={{ color: 'var(--primary)' }}>Modes</span>
               </h2>
               <p style={{ color: 'var(--slate-500)', fontWeight: 500 }}>
                 Select your battleground and prove your worth.
@@ -167,8 +226,49 @@ const LandingPage: React.FC = () => {
                   High Stakes
                 </span>
               </div>
+              {/* Tactical Games */}
+              <div className={styles['arena-card']}>
+                    {/* Absolute Positioned Badge */}
+                    <span 
+                      className={styles['arena-card-badge-top']}
+                    >
+                      Coming Soon
+                    </span>
+
+                    <div
+                      className={styles['arena-icon-box']}
+                      style={{
+                        backgroundColor: 'rgba(0, 242, 255, 0.1)',
+                        border: '1px solid rgba(0, 242, 255, 0.3)',
+                      }}
+                    >
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ color: 'var(--accent-blue)' }}
+                      >
+                        shield_with_heart
+                      </span>
+                    </div>
+
+                    <h4 className={styles['arena-card-title']}>Tactical X/O</h4>
+
+                    <p className={styles['arena-card-description']}>
+                      Use shields and powers to sabotage opponents' logic.
+                    </p>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <span className={styles['arena-card-badge']} style={{ color: 'rgba(0, 242, 255, 0.7)' }}>
+                        Strategic
+                      </span>
+                    </div>
+                  </div>
               {/* Champions League */}
               <div className={styles['arena-card']}>
+                      <span 
+                      className={styles['arena-card-badge-top']}
+                    >
+                      Coming Soon
+                    </span>
                 <div
                   className={styles['arena-icon-box']}
                   style={{
@@ -184,34 +284,21 @@ const LandingPage: React.FC = () => {
                 <p className={styles['arena-card-description']}>
                   Scheduled seasonal tournaments with massive point pools.
                 </p>
-                <span className={styles['arena-card-badge']} style={{ color: 'rgba(236, 91, 19, 0.7)' }}>
-                  Tournament Mode
-                </span>
-              </div>
-              {/* Tactical Games */}
-              <div className={styles['arena-card']}>
-                <div
-                  className={styles['arena-icon-box']}
-                  style={{
-                    backgroundColor: 'rgba(0, 242, 255, 0.1)',
-                    border: '1px solid rgba(0, 242, 255, 0.3)',
-                  }}
-                >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ color: 'var(--accent-blue)' }}
-                  >
-                    shield_with_heart
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <span className={styles['arena-card-badge']} style={{ color: 'rgba(236, 91, 19, 0.7)' }}>
+                    Tournament Mode
                   </span>
+
                 </div>
-                <h4 className={styles['arena-card-title']}>Tactical X/O</h4>
-                <p className={styles['arena-card-description']}>Use shields and powers to sabotage opponents' logic.</p>
-                <span className={styles['arena-card-badge']} style={{ color: 'rgba(0, 242, 255, 0.7)' }}>
-                  Strategic
-                </span>
               </div>
+
               {/* Polygon Integration */}
               <div className={styles['arena-card']}>
+                    <span 
+                      className={styles['arena-card-badge-top']}
+                    >
+                      Coming Soon
+                    </span>
                 <div
                   className={styles['arena-icon-box']}
                   style={{
@@ -227,15 +314,18 @@ const LandingPage: React.FC = () => {
                 <p className={styles['arena-card-description']}>
                   Full CD Ladder integration and problem development suite.
                 </p>
-                <span className={styles['arena-card-badge']} style={{ color: 'rgba(168, 85, 247, 0.7)' }}>
-                  Integration
-                </span>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <span className={styles['arena-card-badge']} style={{ color: 'rgba(168, 85, 247, 0.7)' }}>
+                    Integration
+                  </span>
+
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* â”€â”€ Evolution System Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* Evolution System Section  */}
         <section className={styles['evolutionSection']}>
           <div className={styles['evolutionInner']}>
             <div className={styles['evolutionText']}>
@@ -313,8 +403,8 @@ const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* â”€â”€ Leaderboard Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className={styles['leaderboardSection']}>
+        {/*Leaderboard Section */}
+        <section className={styles['leaderboardSection']} id="arena-rankings">
           <div className={styles['leaderboardInner']}>
             <div className={styles['leaderboardTopRow']}>
               <div>
@@ -322,17 +412,17 @@ const LandingPage: React.FC = () => {
                   Arena <span className={styles['leaderboardTitleAccent']}>Rankings</span>
                 </h2>
                 <div className={styles['liveIndicator']}>
-                  <span className={styles['liveBlip']}>
+                  {/* <span className={styles['liveBlip']}>
                     <span className={styles['liveBlipPing']} />
                     <span className={styles['liveBlipDot']} />
                   </span>
-                  Blind Hour Active
+                  Blind Hour Active */}
                 </div>
               </div>
-              <div className={styles['leaderboardFilters']}>
+              {/* <div className={styles['leaderboardFilters']}>
                 <button className={styles['filterBtnInactive']}>Individual</button>
                 <button className={styles['filterBtnActive']}>Teams</button>
-              </div>
+              </div> */}
             </div>
 
             <div className={styles['tableWrapper']}>
@@ -340,63 +430,51 @@ const LandingPage: React.FC = () => {
                 <thead className={styles['tableHead']}>
                   <tr>
                     <th className={styles['tableHeadCell']}>Rank</th>
-                    <th className={styles['tableHeadCell']}>Hacker</th>
-                    <th className={styles['tableHeadCell']}>A</th>
-                    <th className={styles['tableHeadCell']}>B</th>
-                    <th className={styles['tableHeadCell']}>C</th>
-                    <th className={styles['tableHeadCell']}>D</th>
-                    <th className={styles['tableHeadCell']}>E</th>
-                    <th className={`${styles['tableHeadCell']} ${styles['tableHeadCellRight']}`}>Penalty</th>
+                    <th className={styles['tableHeadCell']}>Contestants</th>
+                    <th className={styles['tableHeadCell']}>Codeforces Handle</th>
+                    <th className={`${styles['tableHeadCell']} ${styles['tableHeadCellRight']}`}>Score</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className={styles['tableRow']}>
-                    <td className={styles['tableCell']}><span className={styles['rankPrimary']}>01</span></td>
-                    <td className={styles['tableCell']}>
-                      <div className={styles['hackerInfo']}>
-                        <div className={styles['hackerAvatar']} />
-                        <span className={styles['hackerName']}>NeoCode_01</span>
-                      </div>
-                    </td>
-                    <td className={styles['tableCell']}><span className={`material-symbols-outlined ${styles['iconGreen']}`}>check_circle</span></td>
-                    <td className={styles['tableCell']}><span className={`material-symbols-outlined ${styles['iconGreen']}`}>check_circle</span></td>
-                    <td className={styles['tableCell']}><span className={`material-symbols-outlined ${styles['iconDim']}`}>radio_button_unchecked</span></td>
-                    <td className={styles['tableCell']}><span className={`material-symbols-outlined ${styles['iconRed']}`}>cancel</span></td>
-                    <td className={styles['tableCell']}><span className={`material-symbols-outlined ${styles['iconDim']}`}>radio_button_unchecked</span></td>
-                    <td className={styles['tableCellRight']}>145</td>
-                  </tr>
+                  {topUsers.map((user, index) => {
+                    let rowClass = styles['tableRow'];
+                    if (index === 0) {
+                      rowClass = `${styles['tableRow']} ${styles['tableRowFirstPlace']}`;
+                    } else if (index === 1) {
+                      rowClass = `${styles['tableRow']} ${styles['tableRowSecondPlace']}`;
+                    } else if (index === 2) {
+                      rowClass = `${styles['tableRow']} ${styles['tableRowThirdPlace']}`;
+                    }
 
-                  <tr className={`${styles['tableRow']} ${styles['tableRowHighlight']}`}>
-                    <td className={styles['tableCell']}><span className={styles['rankPrimary']}>02</span></td>
-                    <td className={styles['tableCell']}>
-                      <div className={styles['hackerInfo']}>
-                        <div className={styles['hackerAvatar']} />
-                        <span className={styles['hackerName']}>NullPointer_Ex</span>
-                      </div>
-                    </td>
-                    <td className={styles['tableCell']}><span className={`material-symbols-outlined ${styles['iconGreen']}`}>check_circle</span></td>
-                    <td className={styles['tableCell']}><span className={`material-symbols-outlined ${styles['iconGreen']}`}>check_circle</span></td>
-                    <td className={`${styles['tableCell']} ${styles['statusBlueText']}`}>???</td>
-                    <td className={`${styles['tableCell']} ${styles['statusBlueText']}`}>???</td>
-                    <td className={styles['tableCell']}><span className={`material-symbols-outlined ${styles['iconDim']}`}>radio_button_unchecked</span></td>
-                    <td className={styles['tableCellRight']}>182</td>
-                  </tr>
-
-                  <tr className={styles['tableRow']}>
-                    <td className={styles['tableCell']}><span className={styles['rankDefault']}>03</span></td>
-                    <td className={styles['tableCell']}>
-                      <div className={styles['hackerInfo']}>
-                        <div className={styles['hackerAvatar']} />
-                        <span className={styles['hackerName']}>BinaryWitch</span>
-                      </div>
-                    </td>
-                    <td className={styles['tableCell']}><span className={`material-symbols-outlined ${styles['iconGreen']}`}>check_circle</span></td>
-                    <td className={`${styles['tableCell']} ${styles['statusBlueText']}`}>???</td>
-                    <td className={styles['tableCell']}><span className={`material-symbols-outlined ${styles['iconDim']}`}>radio_button_unchecked</span></td>
-                    <td className={styles['tableCell']}><span className={`material-symbols-outlined ${styles['iconDim']}`}>radio_button_unchecked</span></td>
-                    <td className={styles['tableCell']}><span className={`material-symbols-outlined ${styles['iconDim']}`}>radio_button_unchecked</span></td>
-                    <td className={styles['tableCellRight']}>204</td>
-                  </tr>
+                    return (
+                      <tr key={user.id} className={rowClass}>
+                        <td className={styles['tableCell']}>
+                          <span className={index === 0 ? styles['rankPrimary'] : styles['rankDefault']}>
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
+                        </td>
+                          <td className={styles['tableCell']}>
+                            <div className={styles['hackerInfo']}>
+                              {/* Remove the " />" and use an opening and closing tag instead */}
+                              <div className={styles['hackerAvatar']}>
+                                <img 
+                                  src={user.avatar} 
+                                  alt={user.username} 
+                                  style={{ width: '100%', height: '100%', display: 'block' }}
+                                />
+                              </div>
+                              <span className={styles['hackerName']}>{user.username}</span>
+                            </div>
+                          </td>
+                        <td className={styles['tableCell']}>
+                          <span className={styles['codeforcesHandle']}>{user.codeforces_handle || '-'}</span>
+                        </td>
+                        <td className={styles['tableCellRight']}>
+                          <span className={styles['userScore']}>{user.score}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -404,7 +482,7 @@ const LandingPage: React.FC = () => {
         </section>
 
         {/* â”€â”€ Community Nodes Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className={styles['communitySection']}>
+        {/* <section className={styles['communitySection']}>
           <div className={styles['communityGrid']}>
 
             <div className={styles['communityCol']}>
@@ -448,7 +526,7 @@ const LandingPage: React.FC = () => {
                 </div>
               </div>
             </div>
-
+          
             <div className={styles['communityCol']}>
               <div className={styles['communityColHeader']}>
                 <span className={`material-symbols-outlined ${styles['communityColIcon']}`}>leaderboard</span>
@@ -462,13 +540,13 @@ const LandingPage: React.FC = () => {
                   </div>
                   <span className={styles['clanPoints']}>12,400p</span>
                 </div>
-                <div className={styles['clanRow']}>
-                  <div className={styles['clanRowInfo']}>
-                    <span className={styles['clanRankDim']}>#2</span>
-                    <span className={styles['clanName']}>NULL_VOID</span>
+                  <div className={styles['clanRow']}>
+                    <div className={styles['clanRowInfo']}>
+                      <span className={styles['clanRankDim']}>#2</span>
+                      <span className={styles['clanName']}>NULL_VOID</span>
+                    </div>
+                    <span className={styles['clanPoints']}>11,850p</span>
                   </div>
-                  <span className={styles['clanPoints']}>11,850p</span>
-                </div>
                 <div className={styles['clanViewAll']}>
                   <button className={styles['clanViewAllBtn']}>
                     View All Clans
@@ -479,85 +557,7 @@ const LandingPage: React.FC = () => {
             </div>
 
           </div>
-        </section>
-
-        {/* â”€â”€ Training Grounds Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className={styles['trainingSection']}>
-          <div className={styles['trainingSectionInner']}>
-            <div className={styles['trainingGrid']}>
-
-              <div>
-                <h2 className={styles['trainingTitle']}>
-                  Training <br />
-                  <span className={styles['trainingTitleAccent']}>Grounds</span>
-                </h2>
-                <p className={styles['trainingSubtitle']}>
-                  Sharpen your edge before entering the ranked arena.
-                </p>
-                <div className={styles['trainingBtns']}>
-                  <button className={styles['trainingBtnActive']}>
-                    Algorithms
-                    <span className="material-symbols-outlined">menu_book</span>
-                  </button>
-                  <button className={styles['trainingBtnInactive']}>
-                    Data Structures
-                    <span className="material-symbols-outlined">account_tree</span>
-                  </button>
-                  <button className={styles['trainingBtnInactive']}>
-                    Math &amp; Logic
-                    <span className="material-symbols-outlined">functions</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className={styles['trainingContent']}>
-
-                <div className={styles['challengeCard']}>
-                  <div>
-                    <div className={styles['challengeCardTop']}>
-                      <span className={styles['challengeBadge']}>Hard Challenge</span>
-                      <span className={`material-symbols-outlined ${styles['challengeBookmark']}`}>bookmark</span>
-                    </div>
-                    <h4 className={styles['challengeTitle']}>Matrix Inversion 2.0</h4>
-                    <p className={styles['challengeDesc']}>
-                      Master the efficient way of calculating inverse matrices under modulo prime
-                      constraints.
-                    </p>
-                  </div>
-                  <div className={styles['challengeCardBottom']}>
-                    <div className={styles['challengeTimerInfo']}>
-                      <span className={`material-symbols-outlined ${styles['challengeTimerIcon']}`}>schedule</span>
-                      <span className={styles['challengeTimerText']}>Timed Hints: 15:00</span>
-                    </div>
-                    <button className={styles['challengePracticeBtn']}>Practice Now</button>
-                  </div>
-                </div>
-
-                <div className={styles['relatedCard']}>
-                  <h5 className={styles['relatedCardTitle']}>Related Problems</h5>
-                  <ul className={styles['relatedList']}>
-                    <li className={styles['relatedItem']}>
-                      <span className={styles['relatedItemNum']}>#812</span>
-                      <span className={styles['relatedItemTitle']}>Fast Fourier Transform</span>
-                      <span className={`material-symbols-outlined ${styles['relatedItemIcon']}`}>trending_flat</span>
-                    </li>
-                    <li className={styles['relatedItem']}>
-                      <span className={styles['relatedItemNum']}>#441</span>
-                      <span className={styles['relatedItemTitle']}>Convex Hull Trick</span>
-                      <span className={`material-symbols-outlined ${styles['relatedItemIcon']}`}>trending_flat</span>
-                    </li>
-                    <li className={styles['relatedItem']}>
-                      <span className={styles['relatedItemNum']}>#902</span>
-                      <span className={styles['relatedItemTitle']}>Li-Chao Tree</span>
-                      <span className={`material-symbols-outlined ${styles['relatedItemIcon']}`}>trending_flat</span>
-                    </li>
-                  </ul>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </section>
+        </section> */}
 
         <section className={styles['section']}>
           <div className={`${styles['max-w-7xl']} ${styles['contributors-section']}`}>

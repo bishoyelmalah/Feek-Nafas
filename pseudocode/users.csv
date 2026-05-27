@@ -1,0 +1,13 @@
+id,name,username,email,codeforces_handle,score,created_at,updated_at
+11111111-1111-1111-1111-111111111111,Bishoy Nader,bishoy,bishoy@example.com,bishoy_cf,120,2026-03-01T09:00:00Z,2026-03-14T18:40:00Z
+22222222-2222-2222-2222-222222222222,Sara Adel,sara,sara@example.com,sara_codes,220,2026-03-01T09:10:00Z,2026-03-14T19:00:00Z
+33333333-3333-3333-3333-333333333333,Omar Hany,omar,omar@example.com,omar_h,150,2026-03-01T09:20:00Z,2026-03-12T11:30:00Z
+44444444-4444-4444-4444-444444444444,Lina Mostafa,lina,lina@example.com,lina_m,175,2026-03-01T09:30:00Z,2026-03-13T20:15:00Z
+55555555-5555-5555-5555-555555555555,Youssef Samir,youssef,youssef@example.com,yousef_cf,90,2026-03-02T08:40:00Z,2026-03-14T08:10:00Z
+66666666-6666-6666-6666-666666666666,Nour Ashraf,nour,nour@example.com,nour_ash,310,2026-03-02T09:00:00Z,2026-03-14T21:05:00Z
+77777777-7777-7777-7777-777777777777,Karim Tarek,karim,karim@example.com,karim_t,205,2026-03-03T07:45:00Z,2026-03-14T20:50:00Z
+88888888-8888-8888-8888-888888888888,Menna Wael,menna,menna@example.com,menna_w,165,2026-03-03T10:10:00Z,2026-03-13T12:25:00Z
+99999999-9999-9999-9999-999999999999,Ahmed Fares,ahmed,ahmed@example.com,ahmed_f,140,2026-03-04T11:30:00Z,2026-03-14T10:05:00Z
+aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa,Maya Emad,maya,maya@example.com,maya_e,260,2026-03-05T12:00:00Z,2026-03-14T22:10:00Z
+bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb,Hana Gamal,hana,hana@example.com,hana_g,130,2026-03-06T13:15:00Z,2026-03-12T17:40:00Z
+cccccccc-cccc-cccc-cccc-cccccccccccc,Ziad Adel,ziad,ziad@example.com,ziad_a,185,2026-03-07T14:25:00Z,2026-03-14T16:55:00Z

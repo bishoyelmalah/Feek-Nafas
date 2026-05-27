@@ -1,20 +1,319 @@
-﻿// import Footer from "../../components/Footer/Footer"
-// import Header from "../../components/Header/Header"
-import { useLocation, useNavigate } from 'react-router';
-import styles from './MatchPage.module.css';
+﻿import styles from './MatchPage.module.css';
+import { VictoryPage } from '../VictoryPage/VictoryPage';
+import { LosePage } from '../LosePage/LosePage';
+import { DrawPage } from '../DrawPage/DrawPage';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { RealtimeChannel } from '@supabase/supabase-js';
+import { useAuth } from '../../hooks/useAuth';
+// import { getMatch } from '../../services/matchService';
+
+import { type SubmitEvent } from 'react';
+import { type ChatMessage } from '../../types/ChatMessage';
+import { checkSubmission } from '../../services/codeforcesService';
+import { startMatch, finishMatch, getMatch, cancelMatch } from '../../services/matchService';
+import { supabase } from '../../lib/supabase';
+import { updateUserScore } from '../../services/userService';
+import { useMatchTimer } from '../../hooks/useMatchTimer';
+import { useOpponent } from '../../hooks/useOpponent';
+import { useMatch } from '../../hooks/useMatch';
+import { Modal } from '../../components/Modal/Modal';
+import { getUserData } from '../../services/authService';
+import { getPublicAvatarUrl } from '../../services/avatarService';
+
+
 
 export function MatchPage() {
     const navigate = useNavigate();
-    const { state } = useLocation();
-    const { problem } = state;
-    console.log(problem);
+    const { id: matchId } = useParams<{ id: string }>();
+    const [isLoading, setIsLoading] = useState(true);
 
+    const channelRef = useRef<RealtimeChannel | null>(null);
+    const chatEndRef = useRef<HTMLDivElement | null>(null);
+    const [chatInput, setChatInput] = useState('');
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+    const [isFinished, setIsFinished] = useState<{finished: boolean, win: boolean, draw: boolean}>({finished: false, win: false, draw: false});
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     
+    const {userId, userData} = useAuth();
+    const {opponentData, setOpponentData} = useOpponent();
+    const {matchData, setMatchData} = useMatch();
+    const handle = userData?.codeforces_handle ?? '';
+
+    const userAvatarValue = userData?.avatar_url;
+    const isUserAvatarUrl = userAvatarValue?.startsWith('http');
+
+    const opponentAvatarValue = opponentData?.avatar_url;
+    const isOpponentAvatarUrl = opponentAvatarValue?.startsWith('http');
+
+    // Scroll to bottom whenever messages change
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
+    // Load messages from localStorage and cleanup old matches
+    useEffect(() => {
+        if (!matchId) return;
+
+        // Cleanup: remove any localStorage items for other matches
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('match_chat_') && key !== `match_chat_${matchId}`) {
+                localStorage.removeItem(key);
+            }
+        });
+
+        // Load messages for current match
+        const savedMessages = localStorage.getItem(`match_chat_${matchId}`);
+        if (savedMessages) {
+            setMessages(JSON.parse(savedMessages));
+        }
+    }, [matchId]);
+
+    // Always use fresh data from the database to ensure we have the latest status and winner information
+    const effectiveMatchData = matchData;
+
+    useEffect(() => {
+        const fetchMatchData = async () => {
+            if (!matchId) {
+                navigate('/home');
+                return;
+            }
+
+            try {
+                // Perform a new query every time the user enters the page to bypass stale local storage/context
+                const data = await getMatch(matchId);
+                if (!data) {
+                    navigate('/home');
+                    return;
+                }
+                setMatchData(data);
+
+                // Fetch and resolve opponent data
+                let opponentId = "";
+                if (userId === data.player1_id) {
+                    opponentId = data.player2_id;
+                } else {
+                    opponentId = data.player1_id;
+                }
+
+                if (opponentId) {
+                    const opponent = await getUserData(opponentId);
+                    if (opponent) {
+                        if (opponent.avatar_url && !opponent.avatar_url.startsWith('http')) {
+                            opponent.avatar_url = getPublicAvatarUrl(opponent.avatar_url) || "";
+                        } else if (!opponent.avatar_url) {
+                            opponent.avatar_url = opponent.name
+                                ?.split(' ')
+                                .map((n: string) => n[0])
+                                .join('')
+                                .toUpperCase() || opponent.username?.charAt(0).toUpperCase() || '?';
+                        }
+                        setOpponentData(opponent);
+                    }
+                }
+
+                // If the match is already finished, determine the result and display the appropriate page
+                if (data.status === 'finished') {
+                    setMatchData(null);
+                    setOpponentData(null);
+                    localStorage.removeItem(`match_chat_${matchId}`);
+                    const isDraw = !data.winner_user_id;
+                    setIsFinished({
+                        finished: true,
+                        win: data.winner_user_id === userId,
+                        draw: isDraw
+                    });
+                    setIsLoading(false);
+                    return; // Skip setting context data
+                }
+
+                setMatchData(data);
+            } catch (error) {
+                console.error('Failed to fetch match data:', error);
+                navigate('/home');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchMatchData();
+    }, [matchId, navigate, userId, setMatchData, setOpponentData]);
+
+    const {timeLeft, durationInMinutes, isTimeUp} = useMatchTimer(effectiveMatchData?.id);
+
+    useEffect(() => {
+        if (isTimeUp && effectiveMatchData && effectiveMatchData.status !== 'finished') {
+            finishMatch(effectiveMatchData.id as string, null);
+        }
+    }, [isTimeUp, effectiveMatchData]);
 
     const handleRefresh = async () => {
-        const isCorrect = true
-        if (isCorrect) navigate('/victory');
+        if (!effectiveMatchData) return;
+        const result = await checkSubmission(handle, effectiveMatchData.contest_id, effectiveMatchData.problem_index, durationInMinutes);
+        // console.log(result);
+        if (result) {
+            finishMatch(effectiveMatchData.id as string, userId as string);
+        } 
+            
     };
+
+    const handleReturnToLobby = () => {
+        setIsCancelModalOpen(true);
+    };
+
+    const confirmCancelMatch = async () => {
+        if (effectiveMatchData) {
+            try {
+                await cancelMatch(effectiveMatchData.id);
+                navigate('/home');
+            } catch (error) {
+                console.error('Failed to cancel match:', error);
+            }
+        }
+        setIsCancelModalOpen(false);
+    };
+
+    const handleSendMessage = async (e: SubmitEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!effectiveMatchData || !userId || !chatInput || !channelRef.current) return;
+
+        const newMessage: ChatMessage = {
+            match_id: effectiveMatchData.id,
+            sender_id: userId,
+            content: chatInput,
+        };
+
+        try {
+            // Broadcast the message to other devices
+            channelRef.current.send({
+                type: 'broadcast',
+                event: 'chat-message',
+                payload: newMessage
+            });
+
+            // Save to localStorage and update state
+            setMessages((prev) => {
+                const updated = [...prev, newMessage];
+                localStorage.setItem(`match_chat_${effectiveMatchData.id}`, JSON.stringify(updated));
+                return updated;
+            });
+
+            setChatInput('');
+        } catch (error) {
+            console.error('Failed to send message:', error);
+        }
+    }
+
+    useEffect(()=>{
+        if (!effectiveMatchData?.id) return;
+
+        // Subscribe to broadcast messages and match status changes
+        const channel = supabase
+            .channel(`match_chat:${effectiveMatchData.id}`)
+            .on(
+                'broadcast',
+                { event: 'chat-message' },
+                (payload) => {
+                    const newMessage = payload.payload as ChatMessage;
+                    setMessages((prev) => {
+                        const updated = [...prev, newMessage];
+                        localStorage.setItem(`match_chat_${effectiveMatchData.id}`, JSON.stringify(updated));
+                        return updated;
+                    });
+                }
+            )
+            .subscribe();
+
+        // Subscribe to match status changes
+        const matchChannel = supabase
+            .channel(`match-status:${effectiveMatchData.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'matches',
+                    filter: `id=eq.${effectiveMatchData.id}`
+                },
+                (payload) => {
+                    const updatedMatch = payload.new as any;
+                    console.log('Match status update received:', updatedMatch);
+                    
+                    if (updatedMatch.status === 'finished') {
+                        localStorage.removeItem(`match_chat_${effectiveMatchData.id}`);
+                        setMatchData(null);
+                        setOpponentData(null);
+                        const isWin = updatedMatch.winner_user_id === userId;
+                        const isDraw = !updatedMatch.winner_user_id;
+
+                        setIsFinished({
+                            finished: true,
+                            win: isWin,
+                            draw: isDraw
+                        });
+
+                        // LOCAL SCORE UPDATE: Each user updates their OWN score to respect RLS
+                        if (!isDraw && userId) {
+                            const scoreChange = isWin ? 20 : -20;
+                            updateUserScore(userId, scoreChange).catch(err => {
+                                console.error('Failed to update local score:', err);
+                            });
+                        }
+                    } else if (updatedMatch.status === 'canceled') {
+                        localStorage.removeItem(`match_chat_${effectiveMatchData.id}`);
+                        setMatchData(null);
+                        setOpponentData(null);
+                        navigate('/home', { state: { notification: "The match was canceled" } });
+                    }
+                }
+            )
+            .subscribe((status) => {
+                console.log(`Match status subscription: ${status}`);
+            });
+
+        channelRef.current = channel;
+        
+        return () => {
+            channel.unsubscribe();
+            matchChannel.unsubscribe();
+        }
+    }, [effectiveMatchData?.id, userId, setMatchData, setOpponentData, navigate])
+
+    useEffect(()=>{
+        if (!effectiveMatchData?.id || effectiveMatchData.status !== 'accepted') return;
+        
+        const triggerStartMatch = async () => {
+            try {
+                await startMatch(effectiveMatchData.id);
+                if (effectiveMatchData) {
+                    setMatchData({ ...effectiveMatchData, status: 'in_progress' });
+                }
+            } catch (error) {
+                console.error('Failed to start match:', error);
+            }
+        };
+        triggerStartMatch();
+    }, [effectiveMatchData, setMatchData]);
+
+    if (isLoading) {
+        return null;
+    }
+
+    if (isFinished.finished) {
+        if (isFinished.draw) {
+            return <DrawPage />
+        }
+        if (isFinished.win) {
+            return <VictoryPage />
+        } else {
+            return <LosePage />
+        }
+    }
+
+    if (!effectiveMatchData) {
+        return null;
+    }
 
     return (
         <div className={styles['match-page']}>
@@ -28,30 +327,33 @@ export function MatchPage() {
                         <div className={styles['player-info']}>
                             <div className={styles['player-avatar-container']}>
                                 <div className={[styles['player-avatar'], styles['blue-border']].join(' ')}>
-                                    <img 
-                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcSM1JyCgADutBmUal13KYePGDj08Do90Z2zgAeUp9R2VqFq3wAhR8GsAdZXGZTSuutZx0brGzt9_pSsScFju4iwXzh4EDGZuAoCqFm4cXngbLtTRbTHE-EJVXv2GquZ6WbgQhhNKrKfVEszX_TOxWgY8wU9DJFxWG1ueTI_ObIaJ0IS4SNEZeJP1ibgFZZ0zOzsHkSeRXUvCEi6yHozWr8t8kDH9RKiZGgSvlruDo53Bc5B0C87nqhIdbIIYJXU7m0TSF-uX35Ds" 
-                                        alt="Player A avatar"
-                                    />
+                                    {isUserAvatarUrl ? (
+                                        <img src={userAvatarValue} alt="Player A avatar" />
+                                    ) : (
+                                        <div className={styles['avatar-placeholder']}>
+                                            {userAvatarValue}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className={styles['online-indicator']}></div>
                             </div>
                             <div className={styles['player-details']}>
-                                <span className={[styles['player-name'], styles['blue-text']].join(' ')}>Player A (You)</span>
-                                <div className={styles['player-stats']}>
+                                <span className={[styles['player-name'], styles['blue-text']].join(' ')}>{handle} (You)</span>
+                                {/* <div className={styles['player-stats']}>
                                     <span className={[styles['rank-badge'], styles['blue-badge']].join(' ')}>Candidate Master</span>
                                     <span className={styles['rating']}>1840</span>
-                                </div>
+                                </div> */}
                             </div>
-                            <div className={styles['player-status']}>
+                            {/* <div className={styles['player-status']}>
                                 <span className={[styles['status-text'], styles['thinking']].join(' ')}>Thinking</span>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 
                     {/* Timer HUD */}
                     <div className={styles['timer-container']}>
                         <div className={styles['timer-display']}>
-                            <span className={styles['timer-value']}>14:20</span>
+                            <span className={styles['timer-value']}>{timeLeft}</span>
                             <p className={styles['timer-label']}>Time Remaining</p>
                         </div>
                     </div>
@@ -59,22 +361,25 @@ export function MatchPage() {
                     {/* Player B (Opponent) */}
                     <div className={[styles['player-card'], styles['player-b']].join(' ')}>
                         <div className={styles['player-info']}>
-                            <div className={styles['player-status']}>
+                            {/* <div className={styles['player-status']}>
                                 <span className={[styles['status-text'], styles['submitting']].join(' ')}>Submitting...</span>
-                            </div>
+                            </div> */}
                             <div className={[styles['player-details'], styles['right']].join(' ')}>
-                                <span className={[styles['player-name'], styles['orange-text']].join(' ')}>Player B</span>
-                                <div className={styles['player-stats']}>
+                                <span className={[styles['player-name'], styles['orange-text']].join(' ')}>{opponentData?.codeforces_handle}</span>
+                                {/* <div className={styles['player-stats']}>
                                     <span className={styles['rating']}>1910</span>
                                     <span className={[styles['rank-badge'], styles['orange-badge']].join(' ')}>Master</span>
-                                </div>
+                                </div> */}
                             </div>
                             <div className={styles['player-avatar-container']}>
                                 <div className={[styles['player-avatar'], styles['orange-border']].join(' ')}>
-                                    <img 
-                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnkP0tPBbWUufigD2mPunXbt4EYjBqJJgv7Uq6uYj01D-AH8FVNHK2Df06ZMf9RTOINJzZwneretI5Z6G09nsHGJ7bdxqbLyPhnZHQfKj4OfN_rUHSoReSnYA9JVVesrBi_gKVpHcZ5Lq6VehWiDvoGxh1OI_66BtggFz9zGVGB3jKzw0B4OcFxWiqSv8QX5NiidXC6FQxBspR2Wwbg52l6NTo5ja3Uf3hLQ1svBSBmC8YcN5HAKC6lQFZW8nCuQN_MZaQ1wfDluw" 
-                                        alt="Player B avatar"
-                                    />
+                                    {isOpponentAvatarUrl ? (
+                                        <img src={opponentAvatarValue} alt="Player B avatar" />
+                                    ) : (
+                                        <div className={styles['avatar-placeholder']}>
+                                            {opponentAvatarValue}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className={styles['online-indicator']}></div>
                             </div>
@@ -83,7 +388,7 @@ export function MatchPage() {
                 </div>
 
                 {/* Tug of War Bar */}
-                <div className={styles['momentum-section']}>
+                {/* <div className={styles['momentum-section']}>
                     <div className={styles['momentum-labels']}>
                         <div className={styles['momentum-player']}>
                             <span className={[styles['momentum-title'], styles['blue-text']].join(' ')}>Momentum</span>
@@ -99,7 +404,7 @@ export function MatchPage() {
                         <div className={[styles['momentum-fill'], styles['orange-momentum']].join(' ')} style={{ width: '50%' }}></div>
                         <div className={styles['momentum-marker']}></div>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Main Content Area */}
                 <div className={styles['match-content']}>
@@ -112,24 +417,33 @@ export function MatchPage() {
                                         <span className="material-symbols-outlined">terminal</span>
                                         Current Challenge
                                     </h3>
-                                    <h1 className={styles['challenge-title']}>{`${problem.contestId}${problem.index} - ${problem.name}`}</h1>
+                                    <h1 className={styles['challenge-title']}>
+                                        {effectiveMatchData
+                                            ? `${effectiveMatchData.contest_id}${effectiveMatchData.problem_index}`
+                                            : 'Loading challenge...'}
+                                    </h1>
                                 </div>
-                                <div className={styles['challenge-meta']}>
-                                    <span className={styles['meta-badge']}>DIFF: 800</span>
-                                    <span className={styles['meta-badge']}>POINTS: 500</span>
-                                </div>
+                                {/* <div className={styles['challenge-meta']}>
+                                    <span className={styles['meta-badge']}>RATING: 800</span>
+                                </div> */}
                             </div>
                             
                             <p className={styles['challenge-description']}>
-                                Contestant who earns a score equal to or greater than the k-th place finisher's score will advance to the next round, as long as the contestant earns a positive score...
+                                To complete this challenge, click the button below to open the problem on Codeforces. Once you've submitted your solution and received an "Accepted" verdict, return here and press the <strong>Refresh</strong> button to synchronize your status.
                             </p>
                             
-                            <div className={styles['challenge-tags']}>
+                            {/* <div className={styles['challenge-tags']}>
                                 <span className={styles['tag']}>Implementation</span>
                                 <span className={styles['tag']}>Special Problems</span>
-                            </div>
+                            </div> */}
                             
-                            <a href={`${problem.link}`} target="_blank" rel="noopener noreferrer" className={styles['solve-button']}>
+                            <a
+                                href={effectiveMatchData ? `https://codeforces.com/contest/${effectiveMatchData.contest_id}/problem/${effectiveMatchData.problem_index}` : '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles['solve-button']}
+                                aria-disabled={!effectiveMatchData}
+                            >
                                 <span className="material-symbols-outlined">launch</span>
                                 Solve on Codeforces
                             </a>
@@ -140,83 +454,126 @@ export function MatchPage() {
                                 <span className="material-symbols-outlined">refresh</span>
                                 Refresh
                             </button>
-                            <button className={[styles['action-btn'], styles['danger']].join(' ')}>
+                            <button 
+                                className={[styles['action-btn'], styles['danger']].join(' ')}
+                                onClick={handleReturnToLobby}
+                            >
                                 <span className="material-symbols-outlined">logout</span>
                                 Return to Lobby
                             </button>
-                            <button
-                                className={[styles['action-btn'], styles['secondary']].join(' ')}
-                                onClick={() => navigate('/victory')}
-                            >
-                                Victory
-                            </button>
-                            <button
-                                className={[styles['action-btn'], styles['danger']].join(' ')}
-                                onClick={() => navigate('/lose')}
-                            >
-                                Lose
-                            </button>
+                            
+                            <div className={styles['simulation-group']}>
+                                <button
+                                    className={[styles['action-btn'], styles['secondary']].join(' ')}
+                                    onClick={() => finishMatch(effectiveMatchData.id as string, userId as string)}
+                                >
+                                    Win
+                                </button>
+                                <button
+                                    className={[styles['action-btn'], styles['warning']].join(' ')}
+                                    onClick={() => finishMatch(effectiveMatchData.id as string, null)}
+                                >
+                                    Draw
+                                </button>
+                                <button
+                                    className={[styles['action-btn'], styles['danger']].join(' ')}
+                                    onClick={() => finishMatch(effectiveMatchData.id as string, opponentData?.id as string)}
+                                >
+                                    Lose
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Right: Live Feed */}
-                    {/* <div className={styles['live-feed']}>
+                    {/* Right: Match Chat */}
+                    <div className={styles['live-feed']}>
                         <div className={styles['feed-card']}>
                             <div className={styles['feed-header']}>
                                 <h4 className={styles['feed-title']}>
                                     <span className={styles['live-indicator']}></span>
-                                    Live Match Feed
+                                    Match Chat
                                 </h4>
-                                <span className={styles['session-id']}>SESSION: #AF92-X</span>
+                                <span className={styles['session-id']}>ROOM: #AF92-X</span>
                             </div>
                             <div className={styles['feed-content']}>
+                                {messages.map((message) => {
+                                    const isYou = message.sender_id === userId;
+                                    const senderLabel =
+                                        isYou
+                                            ? 'You'
+                                            : opponentData?.username;
+
+                                    return (
+                                        <div
+                                            key={message.id}
+                                            className={[
+                                                styles['chat-entry'],
+                                                isYou
+                                                    ? styles['chat-entry-right']
+                                                    : styles['chat-entry-left'],
+                                            ].join(' ')}
+                                        >
+                                            <div
+                                                className={[
+                                                    styles['chat-bubble'],
+                                                    isYou
+                                                        ? styles['chat-bubble-you']
+                                                        : styles['chat-bubble-opponent'],
+                                                ].join(' ')}
+                                            >
+                                                <div className={styles['chat-meta']}>
+                                                    <span
+                                                        className={[
+                                                            styles['feed-player'],
+                                                            isYou
+                                                                ? styles['blue-text']
+                                                                : styles['orange-text'],
+                                                        ].join(' ')}
+                                                    >
+                                                        {senderLabel}
+                                                    </span>
+                                                    {/* <span className={styles['feed-time']}>{`[${message.time}]`}</span> */}
+                                                </div>
+                                                <p className={styles['chat-text']}>{message.content}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                                 <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:15:02]</span>
-                                    <span className={styles['feed-text']}>Match protocol initialized.</span>
-                                </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:15:05]</span>
-                                    <span className={[styles['feed-player'], styles['blue-text']].join(' ')}>Player A</span>
-                                    <span className={styles['feed-text-italic']}>connected to Codeforces API.</span>
-                                </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:15:08]</span>
-                                    <span className={[styles['feed-player'], styles['orange-text']].join(' ')}>Player B</span>
-                                    <span className={styles['feed-text-italic']}>connected to Codeforces API.</span>
-                                </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:15:10]</span>
-                                    <span className={styles['feed-system']}>SYSTEM:</span>
-                                    <span className={styles['feed-text-white']}>Match Started! Problem set released.</span>
-                                </div>
-                                <div className={[styles['feed-entry'], styles['column']].join(' ')}>
-                                    <span className={styles['feed-time']}>[14:18:22]</span>
-                                    <div className={styles['feed-submission']}>
-                                        <span className={[styles['feed-player'], styles['orange-text']].join(' ')}>Player B</span>
-                                        <span className={styles['submission-text']}>Attempting submission for Test Case 1...</span>
-                                    </div>
-                                </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:19:45]</span>
-                                    <span className={[styles['feed-player'], styles['blue-text']].join(' ')}>Player A</span>
-                                    <span className={styles['feed-text-italic']}>viewing problem description.</span>
-                                </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:20:00]</span>
-                                    <span className={styles['feed-alert']}>MATCH ALERT:</span>
-                                    <span className={styles['feed-text-alert']}>T-minus 14 minutes remaining.</span>
-                                </div>
-                                <div className={styles['feed-entry']}>
-                                    <span className={styles['feed-time']}>[14:20:01]</span>
                                     <span className={styles['feed-cursor']}></span>
                                 </div>
+                                <div ref={chatEndRef} />
                             </div>
+
+                            <form className={styles['chat-form']} onSubmit={handleSendMessage}>
+                                <input
+                                    type="text"
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    className={styles['chat-input']}
+                                    placeholder="Type your message..."
+                                    aria-label="Type your message"
+                                />
+                                <button type="submit" className={styles['chat-send-button']}>
+                                    Send
+                                </button>
+                            </form>
                         </div>
-                    </div> */}
+                    </div>
                 </div>
             </main>
 
             {/* <Footer/> */}
+            
+            <Modal 
+                isOpen={isCancelModalOpen}
+                title="Cancel Match"
+                message="Do you want to cancel this match and return to home page?"
+                onConfirm={confirmCancelMatch}
+                onCancel={() => setIsCancelModalOpen(false)}
+                confirmText="Yes, Cancel"
+                cancelText="No, Stay"
+            />
         </div>
     )
 }

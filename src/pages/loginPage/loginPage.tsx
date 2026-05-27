@@ -1,6 +1,6 @@
 ﻿import { useState, type SubmitEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { supabase } from '../../services/supabase';
+import { signIn } from '../../services/authService';
 import styles from './loginPage.module.css';
 
 export function LoginPage() {
@@ -16,8 +16,7 @@ export function LoginPage() {
         setError('');
         setLoading(true);
 
-        const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-
+        const { error: authError } = await signIn({ email, password });
         if (authError) {
             setError(authError.message.toUpperCase());
         } else {

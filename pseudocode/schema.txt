@@ -1,0 +1,30 @@
+users:
+    id uuid pk
+    name text not null
+    username text unique not null
+    email text unique not null
+    codeforces_handle text unique not null
+    score int default 0
+    created_at timestamptz
+    updated_at timestamptz
+
+matches:
+    id uuid pk
+    player1_id uuid fk users(id)
+    player2_id uuid fk users(id)
+    status enum(pending, declined, in_progress, finished, canceled)
+    contest_id int
+    problem_index text
+    winner_user_id uuid null fk users(id)
+    created_at timestamptz
+    finished_at timestamptz null
+    updated_at timestamptz
+
+match_inviations:
+    id uuid pk
+    from_user_id uuid fk users(id)
+    to_user_id uuid fk users(id)
+    status enum(pending, accepted, declined, expired)
+    match_id uuid null fk matches(id)
+    created_at timestamptz
+

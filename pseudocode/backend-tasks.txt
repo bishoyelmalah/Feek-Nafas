@@ -1,0 +1,31 @@
+this is another change
+Auth Services:
+    - separate auth services (sign up, sign in) into separate file
+    - when the user sign up it should be added to the "Users" table with the same uuid he was assigned
+    - track the auth of the user, if he is signed in don't let him back again to the sign in and landing pages
+    - if the user is signed in bring him to the home page directly when he enters the website
+
+Create Match Service:
+    - in the find Match page when the user search for a player and press invite it should check if the username exists in the "Users" table
+    - if the username exists create a new row in "Matches" table with the username_1 as player_1 and username_2 as player_2
+    - set the status to "Pending"
+    - user go to the "Get Ready Page"
+
+Match Invitation Service:
+    - when a row is added in "Matches" table with the value of player_2 as my username, I should receive an invitation for the match with an Accept or Decline options
+    - if I decline then the status of the match should be changed to "decline"
+    - if I accepted then I should go to the "Get Ready Page"
+
+Get Ready Service:
+    - when the two players are in the lobby they both have "Ready" button
+    - when they both press it a counter should starts and then they go to the Match Page
+    - the status of the match is updated to "in_progress"
+
+Match Service:
+    - when the two players enter the match, there is a timer (e.g 10 Min)
+    - if the timer finished and no one answered then it a draw
+    - if a player submitted a solution on codeforces, then he should press the refresh button
+    - when he press the refresh button, the code call codeforces api with the user's handle and check his submissions
+    - if there is a submisson then it checks if it is accepted or not
+    - if any user get an accepted submission then this user go to the victory page and the other user go the lose page
+    - the match status is set to "finished" and the results are pushed
