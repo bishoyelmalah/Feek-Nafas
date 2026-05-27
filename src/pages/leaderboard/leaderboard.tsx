@@ -27,9 +27,8 @@ const LeaderboardPage: React.FC = () => {
 
     const [topUsers, setTopUsers] = useState<Hacker[]>([]);
     const [currentUserRank, setCurrentUserRank] = useState<any>(null);
-    const [isLoading, setIsLoading] = useState(true);
     const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
-    const [notifications, setNotifications ] = useState<Notification[]>([]);
+    const [notifications ] = useState<Notification[]>([]);
     const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
     const getAvatarUrl = async (userId: string): Promise<string | null> => {
@@ -57,7 +56,6 @@ const LeaderboardPage: React.FC = () => {
 
     useEffect(() => {
         const fetchLeaderboard = async () => {
-            setIsLoading(true);
             try {
                 const users = await getTopUsers(userLimit);
 
@@ -72,8 +70,6 @@ const LeaderboardPage: React.FC = () => {
                 setTopUsers(usersWithAvatars);
             } catch (error) {
                 console.error("Failed to fetch rankings:", error);
-            } finally {
-                setIsLoading(false);
             }
         };
 

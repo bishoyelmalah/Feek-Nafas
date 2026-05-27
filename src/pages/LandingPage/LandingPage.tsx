@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, startTransition } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './LandingPage.module.css';
 import Header from '../../components/Header/Header';
@@ -99,7 +99,9 @@ const LandingPage: React.FC = () => {
 
   useEffect(() => {
     // Use mock data for non-authenticated users
-    setTopUsers(mockTopUsers);
+    startTransition(() => {
+      setTopUsers(mockTopUsers);
+    });
   }, []);
   return (
     <div className={`${styles['landing-page']} ${styles['grid-overlay']}`}>

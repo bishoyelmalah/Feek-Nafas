@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, startTransition } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Footer from '../../components/Footer/Footer';
 import Header from '../../components/Header/Header';
@@ -26,10 +26,12 @@ export function HomePage() {
 
     useEffect(() => {
         if (location.state?.notification) {
-            setModalConfig({
-                isOpen: true,
-                message: location.state.notification
-            });
+            startTransition(()=>{
+                setModalConfig({
+                    isOpen: true,
+                    message: location.state.notification
+                })
+            })
             // Clear location state to prevent alert on refresh
             window.history.replaceState({}, document.title);
         }

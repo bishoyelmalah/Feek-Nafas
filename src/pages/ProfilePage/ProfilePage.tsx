@@ -9,7 +9,7 @@ import { useAuth } from '../../hooks/useAuth';
 
 export function ProfilePage() {
   const nav = useNavigate();
-  const { session, userId, userData, loading: authLoading } = useAuth();
+  const { userId, userData, loading: authLoading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ username: '' });
   const [isUploading, setIsUploading] = useState(false);

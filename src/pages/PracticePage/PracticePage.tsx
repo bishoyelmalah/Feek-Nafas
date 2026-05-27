@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useMemo, startTransition } from 'react';
+// import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import styles from './PracticePage.module.css';
@@ -44,9 +44,12 @@ export function PracticePage() {
   const paginatedProblems = filteredProblems.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   // Reset to page 1 when filters change
+  const filterKey = `${selectedRatings.join(',')}-${selectedTags.join(',')}-${searchQuery}`;
   useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedRatings, selectedTags, searchQuery]);
+    startTransition(() => {
+      setCurrentPage(1);
+    });
+  }, [filterKey]);
 
   const handleRatingToggle = (rating: number) => {
     setSelectedRatings(prev =>
