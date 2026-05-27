@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getTopUsers, getUserRank } from '../../services/userService';
-import landingStyles from './Leaderboard.module.css';
+import landingStyles from './leaderboard.module.css';
 import Header from '../../components/Header/Header';
 import { type Notification } from '../../types/Notification';
 import { supabase } from '../../lib/supabase';
