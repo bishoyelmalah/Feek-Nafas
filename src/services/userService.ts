@@ -59,7 +59,7 @@ export const updateUserScore = async (userId: string, scoreChange: number) => {
     
     if (fetchError) throw fetchError;
     
-    const newScore = (userData.score || 0) + scoreChange;
+    const newScore = Math.max(0, (userData.score || 0) + scoreChange);
     
     // Update user's score in the database
     const { error: updateError } = await supabase
