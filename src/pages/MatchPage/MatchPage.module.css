@@ -731,12 +731,12 @@
 .live-feed {
   display: flex;
   flex-direction: column;
-  height: 490px;
+  height: 460px;
 }
 
 @media (min-width: 1024px) {
   .live-feed {
-    height: 490px;
+    height: 460px;
   }
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, startTransition } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../services/authService';
 import styles from './Header.module.css';
@@ -29,26 +29,27 @@ function Header({
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
-  const [toast, setToast] = useState<{isOpen: boolean, message: string, color: string}>({
+  const [toast, setToast] = useState<{isOpen: boolean, message: string, color: string, id: number}>({
     isOpen: false, 
     message: '', 
-    color: '#ec5b13'
+    color: '#ec5b13',
+    id: 0
   });
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
+  const toastIdRef = useRef(0);
 
   useEffect(() => {
     if (location.state?.notification) {
-      startTransition(()=>{
-        setToast({
-          isOpen: true,
-          message: location.state.notification,
-          color: location.state.notificationColor || '#ec5b13'
-        });
-      })
+      setToast({
+        isOpen: true,
+        message: location.state.notification,
+        color: location.state.notificationColor || '#ec5b13',
+        id: ++toastIdRef.current
+      });
       // Clear state to prevent showing again on refresh
-      window.history.replaceState({ ...location.state, notification: undefined }, document.title);
+      navigate(location.pathname, { replace: true, state: { ...location.state, notification: undefined } });
     }
-  }, [location.state]);
+  }, [location.state, location.pathname, navigate]);
 
   const displayUsername =
     userData?.username ??
@@ -144,7 +145,7 @@ function Header({
       if (result.status === 'declined') message = "The invitation was declined";
       if (result.status === 'finished') message = "The match is already finished";
       
-      setToast({ isOpen: true, message, color: '#ef4444' });
+      setToast({ isOpen: true, message, color: '#ef4444', id: ++toastIdRef.current });
       setNotifications((prev) => prev.filter((n) => n.matchId !== matchId));
       return;
     }
@@ -324,9 +325,10 @@ function Header({
       </div>
       {toast.isOpen && (
         <Toast 
+          key={toast.id}
           message={toast.message} 
           color={toast.color} 
-          onClose={() => setToast({ ...toast, isOpen: false })} 
+          onClose={() => setToast(prev => ({ ...prev, isOpen: false }))} 
         />
       )}
     </header>

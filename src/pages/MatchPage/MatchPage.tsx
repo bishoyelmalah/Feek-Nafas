@@ -20,6 +20,7 @@ import { useMatch } from '../../hooks/useMatch';
 import { Modal } from '../../components/Modal/Modal';
 import { getUserData } from '../../services/authService';
 import { getPublicAvatarUrl } from '../../services/avatarService';
+import { Notification as Toast } from '../../components/Notification/Notification';
 
 
 
@@ -35,6 +36,12 @@ export function MatchPage() {
 
     const [isFinished, setIsFinished] = useState<{finished: boolean, win: boolean, draw: boolean}>({finished: false, win: false, draw: false});
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+    const [toast, setToast] = useState<{isOpen: boolean, message: string, color: string, id: number}>({
+        isOpen: false, 
+        message: '', 
+        color: '#00f2ff',
+        id: 0
+    });
     
     const {userId, userData} = useAuth();
     const {opponentData, setOpponentData} = useOpponent();
@@ -181,7 +188,14 @@ export function MatchPage() {
         // console.log(result);
         if (result) {
             finishMatch(effectiveMatchData.id as string, userId as string);
-        } 
+        } else {
+            setToast({
+                isOpen: true,
+                message: "No submission detected",
+                color: "#00f2ff",
+                id: Date.now()
+            });
+        }
             
     };
 
@@ -450,27 +464,6 @@ export function MatchPage() {
                                 <span className="material-symbols-outlined">logout</span>
                                 Return to Lobby
                             </button>
-                            
-                            <div className={styles['simulation-group']}>
-                                <button
-                                    className={[styles['action-btn'], styles['secondary']].join(' ')}
-                                    onClick={() => finishMatch(effectiveMatchData.id as string, userId as string)}
-                                >
-                                    Win
-                                </button>
-                                <button
-                                    className={[styles['action-btn'], styles['warning']].join(' ')}
-                                    onClick={() => finishMatch(effectiveMatchData.id as string, null)}
-                                >
-                                    Draw
-                                </button>
-                                <button
-                                    className={[styles['action-btn'], styles['danger']].join(' ')}
-                                    onClick={() => finishMatch(effectiveMatchData.id as string, opponentData?.id as string)}
-                                >
-                                    Lose
-                                </button>
-                            </div>
                         </div>
                     </div>
 
@@ -560,6 +553,15 @@ export function MatchPage() {
                 confirmText="Yes, Cancel"
                 cancelText="No, Stay"
             />
+
+            {toast.isOpen && (
+                <Toast 
+                    key={toast.id}
+                    message={toast.message} 
+                    color={toast.color} 
+                    onClose={() => setToast(prev => ({ ...prev, isOpen: false }))} 
+                />
+            )}
         </div>
     )
 }
