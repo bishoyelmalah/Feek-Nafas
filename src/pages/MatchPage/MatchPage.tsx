@@ -462,7 +462,7 @@ export function MatchPage() {
                                 Return to Lobby
                             </button>
                             
-                            <div className={styles['simulation-group']}>
+                            {/* <div className={styles['simulation-group']}>
                                 <button
                                     className={[styles['action-btn'], styles['secondary']].join(' ')}
                                     onClick={() => finishMatch(effectiveMatchData.id as string, userId as string)}
@@ -481,7 +481,7 @@ export function MatchPage() {
                                 >
                                     Lose
                                 </button>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 
