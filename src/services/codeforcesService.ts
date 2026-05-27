@@ -77,7 +77,7 @@ export async function getProblemByRatingOrTopic({rating, topic}: ProblemData, ex
   }
 }
 
-export const checkSubmission = async (handle: string, contestId: string, problem: string, minutes = 60) => {
+export const checkSubmission = async (handle: string, contestId: string, problem: string, minutes = 5) => {
   // calculate time from 5 minutes in seconds
   const currentTimeSeconds = Math.floor(Date.now() / 1000);
   const timeLimitSeconds = currentTimeSeconds - (minutes * 60);

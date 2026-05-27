@@ -6,11 +6,6 @@ import styles from './HomePage.module.css';
 import landingStyles from '../LandingPage/LandingPage.module.css';
 import { useAuth } from '../../hooks/useAuth';
 
-import { createInbox, removeInbox, checkMatchInvitations } from '../../services/invitationService';
-import { type MatchData } from '../../types/MatchData';
-import { getOpponentDetails } from '../../utils/getOpponentDetails';
-import type { User } from '../../types/UserData';
-import { type Notification } from '../../types/Notification';
 import { getActiveMatch } from '../../services/matchService';
 import { Modal } from '../../components/Modal/Modal';
 
@@ -18,8 +13,6 @@ export function HomePage() {
     const navigate = useNavigate();
     const location = useLocation();
     const { userId } = useAuth();
-    const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
-    const [notifications, setNotifications ] = useState<Notification[]>([]);
     const [isCheckingActiveMatch, setIsCheckingActiveMatch] = useState(true);
 
     const [modalConfig, setModalConfig] = useState<{isOpen: boolean, message: string}>({isOpen: false, message: ''});
@@ -46,7 +39,7 @@ export function HomePage() {
             try {
                 const activeMatch = await getActiveMatch(userId);
                 if (activeMatch) {
-                    if (activeMatch.status === 'accepted') {
+                    if (activeMatch.status === 'accepted' || activeMatch.status === 'pending') {
                         navigate(`/getReady/${activeMatch.id}`);
                         return; // Prevent setting isCheckingActiveMatch to false
                     } else if (activeMatch.status === 'in_progress') {
@@ -67,55 +60,13 @@ export function HomePage() {
         navigate('/findMatch');
     };
 
-    useEffect(() => {
-        if (!userId) {
-            return;
-        }
-        const inboxChannel = createInbox(userId, async (invitation: MatchData) => {
-            setHasUnreadNotification(true);
-            const opponent: User | undefined = await getOpponentDetails(invitation.player1_id);
-            setNotifications((prev) => [...prev, {
-                body: `You have a new match invitation from ${opponent?.username}`,
-                matchId: invitation.id
-            }]);
-        });
-
-        checkMatchInvitations(userId, async (matches: MatchData[]) => {
-            if (!matches?.length) {
-                return;
-            }
-
-            const invitations = await Promise.all(
-                matches.map(async (match: MatchData) => {
-                    const opponent = await getOpponentDetails(match.player1_id);
-                    return {
-                        body: `You have a new match invitation from ${opponent?.username}`,
-                        matchId: match.id
-                    };
-                })
-            );
-
-            setHasUnreadNotification(true);
-            setNotifications((prev) => [...prev, ...invitations]);
-        });
-
-        return () => {
-            removeInbox(inboxChannel);
-        };
-    }, [userId]);
-
     if (isCheckingActiveMatch) {
         return null; // Or a splash screen/spinner
     }
 
     return (
         <>
-            <Header
-                activeLink="arena"
-                notificationCount={hasUnreadNotification ? 1 : 0}
-                onNotificationOpened={() => setHasUnreadNotification(false)}
-                notifications={notifications}
-            />
+            <Header activeLink="arena" />
 
             <main className={styles.contentSpacing}>
                 <section className={styles.heroSection}>
