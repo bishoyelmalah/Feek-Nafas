@@ -248,29 +248,38 @@
 }
 
 .cancelMatchButton {
-    width: 100%;
-    margin-top: 1rem;
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
     background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.9rem;
+    width: 100%;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    text-align: left;
 }
 
 .cancelMatchButton:hover:not(:disabled) {
     background: rgba(239, 68, 68, 0.2);
     border-color: #ef4444;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.1);
 }
 
 .cancelMatchButton:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.cancelIcon {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 0.55rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    display: grid;
+    place-items: center;
 }
 
 .connectionRow {

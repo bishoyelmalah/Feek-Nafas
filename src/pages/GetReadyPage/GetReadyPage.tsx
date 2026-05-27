@@ -252,17 +252,7 @@ export function GetReadyPage() {
                             >
                                 {isp1ready ? (ready ? 'LOCKED IN' : 'CANCEL') : 'READY'}
                             </button>
-
-                            <button 
-                                onClick={handleCancelMatch}
-                                disabled={ready || isCancelling}
-                                className={styles.cancelMatchButton}
-                            >
-                                {isCancelling ? 'CANCELLING...' : 'CANCEL MATCH'}
-                            </button>
-
                         </div>
-
 
                         <div className={styles.connectionRow}>
                             <span>Ping: 24ms</span>
@@ -329,6 +319,21 @@ export function GetReadyPage() {
                             <p className={styles.hudValue}>NEON RIYADH</p>
                         </div>
                     </article>
+
+                    <button 
+                        onClick={handleCancelMatch}
+                        disabled={ready || isCancelling}
+                        className={styles.cancelMatchButton}
+                    >
+                        <div className={styles.cancelIcon}>
+                            <span className="material-symbols-outlined">close</span>
+                        </div>
+                        <div>
+                            <p className={styles.hudLabel}>Session Control</p>
+                            <p className={styles.hudValue}>{isCancelling ? 'CANCELLING...' : 'CANCEL MATCH'}</p>
+                        </div>
+                    </button>
+
                     <article className={styles.hudCard}>
                         <div className={styles.hudIcon}>
                             <span className="material-symbols-outlined">timer</span>
@@ -336,15 +341,6 @@ export function GetReadyPage() {
                         <div>
                             <p className={styles.hudLabel}>Match Duration</p>
                             <p className={styles.hudValue}>{selectedDuration}:00 MINUTES</p>
-                        </div>
-                    </article>
-                    <article className={styles.hudCard}>
-                        <div className={styles.hudIcon}>
-                            <span className="material-symbols-outlined">chat</span>
-                        </div>
-                        <div>
-                            <p className={styles.hudLabel}>Lobby Chat</p>
-                            <p className={styles.hudHint}>Press [T] to talk</p>
                         </div>
                     </article>
                 </section>
