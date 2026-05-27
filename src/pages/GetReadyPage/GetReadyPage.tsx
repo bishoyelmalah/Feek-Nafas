@@ -194,18 +194,18 @@ export function GetReadyPage() {
         findMatch();
     }, [timer, matchData?.id, nav, selectedDuration]);
 
-    useEffect(() => {
-        // Prevent back button
-        window.history.pushState(null, '', window.location.href);
-        const handlePopState = () => {
-            window.history.pushState(null, '', window.location.href);
-        };
+    // useEffect(() => {
+    //     // Prevent back button
+    //     window.history.pushState(null, '', window.location.href);
+    //     const handlePopState = () => {
+    //         window.history.pushState(null, '', window.location.href);
+    //     };
 
-        window.addEventListener('popstate', handlePopState);
-        return () => {
-            window.removeEventListener('popstate', handlePopState);
-        };
-    }, []);
+    //     window.addEventListener('popstate', handlePopState);
+    //     return () => {
+    //         window.removeEventListener('popstate', handlePopState);
+    //     };
+    // }, []);
 
     useEffect(() => {
         audio.loop = true;
