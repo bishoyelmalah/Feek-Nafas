@@ -286,7 +286,6 @@ export function ProfilePage() {
           </div>
         </div>
       )}
-      <Footer />
     </>
   );
 }

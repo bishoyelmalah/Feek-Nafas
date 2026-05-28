@@ -11,10 +11,18 @@ Unlike traditional contests, **Feek Nafas** focuses on the adrenaline of live, d
 
 ---
 
-## 📸 Screenshots
-| **Home Page** | **Match Page** |
+## 📸 Gallery
+| **Landing Page** | **Home Page** |
 |:---:|:---:|
-| ![Arena UI](./design/feek_nafas_home_page/screen.png) | ![Lobby UI](./design/battle_arena_live_match/screen.png) |
+| ![Landing UI](./design/Landing_page.png) | ![Home UI](./design/Home_page.png) |
+
+| **Find Match** | **Get Ready Lobby** |
+|:---:|:---:|
+| ![Find Match](./design/Find_Match.png) | ![Lobby UI](./design/Get_Ready.png) |
+
+| **Match Arena** | **Profile Page** |
+|:---:|:---:|
+| ![Arena UI](./design/Match_page.png) | ![Profile UI](./design/Profile_page.png) |
 
 ---
 
@@ -22,10 +30,11 @@ Unlike traditional contests, **Feek Nafas** focuses on the adrenaline of live, d
 
 * **1v1 Real-Time Battles:** Challenge a friend or get matched instantly. First to solve wins.
 * **Live Scoreboard:** Real-time updates using Supabase Realtime. See your opponent's status instantly.
-* **Fair Play Referee:** Server-side validation using **Supabase Edge Functions** ensures no client-side cheating.
-* **Smart Matchmaking:** Filters problems by rating (800 - 3000) to ensure fair fights.
-* **Cyberpunk UI:** A dark-mode, neon-styled interface designed for focus and immersion.
-* **Codeforces Integration:** Fetches problems and verifies submissions directly from the Codeforces API.
+* **Fair Play Referee:** Server-side validation (Refreshed via user action or Edge Functions) ensures no client-side cheating.
+* **Smart Matchmaking:** Filters problems by rating (800 - 3000) from Codeforces.
+* **Interactive HUD:** Cyberpunk-styled interface with live timers, problem details, and chat.
+* **Immersive Audio:** Game sounds for notifications, match starts, and victories.
+* **User Profiles & Leaderboards:** Track your wins, losses, and global rank.
 
 ---
 
@@ -49,64 +58,48 @@ This project uses a modern, serverless architecture to ensure speed and scalabil
 
 ---
 
-## 🏗️ Architecture Overview
+## 🧠 Core Logic & Services
 
-1.  **Match Creation:** User A creates a lobby. Supabase creates a row in the `matches` table.
-2.  **Problem Selection:** The app fetches a random problem from Codeforces based on the selected difficulty.
-3.  **The Race:** Both players see the problem link.
-4.  **Verification (The Referee):**
-    * Instead of the frontend checking the winner (which is insecure), a **Supabase Edge Function** runs in the background.
-    * It polls the Codeforces API: `GET /user.status?handle={player_handle}`.
-    * If it finds an `OK` verdict for the current problem, it updates the database.
-5.  **Game Over:** Supabase Realtime pushes the "Winner" update to both clients instantly.
+### **1. Real-Time Invitation System**
+- Users listen to a private **Supabase Realtime** channel for invitations.
+- When an opponent challenges you, a notification appears with options to **Accept** or **Decline**.
+- Status updates (`Pending`, `Accepted`, `Declined`) are managed through the `Matches` table.
+
+### **2. Presence-Based Lobby**
+- Once a match is accepted, both players enter the **Get Ready Lobby**.
+- A "Ready" status is tracked for both. When both are ready, a countdown starts, and the match begins.
+
+### **3. Secure Referee Logic**
+- The app polls the **Codeforces API** to verify submissions.
+- When a player solves the problem, the state is updated globally.
+- Matches can end in **Victory**, **Loss**, or a **Draw** if the timer expires.
 
 ---
 
-## ⚡ Getting Started
+## 🗺️ Application Map
 
-### Prerequisites
-* Node.js (v18 or higher)
-* npm or yarn
-* A free [Supabase](https://supabase.com/) account.
-
-### Installation
-
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/yourusername/feek-nafas.git](https://github.com/yourusername/feek-nafas.git)
-    cd feek-nafas
-    ```
-
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-
-3.  **Environment Variables:**
-    Create a `.env` file in the root directory and add your Supabase keys:
-    ```env
-    VITE_SUPABASE_URL=your_supabase_project_url
-    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-    ```
-
-4.  **Database Setup:**
-    Run the SQL scripts located in `supabase/schema.sql` in your Supabase SQL Editor to create the necessary tables (`matches`, `users`, etc.).
-
-5.  **Run the App:**
-    ```bash
-    npm run dev
-    ```
-    Open `http://localhost:5173` to view it in the browser.
+- **Landing:** The cyberpunk intro to the arena.
+- **Auth:** Login and Register pages integrated with Supabase Auth.
+- **Home:** Main hub to start matches or view stats.
+- **Find Match:** Search for users and send invitations.
+- **Get Ready:** The pre-match lobby for synchronized starts.
+- **Match Arena:** The core competition page with problem links and live timer.
+- **Leaderboard:** Compete for the top spot globally.
+- **Profile:** Track your performance and personal stats.
+- **Settings:** Customize your experience.
 
 ---
 
 ## 🔮 Roadmap
 
 - [x] Basic 1v1 Match Logic
-- [ ] User Authentication (Supabase Auth)
+- [x] User Authentication (Supabase Auth)
+- [x] Real-time Invitation System
+- [x] Leaderboards & Global Rankings
 - [ ] Elo/Rating System
 - [ ] "Spectator Mode" for live viewing
 - [ ] Team Battles (2v2)
+- [ ] Sound effects and haptic feedback
 
 ---
 
