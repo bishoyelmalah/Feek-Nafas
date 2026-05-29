@@ -27,6 +27,7 @@ function Header({
   const { setMatchData } = useMatch();
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
   const [toast, setToast] = useState<{isOpen: boolean, message: string, color: string, id: number}>({
@@ -37,6 +38,17 @@ function Header({
   });
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const toastIdRef = useRef(0);
+
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isSidebarOpen]);
 
   useEffect(() => {
     if (location.state?.notification) {
@@ -175,9 +187,64 @@ function Header({
   );
 
   return (
-    <header>
-      <div className={styles['header-content']}>
+    <>
+      {/* Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div className={styles['sidebar-overlay']} onClick={() => setIsSidebarOpen(false)} />
+      )}
+
+      {/* Sidebar */}
+      <div className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ''}`}>
+        <div className={styles['sidebar-header']}>
+          <div className={styles['logo-container']}>
+            <div className={styles['logo-icon']}>
+              <span className="material-symbols-outlined">terminal</span>
+            </div>
+            <h1 className={styles['logo-text']} onClick={() => { navigate('/home'); setIsSidebarOpen(false); }}>
+              FEEK<span className={styles['highlight']}>NAFAS</span>
+            </h1>
+          </div>
+          <button className={styles['close-btn']} onClick={() => setIsSidebarOpen(false)}>
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div className={styles['sidebar-content']}>
+          {session && (
+            <div className={styles['sidebar-nav']}>
+              <button 
+                onClick={() => { navigate('/'); setIsSidebarOpen(false); }} 
+                className={`${styles.sidebarBtn} ${activeLink === 'arena' ? styles.active : ''}`}
+              >
+                <span className="material-symbols-outlined">sports_esports</span>
+                Arena
+              </button>
+              <button 
+                onClick={() => { navigate('/leaderboard/10'); setIsSidebarOpen(false); }} 
+                className={`${styles.sidebarBtn} ${activeLink === 'leaderboard' ? styles.active : ''}`}
+              >
+                <span className="material-symbols-outlined">leaderboard</span>
+                Rankings
+              </button>
+              <button 
+                onClick={() => { navigate('/practice'); setIsSidebarOpen(false); }} 
+                className={`${styles.sidebarBtn} ${activeLink === 'challenges' ? styles.active : ''}`}
+              >
+                <span className="material-symbols-outlined">code</span>
+                Practice
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <header>
+        <div className={styles['header-content']}>
         <div className={styles['header-left']}>
+          {session && (
+            <button className={styles['menu-btn']} onClick={() => setIsSidebarOpen(true)}>
+              <span className="material-symbols-outlined">menu</span>
+            </button>
+          )}
           <div className={styles['logo-container']}>
             <div className={styles['logo-icon']}>
               <span className="material-symbols-outlined">terminal</span>
@@ -332,7 +399,7 @@ function Header({
         />
       )}
     </header>
-  );
-}
+    </>
+  )};
 
 export default Header;
