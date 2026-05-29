@@ -341,6 +341,42 @@ nav a:not(.active):hover {
   gap: 16px;           
   align-items: center; 
 }
+
+@media (max-width: 767px) {
+  .header-content {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .logo-text {
+    font-size: 1rem;
+  }
+
+  .header-left {
+    gap: 0.5rem;
+  }
+
+  .header-right {
+    gap: 0.5rem;
+  }
+
+  .register-btns {
+    gap: 0.375rem;
+  }
+
+  .btn-login {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .logo-icon {
+    padding: 0.25rem;
+  }
+
+  .logo-icon :global(.material-symbols-outlined) {
+    font-size: 1.125rem;
+  }
+}
 /* Avatar Placeholder */
 .avatar-placeholder {
   width: 100%;
