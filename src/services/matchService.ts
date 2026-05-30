@@ -82,7 +82,7 @@ export const getActiveMatch = async (userId: string) => {
     const { data, error } = await supabase
         .from('matches')
         .select()
-        .in('status', ['accepted', 'in_progress', 'pending'])
+        .in('status', ['accepted', 'in_progress'])
         .or(`player1_id.eq.${userId},player2_id.eq.${userId}`)
         .order('created_at', { ascending: false })
         .limit(1)
