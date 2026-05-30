@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode, useCallback, startTransition } from 'react';
 import { supabase } from '../../lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 import { AuthContext } from './AuthContext';
@@ -18,6 +18,36 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         return savedUserData ? JSON.parse(savedUserData) : null;
     });
     const userId = session?.user?.id ?? null;
+
+    const refreshUserData = useCallback(async () => {
+        if (!userId) {
+            setUserData(null);
+            localStorage.removeItem('user_data');
+            return;
+        }
+
+        const response = await getUserData(userId);
+        if (response) {
+            let finalAvatarUrl = "";
+            if (response.avatar_url) {
+                const { data: publicUrlData } = supabase.storage
+                    .from('avatars')
+                    .getPublicUrl(response.avatar_url);
+                finalAvatarUrl = publicUrlData.publicUrl;
+            } else {
+                const initials = response.name
+                    ?.split(' ')
+                    .map((n: string) => n[0])
+                    .join('')
+                    .toUpperCase() || response.username?.charAt(0).toUpperCase() || '?';
+                finalAvatarUrl = initials;
+            }
+
+            const updatedUser = { ...response, avatar_url: finalAvatarUrl };
+            setUserData(updatedUser);
+            localStorage.setItem('user_data', JSON.stringify(updatedUser));
+        }
+    }, [userId]);
 
     useEffect(() => {
         const initializeAuth = async () => {
@@ -53,47 +83,19 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     }, [session]);
 
     useEffect(() => {
-        const handleUserData = async () => {
-            if (!userId) {
-                setUserData(null);
-                localStorage.removeItem('user_data');
-                return;
-            }
-
-            const response = await getUserData(userId);
-            if (response) {
-                let finalAvatarUrl = "";
-                if (response.avatar_url) {
-                    const { data: publicUrlData } = supabase.storage
-                        .from('avatars')
-                        .getPublicUrl(response.avatar_url);
-                    finalAvatarUrl = publicUrlData.publicUrl;
-                } else {
-                    const initials = response.name
-                        ?.split(' ')
-                        .map((n: string) => n[0])
-                        .join('')
-                        .toUpperCase() || response.username?.charAt(0).toUpperCase() || '?';
-                    finalAvatarUrl = initials;
-                }
-
-                const updatedUser = { ...response, avatar_url: finalAvatarUrl };
-                setUserData(updatedUser);
-                localStorage.setItem('user_data', JSON.stringify(updatedUser));
-            }
-        };
-
-        handleUserData();
+        startTransition(()=>{
+            refreshUserData();
+        })
 
         const onAvatarUpdated = (event: any) => {
             if (event.detail?.userId === userId) {
-                handleUserData();
+                refreshUserData();
             }
         };
 
         const onProfileUpdated = (event: any) => {
             if (event.detail?.userId === userId) {
-                handleUserData();
+                refreshUserData();
             }
         };
 
@@ -103,12 +105,12 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
             window.removeEventListener('avatarUpdated', onAvatarUpdated);
             window.removeEventListener('profileUpdated', onProfileUpdated);
         };
-    }, [userId]);
+    }, [userId, refreshUserData]);
     
     // console.log(session);
 
     return (
-        <AuthContext.Provider value={{ session, userId, userData, loading }}>
+        <AuthContext.Provider value={{ session, userId, userData, loading, refreshUserData }}>
             {children}
         </AuthContext.Provider>
     );

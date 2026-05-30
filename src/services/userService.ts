@@ -48,24 +48,3 @@ export const getUserRank = async (userId: string) => {
         userId: userId
     };
 }
-
-export const updateUserScore = async (userId: string, scoreChange: number) => {
-    // Get current user's score
-    const { data: userData, error: fetchError } = await supabase
-        .from('users')
-        .select('score')
-        .eq('id', userId)
-        .single();
-    
-    if (fetchError) throw fetchError;
-    
-    const newScore = Math.max(0, (userData.score || 0) + scoreChange);
-    
-    // Update user's score in the database
-    const { error: updateError } = await supabase
-        .from('users')
-        .update({ score: newScore })
-        .eq('id', userId);
-    
-    if (updateError) throw updateError;
-}

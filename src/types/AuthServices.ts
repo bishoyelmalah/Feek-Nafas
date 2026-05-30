@@ -25,6 +25,7 @@ export type ServiceError = {
 export type AuthContextType = {
     session: Session | null;
     userId: string | null;
-    userData: User | null,
+    userData: User | null;
     loading: boolean;
+    refreshUserData: () => Promise<void>;
 };
