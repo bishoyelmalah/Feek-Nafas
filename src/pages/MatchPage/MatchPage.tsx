@@ -13,7 +13,6 @@ import { type ChatMessage } from '../../types/ChatMessage';
 import { checkSubmission } from '../../services/codeforcesService';
 import { startMatch, finishMatch, getMatch, cancelMatch } from '../../services/matchService';
 import { supabase } from '../../lib/supabase';
-import { updateUserScore } from '../../services/userService';
 import { useMatchTimer } from '../../hooks/useMatchTimer';
 import { useOpponent } from '../../hooks/useOpponent';
 import { useMatch } from '../../hooks/useMatch';
@@ -45,7 +44,7 @@ export function MatchPage() {
         id: 0
     });
     
-    const {userId, userData} = useAuth();
+    const {userId, userData, refreshUserData} = useAuth();
     const {opponentData, setOpponentData} = useOpponent();
     const {matchData, setMatchData} = useMatch();
     const handle = userData?.codeforces_handle ?? '';
@@ -146,6 +145,10 @@ export function MatchPage() {
                         win: data.winner_user_id === userId,
                         draw: isDraw
                     });
+
+                    // Refetch user data to get updated score if match is already finished
+                    refreshUserData();
+
                     setIsLoading(false);
                     return; // Skip setting context data
                 }
@@ -297,13 +300,8 @@ export function MatchPage() {
                             draw: isDraw
                         });
 
-                        // LOCAL SCORE UPDATE: Each user updates their OWN score to respect RLS
-                        if (!isDraw && userId) {
-                            const scoreChange = isWin ? 20 : -20;
-                            updateUserScore(userId, scoreChange).catch(err => {
-                                console.error('Failed to update local score:', err);
-                            });
-                        }
+                        // Refetch user data to get updated score from server
+                        refreshUserData();
                     } else if (updatedMatch.status === 'canceled') {
                         localStorage.removeItem(`match_chat_${effectiveMatchData.id}`);
                         setMatchData(null);
@@ -468,7 +466,7 @@ export function MatchPage() {
                                 Return to Lobby
                             </button>
                             
-                            {/* <div className={styles['simulation-group']}>
+                            <div className={styles['simulation-group']}>
                                 <button
                                     className={[styles['action-btn'], styles['secondary']].join(' ')}
                                     onClick={() => finishMatch(effectiveMatchData.id as string, userId as string)}
@@ -487,7 +485,7 @@ export function MatchPage() {
                                 >
                                     Lose
                                 </button>
-                            </div> */}
+                            </div>
                         </div>
                     </div>
 

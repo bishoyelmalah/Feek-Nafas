@@ -1,8 +1,6 @@
 import { supabase } from "../lib/supabase";
 import type { MatchData } from "../types/MatchData";
 import { type CreateMatchData } from "../types/CreateMatchData";
-// import { type ChatMessage } from "../types/ChatMessage";
-// import { updateUserScore } from "./userService";
 
 export const createMatch = async ({player1_id, player2_id, contest_id, problem_index, duration}: CreateMatchData) => {
     const {data, error} = await supabase
